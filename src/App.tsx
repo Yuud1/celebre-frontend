@@ -5,13 +5,22 @@ import { BuilderPage } from './pages/BuilderPage'
 import { CheckoutPage } from './pages/CheckoutPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { PublicEventPage } from './pages/PublicEventPage'
+import { LoginPage } from './pages/LoginPage'
+import { RegisterPage } from './pages/RegisterPage'
+import { KycPage } from './pages/KycPage'
 import './styles/app.css'
+import './styles/auth.css'
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation()
-  const isBuilder = pathname.startsWith('/criar')
+  const isBuilder = pathname.startsWith('/criar') && !pathname.startsWith('/criar-conta')
   const isBuilderMain = pathname === '/criar'
+  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/criar-conta') || pathname.startsWith('/verificacao')
   const publishHeader = useOptionalBuilderPublishHeader()
+
+  if (isAuth) {
+    return <>{children}</>
+  }
 
   return (
     <div className="app-shell">
@@ -51,6 +60,9 @@ export default function App() {
         <AppLayout>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/criar-conta" element={<RegisterPage />} />
+            <Route path="/verificacao" element={<KycPage />} />
             <Route path="/criar" element={<BuilderPage />} />
             <Route path="/criar/checkout" element={<CheckoutPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
