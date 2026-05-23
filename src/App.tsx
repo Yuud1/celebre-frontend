@@ -1,5 +1,6 @@
 import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom'
 import { BuilderPublishProvider, useOptionalBuilderPublishHeader } from './contexts/BuilderPublishContext'
+import { AuthProvider } from './contexts/AuthContext'
 import { HomePage } from './pages/HomePage'
 import { BuilderPage } from './pages/BuilderPage'
 import { CheckoutPage } from './pages/CheckoutPage'
@@ -15,7 +16,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation()
   const isBuilder = pathname.startsWith('/criar') && !pathname.startsWith('/criar-conta')
   const isBuilderMain = pathname === '/criar'
-  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/criar-conta') || pathname.startsWith('/verificacao')
+  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/criar-conta') || pathname.startsWith('/verificacao') || pathname.startsWith('/dashboard')
   const publishHeader = useOptionalBuilderPublishHeader()
 
   if (isAuth) {
@@ -56,8 +57,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <BrowserRouter>
-      <BuilderPublishProvider>
-        <AppLayout>
+      <AuthProvider>
+        <BuilderPublishProvider>
+          <AppLayout>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
@@ -69,7 +71,8 @@ export default function App() {
             <Route path="/p/:slug" element={<PublicEventPage />} />
           </Routes>
         </AppLayout>
-      </BuilderPublishProvider>
+        </BuilderPublishProvider>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

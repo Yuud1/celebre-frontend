@@ -36,8 +36,17 @@ export function unmask(value: string): string {
   return value.replace(/\D/g, '')
 }
 
-export function maskPIXKey(value: string, type: 'CPF' | 'E-mail' | 'Telefone' | 'Aleatória'): string {
+export function maskPIXKey(value: string): string {
+  const type = recognizePixKey(value)
   if (type === 'CPF') return maskCPF(value)
   if (type === 'Telefone') return maskPhone(value)
   return value
+}
+
+export function recognizePixKey(value: string): 'CPF' | 'E-mail' | 'Telefone' | 'Aleatória' | 'Inválido' {
+  if (!value) return 'Inválido'
+  if (/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/.test(value)) return 'CPF'
+  if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) return 'E-mail'
+  if (/^\(\d{2}\) \d{4,5}\-\d{4}$/.test(value)) return 'Telefone'
+  return 'Aleatória'
 }

@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AuthLogo, AuthBtn, AuthField, AuthInput, AuthStepBar } from '../components/auth/AuthShared'
 import { Icon } from '../components/auth/AuthIcons'
 import { maskCPF } from '../lib/mask'
+import { api } from '../lib/api'
+import { useAuth } from '../contexts/AuthContext'
 
 const STEP_LABELS = ['Conta', 'Tipo de evento', 'Informações', 'Template']
 
@@ -102,9 +104,32 @@ function RegisterSidePanel({ children }: { children: React.ReactNode }) {
 
 // ─── Step 1 ───────────────────────────────────────────────────
 function Step1({ onNext }: { onNext: () => void }) {
+  const { login } = useAuth()
   const [showPass, setShowPass] = useState(false)
   const [terms, setTerms] = useState(false)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [cpf, setCpf] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async () => {
+    if (!name || !email || !cpf || !password) return setError('Preencha todos os campos')
+    if (!terms) return setError('Aceite os termos para continuar')
+    
+    setLoading(true)
+    setError('')
+    try {
+      const res = await api.register({ name, email, cpfCnpj: cpf, password })
+      await login(res.token)
+      onNext()
+    } catch (err: any) {
+      setError(err.message || 'Erro ao criar conta')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <>
@@ -115,13 +140,13 @@ function Step1({ onNext }: { onNext: () => void }) {
           <h2 className="ca-display" style={{ fontSize: 28, marginBottom: 8 }}>Comece gratuitamente</h2>
           <p style={{ fontSize: 14, color: '#64748B', marginBottom: 32 }}>Crie sua conta e monte sua página em minutos.</p>
 
-          <form style={{ display: 'flex', flexDirection: 'column', gap: 18 }} onSubmit={e => e.preventDefault()}>
+          <form style={{ display: 'flex', flexDirection: 'column', gap: 18 }} onSubmit={e => { e.preventDefault(); handleSubmit() }}>
             <AuthField label="Nome completo">
-              <AuthInput icon={<Icon.User style={{ width: 18, height: 18 }} />} type="text" placeholder="Seu nome" />
+              <AuthInput icon={<Icon.User style={{ width: 18, height: 18 }} />} type="text" placeholder="Seu nome" value={name} onChange={e => setName(e.target.value)} />
             </AuthField>
 
             <AuthField label="E-mail">
-              <AuthInput icon={<Icon.Mail style={{ width: 18, height: 18 }} />} type="email" placeholder="seu@email.com" />
+              <AuthInput icon={<Icon.Mail style={{ width: 18, height: 18 }} />} type="email" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} />
             </AuthField>
 
             <AuthField label="CPF">
@@ -132,12 +157,14 @@ function Step1({ onNext }: { onNext: () => void }) {
               <AuthInput
                 icon={<Icon.Lock style={{ width: 18, height: 18 }} />}
                 suffix={
-                  <button type="button" onClick={() => setShowPass(v => !v)} style={{ display: 'flex', alignItems: 'center', color: '#64748B' }}>
+                  <button type="button" onClick={() => setShowPass(v => !v)} style={{ display: 'flex', alignItems: 'center', color: '#64748B', background: 'none', border: 'none', cursor: 'pointer' }}>
                     <Icon.Eye style={{ width: 16, height: 16 }} />
                   </button>
                 }
                 type={showPass ? 'text' : 'password'}
                 placeholder="Mínimo 8 caracteres"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
               />
               {/* Password strength */}
               <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
@@ -147,6 +174,8 @@ function Step1({ onNext }: { onNext: () => void }) {
               </div>
               <div style={{ fontSize: 12, color: '#10B981', marginTop: 4, fontWeight: 500 }}>Forte</div>
             </AuthField>
+
+            {error && <div style={{ color: '#EF4444', fontSize: 13, padding: '8px 12px', background: '#FEF2F2', borderRadius: 8, border: '1px solid #FECACA' }}>{error}</div>}
 
             {/* Terms */}
             <button
@@ -158,7 +187,7 @@ function Step1({ onNext }: { onNext: () => void }) {
               <span className="ca-check__box" style={{ marginTop: 1 }}>
                 {terms && <Icon.Check style={{ width: 10, height: 10 }} />}
               </span>
-              <span style={{ fontSize: 13, lineHeight: 1.5 }}>
+              <span style={{ fontSize: 13, lineHeight: 1.5, textAlign: 'left' }}>
                 Aceito os{' '}
                 <a href="#" style={{ color: '#6366F1', textDecoration: 'none', fontWeight: 500 }}>Termos de Uso</a>
                 {' '}e a{' '}
@@ -166,8 +195,8 @@ function Step1({ onNext }: { onNext: () => void }) {
               </span>
             </button>
 
-            <AuthBtn variant="primary" block size="lg" style={{ marginTop: 8 }} iconRight={<Icon.ArrowRight style={{ width: 18, height: 18 }} />} onClick={onNext}>
-              Continuar
+            <AuthBtn type="submit" variant="primary" block size="lg" style={{ marginTop: 8 }} iconRight={!loading && <Icon.ArrowRight style={{ width: 18, height: 18 }} />}>
+              {loading ? 'Criando conta...' : 'Continuar'}
             </AuthBtn>
           </form>
         </div>

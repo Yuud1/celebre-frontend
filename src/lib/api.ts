@@ -21,6 +21,21 @@ export function getToken() {
 }
 
 export const api = {
+  // ─── Auth ───────────────────────────────────────────────────
+  register(payload: unknown) {
+    return request<{ token: string; user: any }>('/auth/register', { method: 'POST', body: JSON.stringify(payload) })
+  },
+  login(payload: unknown) {
+    return request<{ token: string; user: any }>('/auth/login', { method: 'POST', body: JSON.stringify(payload) })
+  },
+  me(token?: string) {
+    return request<any>('/auth/me', {}, token ?? getToken())
+  },
+  updatePixKey(pixKey: string, token?: string) {
+    return request<any>('/auth/pix-key', { method: 'PATCH', body: JSON.stringify({ pixKey }) }, token ?? getToken())
+  },
+
+  // ─── Drafts ─────────────────────────────────────────────────
   createDraft(payload: unknown, token?: string) {
     return request<{ id: string }>('/drafts', { method: 'POST', body: JSON.stringify(payload) }, token ?? getToken())
   },
