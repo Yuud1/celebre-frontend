@@ -208,12 +208,11 @@ export function BuilderPage() {
       content: state.content,
     })
 
-    const token = localStorage.getItem('celebre-token')
     try {
       if (state.draftId) {
-        await api.updateDraft(state.draftId, payload, token ?? undefined)
-      } else if (token) {
-        const draft = await api.createDraft(payload, token)
+        await api.updateDraft(state.draftId, payload)
+      } else {
+        const draft = await api.createDraft(payload)
         setDraftId(draft.id)
         navigate(`/criar/checkout?draft=${draft.id}`)
         return

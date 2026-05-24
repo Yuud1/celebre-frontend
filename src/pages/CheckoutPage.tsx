@@ -2,6 +2,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 
 const PUBLICATION_FEE = 49
 
+
 const UPSELLS = [
   { id: 'domain', label: 'Domínio personalizado', price: 'Em breve', note: 'seuevento.com.br' },
   { id: 'premium', label: 'Template premium', price: '+ R$ 29', note: 'Layouts exclusivos' },
@@ -11,7 +12,6 @@ const UPSELLS = [
 export function CheckoutPage() {
   const [params] = useSearchParams()
   const draftId = params.get('draft')
-  const hasToken = !!localStorage.getItem('celebre-token')
 
   return (
     <div className="checkout-box">
@@ -38,14 +38,8 @@ export function CheckoutPage() {
         </p>
       </div>
 
-      {!hasToken ? (
-        <p style={{ fontSize: '0.9rem', color: 'var(--cb-primary)', marginBottom: '1rem' }}>
-          Faça login ou cadastre-se para concluir o pagamento. Seu rascunho está salvo neste navegador.
-        </p>
-      ) : null}
-
-      <button type="button" className="btn btn-primary" style={{ width: '100%' }} disabled={!hasToken}>
-        {hasToken ? 'Pagar e publicar' : 'Entrar para pagar'}
+      <button type="button" className="btn btn-primary" style={{ width: '100%' }}>
+        Pagar e publicar
       </button>
 
       {draftId ? (

@@ -1,6 +1,7 @@
 import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom'
 import { BuilderPublishProvider, useOptionalBuilderPublishHeader } from './contexts/BuilderPublishContext'
 import { AuthProvider } from './contexts/AuthContext'
+import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { HomePage } from './pages/HomePage'
 import { BuilderPage } from './pages/BuilderPage'
 import { CheckoutPage } from './pages/CheckoutPage'
@@ -64,10 +65,10 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/criar-conta" element={<RegisterPage />} />
-            <Route path="/verificacao" element={<KycPage />} />
-            <Route path="/criar" element={<BuilderPage />} />
-            <Route path="/criar/checkout" element={<CheckoutPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/verificacao" element={<ProtectedRoute><KycPage /></ProtectedRoute>} />
+            <Route path="/criar" element={<ProtectedRoute requireKyc><BuilderPage /></ProtectedRoute>} />
+            <Route path="/criar/checkout" element={<ProtectedRoute requireKyc><CheckoutPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute requireKyc><DashboardPage /></ProtectedRoute>} />
             <Route path="/p/:slug" element={<PublicEventPage />} />
           </Routes>
         </AppLayout>

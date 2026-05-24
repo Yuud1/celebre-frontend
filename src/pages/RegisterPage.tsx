@@ -6,6 +6,7 @@ import { maskCPF } from '../lib/mask'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 
+
 const STEP_LABELS = ['Conta', 'Tipo de evento', 'Informações', 'Template']
 
 // ─── Shell ────────────────────────────────────────────────────
@@ -104,7 +105,7 @@ function RegisterSidePanel({ children }: { children: React.ReactNode }) {
 
 // ─── Step 1 ───────────────────────────────────────────────────
 function Step1({ onNext }: { onNext: () => void }) {
-  const { login } = useAuth()
+  const { setUser } = useAuth()
   const [showPass, setShowPass] = useState(false)
   const [terms, setTerms] = useState(false)
   const [name, setName] = useState('')
@@ -122,7 +123,7 @@ function Step1({ onNext }: { onNext: () => void }) {
     setError('')
     try {
       const res = await api.register({ name, email, cpfCnpj: cpf, password })
-      await login(res.token)
+      setUser(res.user)
       onNext()
     } catch (err: any) {
       setError(err.message || 'Erro ao criar conta')

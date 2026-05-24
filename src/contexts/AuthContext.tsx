@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { api, getToken } from '../lib/api'
+import { api } from '../lib/api'
 
 interface User {
   id: string
@@ -14,57 +14,38 @@ interface User {
 }
 
 interface AuthContextValue {
-  token: string | null
   user: User | null
   loading: boolean
-  login: (token: string) => Promise<void>
-  logout: () => void
+  setUser: (u: User | null) => void
+  logout: () => Promise<void>
   refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(getToken() || null)
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const fetchUser = async (t: string) => {
-    try {
-      const userData = await api.me(t)
-      setUser(userData)
-    } catch (error) {
-      console.error('Failed to fetch user:', error)
-      logout()
-    }
-  }
-
   useEffect(() => {
-    if (token) {
-      fetchUser(token).finally(() => setLoading(false))
-    } else {
-      setLoading(false)
-    }
-  }, [token])
+    api.me()
+      .then(userData => setUser(userData))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false))
+  }, [])
 
-  const login = async (newToken: string) => {
-    localStorage.setItem('celebre-token', newToken)
-    setToken(newToken)
-    await fetchUser(newToken)
-  }
-
-  const logout = () => {
-    localStorage.removeItem('celebre-token')
-    setToken(null)
+  const logout = async () => {
+    await api.logout().catch(() => {})
     setUser(null)
   }
 
   const refreshUser = async () => {
-    if (token) await fetchUser(token)
+    const userData = await api.me()
+    setUser(userData)
   }
 
   return (
-    <AuthContext.Provider value={{ token, user, loading, login, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, setUser, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

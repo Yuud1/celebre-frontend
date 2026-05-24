@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { AuthLogo, AuthBtn, AuthField, AuthInput } from '../components/auth/AuthShared'
 import { Icon } from '../components/auth/AuthIcons'
+import { api } from '../lib/api'
+import { useAuth } from '../contexts/AuthContext'
 
 const BAR_HEIGHTS = [28, 42, 36, 52, 48, 64, 58]
 
@@ -120,8 +122,36 @@ function MarketingPanel() {
 }
 
 export function LoginPage() {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const { setUser } = useAuth()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || !password) return setError('Preencha e-mail e senha')
+    setLoading(true)
+    setError('')
+    try {
+      const { user } = await api.login({ email, password })
+      setUser(user)
+      const redirect = searchParams.get('redirect')
+      if (user.kycStatus !== 'pix_configured') {
+        navigate('/verificacao', { replace: true })
+      } else {
+        navigate(redirect ?? '/dashboard', { replace: true })
+      }
+    } catch (err: any) {
+      setError(err.message || 'E-mail ou senha inválidos')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="auth-page ca-root" style={{ display: 'grid', gridTemplateColumns: '1.05fr 1fr' }}>
@@ -155,13 +185,15 @@ export function LoginPage() {
           <div className="ca-or" style={{ marginBottom: 24 }}>ou</div>
 
           {/* Form */}
-          <form style={{ display: 'flex', flexDirection: 'column', gap: 18 }} onSubmit={e => e.preventDefault()}>
+          <form style={{ display: 'flex', flexDirection: 'column', gap: 18 }} onSubmit={handleSubmit}>
             <AuthField label="E-mail">
               <AuthInput
                 icon={<Icon.Mail style={{ width: 18, height: 18 }} />}
                 type="email"
                 placeholder="seu@email.com"
                 autoComplete="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
               />
             </AuthField>
 
@@ -172,7 +204,7 @@ export function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(v => !v)}
-                    style={{ display: 'flex', alignItems: 'center', color: '#64748B', cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', color: '#64748B', cursor: 'pointer', background: 'none', border: 'none' }}
                   >
                     <Icon.Eye style={{ width: 16, height: 16 }} />
                   </button>
@@ -180,6 +212,8 @@ export function LoginPage() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 autoComplete="current-password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
               />
             </AuthField>
 
@@ -198,8 +232,10 @@ export function LoginPage() {
               <a href="#" style={{ fontSize: 13.5, color: '#6366F1', fontWeight: 500, textDecoration: 'none' }}>Esqueci a senha</a>
             </div>
 
-            <AuthBtn variant="primary" block size="lg" style={{ marginTop: 8 }} iconRight={<Icon.ArrowRight style={{ width: 18, height: 18 }} />}>
-              Entrar
+            {error && <div style={{ color: '#EF4444', fontSize: 13, padding: '8px 12px', background: '#FEF2F2', borderRadius: 8, border: '1px solid #FECACA' }}>{error}</div>}
+
+            <AuthBtn type="submit" variant="primary" block size="lg" style={{ marginTop: 8 }} iconRight={!loading && <Icon.ArrowRight style={{ width: 18, height: 18 }} />}>
+              {loading ? 'Entrando...' : 'Entrar'}
             </AuthBtn>
           </form>
 
