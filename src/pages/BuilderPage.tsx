@@ -371,9 +371,7 @@ export function BuilderPage() {
                   {!isMobile ? (
                     <EditSidebar
                       content={state.content}
-                      theme={state.theme!}
                       onContent={updateContent}
-                      onTheme={updateTheme}
                       onGift={updateGift}
                       onAddGift={addGift}
                       onRemoveGift={removeGift}

@@ -41,6 +41,8 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
     setCoverFile(null)
     const pi = PALETTES.findIndex(p => p[0] === d.theme?.primary)
     setColorIdx(pi >= 0 ? pi : 0)
+    const matchedFont = FONTS.find(f => f.family === d.theme?.fontFamily)
+    setFont(matchedFont?.id ?? 'grotesk')
   }
 
   useEffect(() => { resetFromEvent(event) }, [event])
@@ -66,8 +68,9 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
           coverUrl:    finalCoverUrl,
           theme: {
             ...(event.data?.theme ?? {}),
-            primary:   PALETTES[colorIdx][0],
-            secondary: PALETTES[colorIdx][1],
+            primary:    PALETTES[colorIdx][0],
+            secondary:  PALETTES[colorIdx][1],
+            fontFamily: selectedFont.family,
           },
         },
         coverUrl:  finalCoverUrl,

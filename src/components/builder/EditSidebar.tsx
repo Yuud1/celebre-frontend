@@ -1,11 +1,9 @@
-import type { EventContent, EventTheme } from '../../types/event'
+import type { EventContent } from '../../types/event'
 import { ImagePicker } from './ImagePicker'
 
 interface Props {
   content: EventContent
-  theme: EventTheme
   onContent: (patch: Partial<EventContent>) => void
-  onTheme: (patch: Partial<EventTheme>) => void
   onGift: (id: string, patch: Partial<EventContent['gifts'][0]>) => void
   onAddGift: (type: 'fixed' | 'contribution') => void
   onRemoveGift: (id: string) => void
@@ -13,9 +11,7 @@ interface Props {
 
 export function EditSidebar({
   content,
-  theme,
   onContent,
-  onTheme,
   onGift,
   onAddGift,
   onRemoveGift,
@@ -87,47 +83,6 @@ export function EditSidebar({
         onChange={(coverUrl) => onContent({ coverUrl })}
         hint="Importe uma foto do seu dispositivo"
       />
-
-      <hr style={{ border: 0, borderTop: '1px solid var(--cb-border)', margin: '0.5rem 0' }} />
-
-      <label>
-        Cor principal
-        <input
-          type="color"
-          value={theme.primary}
-          onChange={(e) => onTheme({ primary: e.target.value })}
-        />
-      </label>
-
-      <label>
-        Cor de destaque
-        <input
-          type="color"
-          value={theme.accent}
-          onChange={(e) => onTheme({ accent: e.target.value })}
-        />
-      </label>
-
-      <label>
-        Fundo da página
-        <input
-          type="color"
-          value={theme.background}
-          onChange={(e) => onTheme({ background: e.target.value })}
-        />
-      </label>
-
-      <label>
-        Tamanho do texto ({Math.round(theme.fontScale * 100)}%)
-        <input
-          type="range"
-          min={0.85}
-          max={1.2}
-          step={0.05}
-          value={theme.fontScale}
-          onChange={(e) => onTheme({ fontScale: Number(e.target.value) })}
-        />
-      </label>
 
       <hr style={{ border: 0, borderTop: '1px solid var(--cb-border)', margin: '0.5rem 0' }} />
 

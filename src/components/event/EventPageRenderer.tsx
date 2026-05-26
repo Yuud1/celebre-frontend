@@ -96,6 +96,10 @@ export function EventPageRenderer({
     '--theme-accent': theme.accent,
     '--theme-ink': theme.ink,
     '--theme-font-scale': theme.fontScale,
+    ...(theme.fontFamily ? {
+      '--ep-display': theme.fontFamily,
+      fontFamily: theme.fontFamily,
+    } : {}),
   } as CSSProperties
 
   const spot = (field: EditableField, node: React.ReactNode, as: 'inline' | 'block' = 'inline') => (

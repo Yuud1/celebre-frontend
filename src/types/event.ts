@@ -28,6 +28,7 @@ export interface EventTheme {
   accent: string
   ink: string
   fontScale: number
+  fontFamily?: string
 }
 
 export interface EventContent {
