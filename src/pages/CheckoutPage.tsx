@@ -1,7 +1,8 @@
-import { Link, useSearchParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { api } from '../lib/api'
 
 const PUBLICATION_FEE = 49
-
 
 const UPSELLS = [
   { id: 'domain', label: 'Domínio personalizado', price: 'Em breve', note: 'seuevento.com.br' },
@@ -11,7 +12,46 @@ const UPSELLS = [
 
 export function CheckoutPage() {
   const [params] = useSearchParams()
+  const navigate = useNavigate()
   const draftId = params.get('draft')
+
+  const [publishing, setPublishing] = useState(false)
+  const [chargeUrl, setChargeUrl] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  // Poll for publication after payment is initiated
+  useEffect(() => {
+    if (!draftId || !chargeUrl) return
+
+    const interval = setInterval(async () => {
+      try {
+        const { status, eventSlug } = await api.getDraftStatus(draftId)
+        if (status === 'published' && eventSlug) {
+          clearInterval(interval)
+          navigate(`/p/${eventSlug}`)
+        }
+      } catch {
+        // ignore transient poll errors
+      }
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [draftId, chargeUrl, navigate])
+
+  async function handlePublish() {
+    if (!draftId) return
+    setPublishing(true)
+    setError(null)
+    try {
+      const { chargeUrl: url } = await api.publishDraft(draftId)
+      setChargeUrl(url)
+      window.open(url, '_blank')
+    } catch (err: any) {
+      setError(err.message ?? 'Erro ao gerar cobrança. Tente novamente.')
+    } finally {
+      setPublishing(false)
+    }
+  }
 
   return (
     <div className="checkout-box">
@@ -38,15 +78,45 @@ export function CheckoutPage() {
         </p>
       </div>
 
-      <button type="button" className="btn btn-primary" style={{ width: '100%' }}>
-        Pagar e publicar
+      <button
+        type="button"
+        className="btn btn-primary"
+        style={{ width: '100%' }}
+        onClick={handlePublish}
+        disabled={publishing || !draftId || !!chargeUrl}
+      >
+        {publishing
+          ? 'Gerando cobrança...'
+          : chargeUrl
+            ? 'Aguardando pagamento...'
+            : 'Pagar e publicar'}
       </button>
 
-      {draftId ? (
+      {chargeUrl && (
+        <p style={{ fontSize: '0.85rem', color: 'var(--cb-muted)', marginTop: 8 }}>
+          <a href={chargeUrl} target="_blank" rel="noreferrer">
+            Abrir link de pagamento
+          </a>
+          {' · '}Confirmação automática em alguns segundos após o pagamento.
+        </p>
+      )}
+
+      {error && (
+        <p style={{ fontSize: '0.85rem', color: '#c0392b', marginTop: 8 }}>{error}</p>
+      )}
+
+      {!draftId && (
+        <p style={{ fontSize: '0.85rem', color: 'var(--cb-muted)', marginTop: 8 }}>
+          Rascunho não encontrado.{' '}
+          <Link to="/criar">Voltar ao editor</Link>
+        </p>
+      )}
+
+      {draftId && !chargeUrl && (
         <p style={{ fontSize: '0.75rem', color: 'var(--cb-muted)', marginTop: 8 }}>
           Rascunho: {draftId.slice(0, 8)}…
         </p>
-      ) : null}
+      )}
 
       <h2 style={{ fontSize: '1rem', margin: '2rem 0 0.5rem' }}>Extras (pós-compra)</h2>
       <ul className="upsell-list">
