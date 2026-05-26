@@ -19,8 +19,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const isBuilderMain = pathname === '/criar'
   const isAuth = pathname.startsWith('/login') || pathname.startsWith('/criar-conta') || pathname.startsWith('/verificacao') || pathname.startsWith('/dashboard')
   const publishHeader = useOptionalBuilderPublishHeader()
+  const isPublicEvent = pathname.startsWith('/p/')
 
-  if (isAuth) {
+  if (isAuth || isPublicEvent) {
     return <>{children}</>
   }
 
