@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '^/(auth|drafts|events|p|contributions|admin)': {
+      '^/(auth|drafts|events|upload|p|contributions|admin)': {
         target: 'http://localhost:3000',
         changeOrigin: true,
       },

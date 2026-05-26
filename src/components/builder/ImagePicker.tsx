@@ -4,7 +4,7 @@ import { readImageFile } from '../../lib/image'
 interface Props {
   label: string
   value: string
-  onChange: (url: string) => void
+  onChange: (url: string, file?: File) => void
   hint?: string
 }
 
@@ -20,7 +20,7 @@ export function ImagePicker({ label, value, onChange, hint }: Props) {
     setError(null)
     try {
       const dataUrl = await readImageFile(file)
-      onChange(dataUrl)
+      onChange(dataUrl, file)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao importar imagem.')
     } finally {

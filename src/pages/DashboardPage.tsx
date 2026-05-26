@@ -1,12 +1,40 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Icon } from '../components/auth/AuthIcons'
+import { api } from '../lib/api'
+import { ImagePicker } from '../components/builder/ImagePicker'
 import '../styles/dash.css'
+import { Personalize } from '../components/dashboard/Personalize'
 
-type ActivePage = 'dashboard' | 'gifts' | 'payouts' | 'customize'
+export type ActivePage = 'dashboard' | 'gifts' | 'contrib' | 'payouts' | 'customize'
 
 // ─── Helpers ─────────────────────────────────────────────────
+const AVATAR_COLORS = [
+  'linear-gradient(135deg,#F472B6,#A855F7)',
+  'linear-gradient(135deg,#6366F1,#8B5CF6)',
+  'linear-gradient(135deg,#34D399,#10B981)',
+  'linear-gradient(135deg,#FBBF24,#F97316)',
+  'linear-gradient(135deg,#60A5FA,#6366F1)',
+]
+
+function fmtDate(iso: string | null | undefined) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function nameInitials(name: string | null | undefined) {
+  if (!name) return '?'
+  return name.split(' ').filter(Boolean).slice(0, 2).map((w: string) => w[0]).join('').toUpperCase()
+}
+
+const EVENT_TYPE_LABELS: Record<string, string> = {
+  wedding: 'Casamento',
+  baby_shower: 'Chá de Bebê',
+  housewarming: 'Chá de Casa Nova',
+  birthday: 'Aniversário',
+}
+
 function fmtCurrencyInner(v: number) {
   const r = Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   const [reais, cents] = r.split(',')
@@ -173,14 +201,18 @@ function KycSidebarWidget() {
 interface SidebarProps {
   activePage: ActivePage
   onNav: (p: ActivePage) => void
+  event: any | null
+  contribCount: number
+  giftCount: number
 }
-function Sidebar({ activePage, onNav }: SidebarProps) {
-  type NavId = ActivePage | 'event' | 'contrib' | 'settings'
+function Sidebar({ activePage, onNav, event, contribCount, giftCount }: SidebarProps) {
+  const { user } = useAuth()
+  type NavId = ActivePage | 'event' | 'settings'
   const main: Array<{ id: NavId; label: string; icon: React.ReactNode; count?: number }> = [
     { id: 'dashboard', label: 'Dashboard',     icon: <Icon.Globe   style={{ width: 17, height: 17 }} /> },
     { id: 'event',     label: 'Meu evento',    icon: <Icon.Heart   style={{ width: 17, height: 17 }} /> },
-    { id: 'gifts',     label: 'Presentes',     icon: <Icon.Sparkle style={{ width: 17, height: 17 }} />, count: 24 },
-    { id: 'contrib',   label: 'Contribuições', icon: <Icon.Pix     style={{ width: 17, height: 17 }} />, count: 87 },
+    { id: 'gifts',     label: 'Presentes',     icon: <Icon.Sparkle style={{ width: 17, height: 17 }} />, count: giftCount || undefined },
+    { id: 'contrib',   label: 'Contribuições', icon: <Icon.Pix     style={{ width: 17, height: 17 }} />, count: contribCount || undefined },
     { id: 'payouts',   label: 'Saques',        icon: <Icon.Bank    style={{ width: 17, height: 17 }} /> },
   ]
   const account: Array<{ id: NavId; label: string; icon: React.ReactNode }> = [
@@ -190,10 +222,15 @@ function Sidebar({ activePage, onNav }: SidebarProps) {
   const navCls = (id: NavId) =>
     'cd-nav__item' + (id === activePage ? ' cd-nav__item--on' : '')
   const go = (id: NavId) => {
-    if (id === 'dashboard' || id === 'gifts' || id === 'payouts' || id === 'customize') {
+    if (id === 'dashboard' || id === 'gifts' || id === 'contrib' || id === 'payouts' || id === 'customize') {
       onNav(id)
     }
   }
+
+  const eventName = event?.data?.name ?? '—'
+  const eventTypeLabel = EVENT_TYPE_LABELS[event?.data?.eventType] ?? event?.data?.eventType ?? '—'
+  const eventDate = fmtDate(event?.eventDate)
+  const userInitials = nameInitials(user?.name)
 
   return (
     <aside className="cd-side">
@@ -205,10 +242,10 @@ function Sidebar({ activePage, onNav }: SidebarProps) {
       </div>
 
       <div className="cd-switcher">
-        <span className="cd-switcher__avatar">J&amp;M</span>
+        <span className="cd-switcher__avatar">{userInitials}</span>
         <div className="cd-switcher__meta">
-          <b>Júlia &amp; Marcos</b>
-          <small>Casamento · 18 Out 2026</small>
+          <b>{eventName}</b>
+          <small>{eventTypeLabel} · {eventDate}</small>
         </div>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ width: 14, height: 14, color: 'var(--ca-muted-2)', flexShrink: 0 }}>
           <path d="M8 9l4-4 4 4M8 15l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
@@ -243,10 +280,10 @@ function Sidebar({ activePage, onNav }: SidebarProps) {
       <div className="cd-side__footer">
         <KycSidebarWidget />
         <div className="cd-user" style={{ marginTop: 10 }}>
-          <span className="cd-user__avatar">JM</span>
+          <span className="cd-user__avatar">{userInitials}</span>
           <div style={{ flex: 1, minWidth: 0, lineHeight: 1.2 }}>
-            <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--ca-ink)' }}>Júlia Mendes</div>
-            <div style={{ fontSize: 11.5, color: 'var(--ca-muted)' }}>julia@email.com</div>
+            <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--ca-ink)' }}>{user?.name ?? '—'}</div>
+            <div style={{ fontSize: 11.5, color: 'var(--ca-muted)' }}>{user?.email ?? '—'}</div>
           </div>
           <Icon.ArrowRight style={{ width: 14, height: 14, color: 'var(--ca-muted-2)' }} />
         </div>
@@ -305,7 +342,7 @@ interface PageHeadProps {
   sub?: string
   actions?: React.ReactNode
 }
-function PageHead({ eyebrow, title, status, sub, actions }: PageHeadProps) {
+export function PageHead({ eyebrow, title, status, sub, actions }: PageHeadProps) {
   const statuses = {
     published: { c: '#047857', bg: 'rgba(16,185,129,0.10)', dot: '#10B981', label: 'Publicado' },
     pending:   { c: '#B45309', bg: 'rgba(245,158,11,0.10)', dot: '#F59E0B', label: 'Aguardando verificação' },
@@ -366,6 +403,8 @@ function KycStatusBig() {
 }
 
 // ─── Dashboard Home ───────────────────────────────────────────
+interface DashHomeProps { event: any | null; contributions: any[]; onNavigate: (p: ActivePage) => void }
+
 const BAR_DATA: BarDatum[] = [
   { label: '05', value: 6 }, { label: '06', value: 8 }, { label: '07', value: 4 },
   { label: '08', value: 11 }, { label: '09', value: 14 }, { label: '10', value: 18, label2: 'pico' },
@@ -374,42 +413,49 @@ const BAR_DATA: BarDatum[] = [
   { label: '17', value: 9 }, { label: '18', value: 5 },
 ]
 
-const FEED = [
-  { name: 'Mariana Castro',  initials: 'MC', color: 'linear-gradient(135deg,#F472B6,#A855F7)', gift: 'Lua de mel · Maldivas',  message: 'Que sejam mil dias de felicidade!',    amount: 750,  status: 'paid',    time: 'há 5 min' },
-  { name: 'Rafael Antunes',  initials: 'RA', color: 'linear-gradient(135deg,#6366F1,#8B5CF6)', gift: 'Jantar romântico',       message: 'Vocês merecem o mundo todo ❤️',       amount: 250,  status: 'paid',    time: 'há 23 min' },
-  { name: 'Letícia Souza',   initials: 'LS', color: 'linear-gradient(135deg,#34D399,#10B981)', gift: 'Cota livre',             message: 'Amo vocês! Que comece a nova fase.', amount: 500,  status: 'paid',    time: 'há 1h' },
-  { name: 'Eduardo Lima',    initials: 'EL', color: 'linear-gradient(135deg,#FBBF24,#F97316)', gift: 'Conjunto de panelas',    message: 'Pra deixar a cozinha completa.',     amount: 380,  status: 'pending', time: 'há 2h' },
-  { name: 'Camila Ferreira', initials: 'CF', color: 'linear-gradient(135deg,#60A5FA,#6366F1)', gift: 'Lua de mel · Maldivas',  message: 'Aproveitem cada momento.',           amount: 1200, status: 'paid',    time: 'há 3h' },
-]
+function DashHome({ event, contributions, onNavigate }: DashHomeProps) {
+  const { user } = useAuth()
+  const firstName = user?.name?.split(' ')[0] ?? 'você'
 
-function DashHome() {
+  const confirmed = contributions.filter((c: any) => c.status === 'confirmed')
+  const totalCollected = confirmed.reduce((s: number, c: any) => s + Number(c.amount), 0)
+  const confirmedCount = confirmed.length
+  const avgTicket = confirmedCount > 0 ? totalCollected / confirmedCount : 0
+  const feed = contributions.slice(0, 5)
+
+  const eventStatus: 'published' | 'pending' | 'closed' =
+    event?.status === 'published' ? 'published' :
+    event?.status === 'closed' ? 'closed' : 'pending'
+
   return (
     <>
       <PageHead
-        eyebrow="Visão geral · 01–18 Out 2026"
-        title="Olá, Júlia 👋"
-        status="published"
-        sub="Faltam 12 dias para o grande dia. Sua página recebeu 8 novas contribuições nas últimas 24h."
+        eyebrow={`Visão geral · ${event?.data?.name ?? '—'}`}
+        title={`Olá, ${firstName} 👋`}
+        status={eventStatus}
+        sub={event ? `Sua página "${event.data?.name}" está ${eventStatus === 'published' ? 'publicada e recebendo contribuições' : 'encerrada'}.` : ''}
         actions={
           <>
-            <button className="ca-btn ca-btn--ghost" style={{ height: 38, padding: '0 16px', fontSize: 13 }}>
+            <button className="ca-btn ca-btn--ghost" style={{ height: 38, padding: '0 16px', fontSize: 13 }} onClick={() => onNavigate('customize')}>
               <Icon.Camera style={{ width: 15, height: 15 }} />
               Editar página
             </button>
-            <button className="ca-btn ca-btn--primary" style={{ height: 38, padding: '0 16px', fontSize: 13 }}>
-              <Icon.Link style={{ width: 15, height: 15 }} />
-              Compartilhar evento
-            </button>
+            {event?.slug && (
+              <a href={`/p/${event.slug}`} target="_blank" rel="noreferrer" className="ca-btn ca-btn--primary" style={{ height: 38, padding: '0 16px', fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <Icon.Link style={{ width: 15, height: 15 }} />
+                Ver evento
+              </a>
+            )}
           </>
         }
       />
 
       {/* Stats grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-        <StatCard icon={<Icon.Pix style={{ color: '#10B981' }} />} label="Total arrecadado" value={42380} currency delta="+24%" deltaTone="up" spark={[8, 12, 10, 18, 14, 22, 20, 28, 26, 34, 30, 38]} />
-        <StatCard icon={<Icon.Heart style={{ color: '#EC4899' }} />} label="Contribuições" value="87" delta="+12" deltaTone="up" hint="Média R$ 487 por contribuição" />
-        <StatCard icon={<Icon.Sparkle style={{ color: '#8B5CF6' }} />} label="Conversão da página" value="34%" delta="+3.2%" deltaTone="up" hint="1.420 visitas · 487 cliques" />
-        <StatCard icon={<Icon.Bank style={{ color: '#6366F1' }} />} label="Saldo disponível" value={28940.50} currency delta="bloqueado" deltaTone="flat" hint="R$ 13.440 em análise" />
+        <StatCard icon={<Icon.Pix style={{ color: '#10B981' }} />} label="Total arrecadado" value={totalCollected} currency spark={[8, 12, 10, 18, 14, 22, 20, 28, 26, 34, 30, 38]} />
+        <StatCard icon={<Icon.Heart style={{ color: '#EC4899' }} />} label="Contribuições" value={confirmedCount} hint={avgTicket > 0 ? `Média R$ ${avgTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por contribuição` : undefined} />
+        <StatCard icon={<Icon.Sparkle style={{ color: '#8B5CF6' }} />} label="Conversão da página" value="—" hint="Dados de visitas indisponíveis" />
+        <StatCard icon={<Icon.Bank style={{ color: '#6366F1' }} />} label="Saldo disponível" value={0} currency delta="bloqueado" deltaTone="flat" hint="Configure saques via Asaas" />
       </div>
 
       {/* Mid row */}
@@ -486,34 +532,46 @@ function DashHome() {
             <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 16, fontWeight: 600 }}>Contribuições recentes</div>
             <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 2 }}>Últimas pessoas que celebraram com você</div>
           </div>
-          <a style={{ fontSize: 13, color: 'var(--ca-indigo)', fontWeight: 600 }}>Ver todas (87) →</a>
         </div>
 
         <div className="cd-feed" style={{ padding: '0 14px 12px' }}>
-          {FEED.map((c, i) => (
-            <div key={i} className="cd-feed__row">
-              <span className="cd-feed__avatar" style={{ background: c.color }}>{c.initials}</span>
-              <div style={{ minWidth: 0 }}>
-                <div className="ca-row ca-row--gap-sm">
-                  <span style={{ fontWeight: 600, fontSize: 13.5 }}>{c.name}</span>
-                  <span style={{ fontSize: 12, color: 'var(--ca-muted)' }}>·</span>
-                  <span style={{ fontSize: 12.5, color: 'var(--ca-muted)' }}>{c.gift}</span>
-                </div>
-                <div style={{ fontSize: 12.5, color: 'var(--ca-ink-3)', marginTop: 2, fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 460 }}>
-                  "{c.message}"
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <Money value={c.amount} size={15} />
-                <div style={{ fontSize: 11, color: 'var(--ca-muted-2)', marginTop: 2 }}>{c.time}</div>
-              </div>
-              <span className={'ca-badge ' + (c.status === 'paid' ? 'ca-badge--success' : 'ca-badge--warn')}>
-                {c.status === 'paid'
-                  ? <><Icon.Check style={{ width: 11, height: 11 }} />Pago</>
-                  : <><Icon.Loader style={{ width: 11, height: 11 }} />Aguardando</>}
-              </span>
+          {feed.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--ca-muted)', fontSize: 13 }}>
+              Nenhuma contribuição ainda.
             </div>
-          ))}
+          )}
+          {feed.map((c: any, i: number) => {
+            const guestName = c.guestName ?? 'Anônimo'
+            const initials = nameInitials(guestName)
+            const color = AVATAR_COLORS[i % AVATAR_COLORS.length]
+            const isPaid = c.status === 'confirmed'
+            return (
+              <div key={c.id} className="cd-feed__row">
+                <span className="cd-feed__avatar" style={{ background: color }}>{initials}</span>
+                <div style={{ minWidth: 0 }}>
+                  <div className="ca-row ca-row--gap-sm">
+                    <span style={{ fontWeight: 600, fontSize: 13.5 }}>{guestName}</span>
+                    <span style={{ fontSize: 12, color: 'var(--ca-muted)' }}>·</span>
+                    <span style={{ fontSize: 12.5, color: 'var(--ca-muted)' }}>{c.gift?.name ?? '—'}</span>
+                  </div>
+                  {c.message && (
+                    <div style={{ fontSize: 12.5, color: 'var(--ca-ink-3)', marginTop: 2, fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 460 }}>
+                      "{c.message}"
+                    </div>
+                  )}
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <Money value={Number(c.amount)} size={15} />
+                  <div style={{ fontSize: 11, color: 'var(--ca-muted-2)', marginTop: 2 }}>{fmtDate(c.createdAt)}</div>
+                </div>
+                <span className={'ca-badge ' + (isPaid ? 'ca-badge--success' : 'ca-badge--warn')}>
+                  {isPaid
+                    ? <><Icon.Check style={{ width: 11, height: 11 }} />Pago</>
+                    : <><Icon.Loader style={{ width: 11, height: 11 }} />Aguardando</>}
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
     </>
@@ -521,121 +579,101 @@ function DashHome() {
 }
 
 // ─── Gifts Page ───────────────────────────────────────────────
-interface GiftData {
-  title: string; type: 'collective' | 'fixed' | 'open'; image: string
-  raised: number; goal: number | null; contributors: string[]; status?: 'purchased'
+interface GiftCardItemProps {
+  gift: any
+  eventId: string
+  onDelete: (giftId: string) => void
 }
-function GiftCardItem({ title, type, image, raised, goal, contributors, status }: GiftData) {
-  const pct = goal ? Math.min(100, (raised / goal) * 100) : 100
+function GiftCardItem({ gift, eventId: _eventId, onDelete }: GiftCardItemProps) {
+  const isFixed = gift.type === 'fixed'
+  const isPurchased = gift.isPurchased
+  const collected = Number(gift.collected ?? 0)
+  const goal = Number(gift.value ?? 0)
+  const pct = isFixed
+    ? (isPurchased ? 100 : 0)
+    : (goal > 0 ? Math.min(100, (collected / goal) * 100) : 0)
+  const typeLabel = gift.type === 'fixed' ? 'Fixo' : 'Coletivo'
+
   return (
     <div className="cd-gift">
-      <div className={'cd-gift__image ' + image} style={{ position: 'relative' }}>
+      <div className="cd-gift__image ca-ph" style={{ position: 'relative' }}>
         <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 6 }}>
           <span className="ca-badge" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', border: 'none', color: 'var(--ca-ink)' }}>
-            {type === 'collective' ? 'Coletivo' : type === 'fixed' ? 'Fixo' : 'Livre'}
+            {typeLabel}
           </span>
-          {status === 'purchased' && (
+          {isPurchased && (
             <span className="ca-badge ca-badge--success">
               <Icon.Check style={{ width: 11, height: 11 }} />Quitado
             </span>
           )}
         </div>
         <div style={{ position: 'absolute', top: 12, right: 12 }}>
-          <button style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', color: 'var(--ca-ink)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
-            <Icon.Camera style={{ width: 14, height: 14 }} />
+          <button onClick={() => onDelete(gift.id)} style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', color: '#EF4444', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ width: 14, height: 14 }}>
+              <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>
       </div>
       <div className="cd-gift__body">
-        <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 15, letterSpacing: '-0.01em' }}>{title}</div>
+        <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 15, letterSpacing: '-0.01em' }}>{gift.name}</div>
         <div className="ca-row ca-row--between" style={{ marginTop: 12, marginBottom: 8 }}>
-          <Money value={raised} size={17} />
-          {goal && <span style={{ fontSize: 12, color: 'var(--ca-muted)', fontVariantNumeric: 'tabular-nums' }}>de R$ {goal.toLocaleString('pt-BR')}</span>}
+          <Money value={isFixed ? (isPurchased ? goal : 0) : collected} size={17} />
+          {goal > 0 && <span style={{ fontSize: 12, color: 'var(--ca-muted)', fontVariantNumeric: 'tabular-nums' }}>de R$ {goal.toLocaleString('pt-BR')}</span>}
         </div>
-        <div className={'cd-progress' + (status === 'purchased' ? ' cd-progress--success' : '')}>
+        <div className={'cd-progress' + (isPurchased ? ' cd-progress--success' : '')}>
           <div className="cd-progress__fill" style={{ width: `${pct}%` }} />
         </div>
         <div className="ca-row ca-row--between" style={{ marginTop: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ display: 'flex' }}>
-              {contributors.slice(0, 3).map((c, i) => (
-                <span key={i} style={{ width: 22, height: 22, borderRadius: 999, background: c, marginLeft: i ? -6 : 0, border: '2px solid #fff' }} />
-              ))}
-              {contributors.length > 3 && (
-                <span style={{ width: 22, height: 22, borderRadius: 999, background: '#F1F5F9', color: '#64748B', fontSize: 10, fontWeight: 600, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginLeft: -6, border: '2px solid #fff' }}>
-                  +{contributors.length - 3}
-                </span>
-              )}
-            </div>
-            <span style={{ fontSize: 12, color: 'var(--ca-muted)' }}>{contributors.length} {contributors.length === 1 ? 'pessoa' : 'pessoas'}</span>
-          </div>
-          <span style={{ fontSize: 12, fontWeight: 600, color: status === 'purchased' ? '#047857' : 'var(--ca-indigo)' }}>{Math.round(pct)}%</span>
+          <span style={{ fontSize: 12, color: 'var(--ca-muted)' }}>{isFixed ? (isPurchased ? 'Quitado' : 'Não quitado') : `${Math.round(pct)}% arrecadado`}</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: isPurchased ? '#047857' : 'var(--ca-indigo)' }}>{Math.round(pct)}%</span>
         </div>
       </div>
     </div>
   )
 }
 
-const GIFTS: GiftData[] = [
-  { title: 'Lua de mel · Maldivas', type: 'collective', image: 'ca-ph ca-ph--violet', raised: 8400, goal: 12000, contributors: ['#F472B6', '#A855F7', '#6366F1', '#34D399', '#FBBF24'] },
-  { title: 'Jantar romântico',      type: 'fixed',      image: 'ca-ph',               raised: 250,  goal: 250,   contributors: ['#6366F1'], status: 'purchased' },
-  { title: 'Conjunto de panelas',   type: 'fixed',      image: 'ca-ph ca-ph--dark',   raised: 380,  goal: 750,   contributors: ['#FBBF24', '#F472B6'] },
-  { title: 'Cota livre',            type: 'open',       image: 'ca-ph ca-ph--violet', raised: 4250, goal: null,  contributors: ['#34D399', '#60A5FA', '#A855F7', '#F472B6', '#FBBF24', '#6366F1', '#EC4899'] },
-  { title: 'Decoração do living',   type: 'collective', image: 'ca-ph',               raised: 1840, goal: 3500,  contributors: ['#A855F7', '#34D399', '#60A5FA'] },
-  { title: 'Eletros da cozinha',    type: 'collective', image: 'ca-ph ca-ph--dark',   raised: 2980, goal: 4200,  contributors: ['#F472B6', '#FBBF24', '#6366F1', '#34D399'] },
-]
+interface DashGiftsProps { event: any | null; onReload: () => void }
+function DashGifts({ event, onReload }: DashGiftsProps) {
+  const gifts: any[] = event?.gifts ?? []
 
-function DashGifts() {
+  const handleDelete = async (giftId: string) => {
+    if (!event?.id) return
+    if (!window.confirm('Remover este presente?')) return
+    try {
+      await api.deleteGift(event.id, giftId)
+      onReload()
+    } catch (e: any) {
+      alert(e.message)
+    }
+  }
+
   return (
     <>
       <PageHead
         eyebrow="Catálogo do evento"
         title="Presentes"
-        sub="24 presentes ativos · 8 totalmente quitados. Adicione, edite ou destaque os presentes que importam mais."
+        sub={`${gifts.length} presente${gifts.length !== 1 ? 's' : ''} cadastrado${gifts.length !== 1 ? 's' : ''}. Adicione, edite ou remova presentes.`}
         actions={
           <>
-            <button className="ca-btn ca-btn--ghost" style={{ height: 38, padding: '0 16px', fontSize: 13 }}>
-              <Icon.Eye style={{ width: 15, height: 15 }} />Ver página pública
-            </button>
-            <button className="ca-btn ca-btn--primary" style={{ height: 38, padding: '0 16px', fontSize: 13 }}>
-              <Icon.Plus style={{ width: 16, height: 16 }} />Novo presente
-            </button>
+            {event?.slug && (
+              <a href={`/p/${event.slug}`} target="_blank" rel="noreferrer" className="ca-btn ca-btn--ghost" style={{ height: 38, padding: '0 16px', fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <Icon.Eye style={{ width: 15, height: 15 }} />Ver página pública
+              </a>
+            )}
           </>
         }
       />
 
-      <div className="ca-row ca-row--between" style={{ marginBottom: 18 }}>
-        <div className="cd-tabs">
-          <span className="cd-tab cd-tab--on">Todos · 24</span>
-          <span className="cd-tab">Coletivos · 9</span>
-          <span className="cd-tab">Fixos · 12</span>
-          <span className="cd-tab">Livres · 3</span>
-          <span className="cd-tab">Quitados · 8</span>
-        </div>
-        <div className="ca-row ca-row--gap-sm">
-          <span style={{ fontSize: 12.5, color: 'var(--ca-muted)' }}>Ordenar por</span>
-          <button className="ca-btn ca-btn--ghost" style={{ height: 36, fontSize: 13 }}>
-            Mais arrecadado
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ width: 13, height: 13 }}>
-              <path d="M8 10l4 4 4-4" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-        {GIFTS.map(g => <GiftCardItem key={g.title} {...g} />)}
-        <button className="cd-gift" style={{ background: 'linear-gradient(180deg, #fff 0%, var(--ca-bg-soft) 100%)', border: '1.5px dashed var(--ca-line)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 340, padding: 28, textAlign: 'center' }}>
-          <div>
-            <span style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--ca-violet-100)', color: 'var(--ca-indigo)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-              <Icon.Plus style={{ width: 22, height: 22 }} />
-            </span>
-            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 15, marginTop: 12 }}>Adicionar presente</div>
-            <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 4, maxWidth: 220 }}>
-              Crie um presente coletivo, fixo ou cota livre.
-            </div>
+        {gifts.map((g: any) => (
+          <GiftCardItem key={g.id} gift={g} eventId={event?.id ?? ''} onDelete={handleDelete} />
+        ))}
+        {gifts.length === 0 && (
+          <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '48px 0', color: 'var(--ca-muted)', fontSize: 14 }}>
+            Nenhum presente cadastrado. Os presentes são adicionados na criação do evento.
           </div>
-        </button>
+        )}
       </div>
     </>
   )
@@ -789,191 +827,144 @@ function Saques() {
   )
 }
 
-// ─── Personalize Page ─────────────────────────────────────────
-const PALETTES = [
-  ['#0F172A', '#6366F1'], ['#3F2A1D', '#B8543A'],
-  ['#1F3D2C', '#5B8C5E'], ['#1E1B4B', '#A855F7'],
-  ['#0C4A6E', '#0EA5E9'], ['#831843', '#EC4899'],
-]
-const FONTS = [
-  { id: 'grotesk' as const, label: 'Geometric', sub: 'Space Grotesk',   family: 'Space Grotesk, sans-serif',      weight: 600 },
-  { id: 'serif'   as const, label: 'Editorial', sub: 'Instrument Serif', family: 'Instrument Serif, Georgia, serif', weight: 400 },
-  { id: 'sans'    as const, label: 'Modern',    sub: 'Inter',            family: 'Inter, sans-serif',               weight: 600 },
-]
 
-function Personalize() {
-  const [tab, setTab] = useState<'design' | 'media' | 'template'>('design')
-  const [colorIdx, setColorIdx] = useState(0)
-  const [font, setFont] = useState<'grotesk' | 'serif' | 'sans'>('grotesk')
 
-  const selectedFont = FONTS.find(f => f.id === font)!
+// ─── Contributions Page ───────────────────────────────────────
+function DashContributions({ contributions }: { contributions: any[] }) {
+  const confirmed = contributions.filter((c: any) => c.status === 'confirmed')
+  const total = confirmed.reduce((s: number, c: any) => s + Number(c.amount), 0)
 
   return (
     <>
       <PageHead
-        eyebrow="Personalização"
-        title="Sua página, do seu jeito"
-        sub="Edite cores, tipografia e foto de capa em tempo real. As alterações aparecem instantaneamente para os seus convidados."
-        actions={
-          <>
-            <button className="ca-btn ca-btn--ghost" style={{ height: 38, padding: '0 16px', fontSize: 13 }}>Descartar alterações</button>
-            <button className="ca-btn ca-btn--primary" style={{ height: 38, padding: '0 16px', fontSize: 13 }}>
-              <Icon.Check style={{ width: 15, height: 15 }} />Publicar mudanças
-            </button>
-          </>
-        }
+        eyebrow="Pagamentos"
+        title="Contribuições"
+        sub={`${contributions.length} contribuição${contributions.length !== 1 ? 'ões' : ''} · ${confirmed.length} confirmada${confirmed.length !== 1 ? 's' : ''}`}
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20 }}>
-        {/* Controls */}
-        <div className="ca-card" style={{ padding: 0, overflow: 'hidden', height: 'fit-content' }}>
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--ca-line-soft)' }}>
-            {([
-              { id: 'design',   label: 'Design',   icon: <Icon.Sparkle style={{ width: 14, height: 14 }} /> },
-              { id: 'media',    label: 'Mídia',    icon: <Icon.Camera  style={{ width: 14, height: 14 }} /> },
-              { id: 'template', label: 'Template', icon: <Icon.Doc     style={{ width: 14, height: 14 }} /> },
-            ] as const).map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: '14px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13, fontWeight: 500, color: tab === t.id ? 'var(--ca-ink)' : 'var(--ca-muted)', background: tab === t.id ? '#fff' : 'transparent', borderBottom: tab === t.id ? '2px solid var(--ca-indigo)' : '2px solid transparent', border: 'none', cursor: 'pointer' }}>
-                {t.icon}{t.label}
-              </button>
-            ))}
-          </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 20 }}>
+        <StatCard icon={<Icon.Pix style={{ color: '#10B981' }} />} label="Total arrecadado" value={total} currency />
+        <StatCard icon={<Icon.Check style={{ color: '#10B981' }} />} label="Confirmadas" value={confirmed.length} />
+        <StatCard icon={<Icon.Loader style={{ color: '#F59E0B' }} />} label="Pendentes" value={contributions.length - confirmed.length} />
+      </div>
 
-          <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 22 }}>
-            {/* Palette */}
-            <div>
-              <div className="ca-row ca-row--between" style={{ marginBottom: 10 }}>
-                <span className="ca-eyebrow">Paleta</span>
-                <button style={{ fontSize: 12, color: 'var(--ca-indigo)', fontWeight: 600 }}>Custom</button>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8 }}>
-                {PALETTES.map((p, i) => (
-                  <button key={i} onClick={() => setColorIdx(i)} className={'cd-swatch' + (colorIdx === i ? ' cd-swatch--on' : '')} style={{ background: `linear-gradient(135deg, ${p[0]} 50%, ${p[1]} 50%)` }} />
-                ))}
-              </div>
-              <div className="ca-row" style={{ gap: 10, marginTop: 12, padding: '10px 12px', background: 'var(--ca-bg-soft)', borderRadius: 10 }}>
-                <span style={{ width: 22, height: 22, borderRadius: 6, background: PALETTES[colorIdx][0] }} />
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--ca-ink-3)' }}>{PALETTES[colorIdx][0]}</span>
-                <span style={{ width: 22, height: 22, borderRadius: 6, background: PALETTES[colorIdx][1], marginLeft: 'auto' }} />
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--ca-ink-3)' }}>{PALETTES[colorIdx][1]}</span>
-              </div>
-            </div>
-
-            {/* Typography */}
-            <div>
-              <div className="ca-eyebrow" style={{ marginBottom: 10 }}>Tipografia</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {FONTS.map(f => (
-                  <button key={f.id} onClick={() => setFont(f.id)} className={'ca-pick' + (font === f.id ? ' ca-pick--on' : '')} style={{ padding: 12, borderRadius: 10 }}>
-                    {font === f.id && <span className="ca-pick__check" style={{ top: 10, right: 10, width: 18, height: 18 }}><Icon.Check style={{ width: 10, height: 10 }} /></span>}
-                    <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontFamily: f.family, fontSize: 18, letterSpacing: '-0.02em', fontWeight: f.weight }}>Júlia &amp; Marcos</div>
-                      <div style={{ fontSize: 11, color: 'var(--ca-muted)', marginTop: 2 }}>{f.label} · {f.sub}</div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Density slider */}
-            <div>
-              <div className="ca-row ca-row--between" style={{ marginBottom: 8 }}>
-                <span className="ca-eyebrow">Densidade</span>
-                <span style={{ fontSize: 12, color: 'var(--ca-ink-3)', fontFamily: 'JetBrains Mono, monospace' }}>1.4</span>
-              </div>
-              <div style={{ height: 26, display: 'flex', alignItems: 'center', position: 'relative' }}>
-                <div style={{ position: 'absolute', left: 0, right: 0, height: 4, background: 'var(--ca-line)', borderRadius: 999 }} />
-                <div style={{ position: 'absolute', left: 0, height: 4, width: '64%', background: 'var(--ca-grad)', borderRadius: 999 }} />
-                <div style={{ position: 'absolute', left: '62%', width: 18, height: 18, borderRadius: 999, background: '#fff', border: '2px solid var(--ca-indigo)', boxShadow: '0 2px 8px rgba(99,102,241,0.3)' }} />
-              </div>
-              <div className="ca-row ca-row--between" style={{ marginTop: 6, fontSize: 11, color: 'var(--ca-muted-2)' }}>
-                <span>Compacto</span><span>Confortável</span><span>Espaçoso</span>
-              </div>
-            </div>
-
-            {/* Toggles */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[['Mostrar contador regressivo', true], ['Permitir mensagens', true], ['Exibir lista de convidados', false]].map(([label, on]) => (
-                <div key={String(label)} className="ca-row ca-row--between" style={{ padding: '10px 0', borderTop: '1px solid var(--ca-line-soft)' }}>
-                  <span style={{ fontSize: 13 }}>{label}</span>
-                  <span className={'cd-toggle' + (on ? ' cd-toggle--on' : '')}><span className="cd-toggle__thumb" /></span>
-                </div>
-              ))}
-            </div>
-          </div>
+      <div className="ca-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '10px 22px', fontSize: 11, color: 'var(--ca-muted-2)', letterSpacing: '0.08em', textTransform: 'uppercase', background: 'var(--ca-bg-soft)', borderBottom: '1px solid var(--ca-line-soft)', display: 'grid', gridTemplateColumns: '1fr 1fr 140px 120px 120px' }}>
+          <span>Convidado</span><span>Presente</span><span style={{ textAlign: 'right' }}>Valor</span><span>Método</span><span>Status</span>
         </div>
-
-        {/* Live preview */}
-        <div className="ca-card" style={{ padding: 0, overflow: 'hidden', background: 'linear-gradient(180deg, #F1F5F9, #F8FAFC)', minHeight: 600 }}>
-          <div className="ca-row ca-row--between" style={{ padding: '14px 18px', background: '#fff', borderBottom: '1px solid var(--ca-line-soft)' }}>
-            <div className="cd-tabs">
-              <span className="cd-tab cd-tab--on"><Icon.Globe style={{ width: 12, height: 12, marginRight: 4 }} />Desktop</span>
-              <span className="cd-tab">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ width: 12, height: 12, marginRight: 4 }}>
-                  <rect x="5" y="2" width="14" height="20" rx="2" /><path d="M12 18h.01" strokeLinecap="round" />
-                </svg>
-                Mobile
+        {contributions.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--ca-muted)', fontSize: 13 }}>
+            Nenhuma contribuição ainda.
+          </div>
+        )}
+        {contributions.map((c: any, i: number) => {
+          const isPaid = c.status === 'confirmed'
+          return (
+            <div key={c.id} style={{ padding: '14px 22px', display: 'grid', gridTemplateColumns: '1fr 1fr 140px 120px 120px', borderBottom: i < contributions.length - 1 ? '1px solid var(--ca-line-soft)' : 'none', alignItems: 'center', fontSize: 13 }}>
+              <span style={{ fontWeight: 500 }}>{c.guestName ?? 'Anônimo'}</span>
+              <span style={{ color: 'var(--ca-muted)' }}>{c.gift?.name ?? '—'}</span>
+              <span style={{ textAlign: 'right', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                R$ {Number(c.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </span>
+              <span style={{ fontSize: 12, color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
+                {c.paymentMethod === 'pix' ? 'PIX' : c.paymentMethod === 'credit_card' ? 'Cartão' : c.paymentMethod ?? '—'}
+              </span>
+              <span>
+                {isPaid
+                  ? <span className="ca-badge ca-badge--success"><Icon.Check style={{ width: 10, height: 10 }} />Confirmado</span>
+                  : <span className="ca-badge ca-badge--warn"><Icon.Loader style={{ width: 10, height: 10 }} />Pendente</span>}
               </span>
             </div>
-            <div className="ca-row ca-row--gap-sm" style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11.5, color: 'var(--ca-muted)' }}>
-              <span style={{ width: 7, height: 7, borderRadius: 999, background: '#10B981' }} />
-              celebre.app/julia-e-marcos
-            </div>
-          </div>
-
-          <div style={{ padding: 28, display: 'flex', justifyContent: 'center' }}>
-            <div style={{ width: '100%', maxWidth: 540, background: '#fff', borderRadius: 14, overflow: 'hidden', boxShadow: '0 20px 50px rgba(15,23,42,0.10)', border: '1px solid var(--ca-line)' }}>
-              <div style={{ height: 240, position: 'relative', background: `linear-gradient(135deg, ${PALETTES[colorIdx][0]} 0%, ${PALETTES[colorIdx][1]} 100%)` }}>
-                <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 80% at 30% 20%, rgba(255,255,255,0.18), transparent 60%)' }} />
-                <div style={{ position: 'absolute', bottom: 20, left: 24, right: 24, color: '#fff' }}>
-                  <div style={{ fontSize: 11, opacity: 0.7, letterSpacing: '0.16em', textTransform: 'uppercase' }}>18 de Outubro · Florianópolis</div>
-                  <div style={{ fontFamily: selectedFont.family, fontSize: 36, marginTop: 6, fontWeight: selectedFont.weight, letterSpacing: '-0.02em', lineHeight: 1 }}>
-                    Júlia &amp; Marcos
-                  </div>
-                </div>
-              </div>
-              <div style={{ padding: 24 }}>
-                <div style={{ fontSize: 11, color: 'var(--ca-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Mensagem dos noivos</div>
-                <p style={{ fontSize: 14, color: 'var(--ca-ink-3)', lineHeight: 1.65, marginTop: 8 }}>
-                  Sua presença é o maior presente. Mas se quiser nos ajudar a começar essa nova fase, ficamos felizes com qualquer contribuição.
-                </p>
-                <button style={{ marginTop: 16, width: '100%', height: 44, borderRadius: 12, background: PALETTES[colorIdx][1], color: '#fff', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer' }}>
-                  Contribuir com um presente
-                </button>
-                <div className="ca-row ca-row--between" style={{ marginTop: 22 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 10, color: 'var(--ca-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Arrecadado</div>
-                    <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 18, marginTop: 2 }}>R$ 42.380</div>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 10, color: 'var(--ca-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Convidados</div>
-                    <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 18, marginTop: 2 }}>128</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          )
+        })}
       </div>
     </>
+  )
+}
+
+// ─── Empty State ──────────────────────────────────────────────
+function NoEventState() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: 48, textAlign: 'center' }}>
+      <span style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--ca-violet-100)', color: 'var(--ca-indigo)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+        <Icon.Sparkle style={{ width: 28, height: 28 }} />
+      </span>
+      <h2 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>
+        Você ainda não tem nenhum evento publicado
+      </h2>
+      <p style={{ fontSize: 14, color: 'var(--ca-muted)', maxWidth: 380, marginBottom: 24 }}>
+        Crie seu evento, adicione presentes e compartilhe com seus convidados.
+      </p>
+      <Link to="/criar" className="ca-btn ca-btn--primary" style={{ height: 44, padding: '0 24px', fontSize: 14 }}>
+        Criar meu primeiro evento
+      </Link>
+    </div>
   )
 }
 
 // ─── Main export ──────────────────────────────────────────────
 export function DashboardPage() {
   const [activePage, setActivePage] = useState<ActivePage>('dashboard')
+  const [event, setEvent] = useState<any | null>(null)
+  const [contributions, setContributions] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [noEvent, setNoEvent] = useState(false)
+
+  const loadData = async () => {
+    try {
+      const events = await api.listEvents()
+      if (events.length === 0) {
+        setNoEvent(true)
+        setLoading(false)
+        return
+      }
+      const firstId = events[0].id
+      const [ev, contrib] = await Promise.all([
+        api.getEvent(firstId),
+        api.getEventContributions(firstId),
+      ])
+      setEvent(ev)
+      setContributions(contrib)
+      setNoEvent(false)
+    } catch {
+      // silently fail — user sees empty state
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { loadData() }, [])
+
+  const confirmedContrib = contributions.filter((c: any) => c.status === 'confirmed')
 
   return (
     <div style={{ position: 'fixed', inset: 0 }} className="ca-root">
       <div className="cd-shell">
-        <Sidebar activePage={activePage} onNav={setActivePage} />
+        <Sidebar
+          activePage={activePage}
+          onNav={setActivePage}
+          event={event}
+          contribCount={confirmedContrib.length}
+          giftCount={event?.gifts?.length ?? 0}
+        />
         <div className="cd-main">
           <Topbar />
           <div className="cd-page">
-            {activePage === 'dashboard' && <DashHome />}
-            {activePage === 'gifts'     && <DashGifts />}
-            {activePage === 'payouts'   && <Saques />}
-            {activePage === 'customize' && <Personalize />}
+            {loading && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--ca-muted)', fontSize: 14 }}>
+                Carregando…
+              </div>
+            )}
+            {!loading && noEvent && <NoEventState />}
+            {!loading && !noEvent && (
+              <>
+                {activePage === 'dashboard' && <DashHome event={event} contributions={contributions} onNavigate={setActivePage} />}
+                {activePage === 'gifts'     && <DashGifts event={event} onReload={loadData} />}
+                {activePage === 'contrib'   && <DashContributions contributions={contributions} />}
+                {activePage === 'payouts'   && <Saques />}
+                {activePage === 'customize' && <Personalize event={event} onReload={loadData} onNavigate={setActivePage} />}
+              </>
+            )}
           </div>
         </div>
       </div>
