@@ -211,17 +211,14 @@ export function BuilderPage() {
     try {
       if (state.draftId) {
         await api.updateDraft(state.draftId, payload)
+        navigate(`/criar/checkout?draft=${state.draftId}`)
       } else {
         const draft = await api.createDraft(payload)
         setDraftId(draft.id)
         navigate(`/criar/checkout?draft=${draft.id}`)
-        return
       }
-      sessionStorage.setItem('celebre-pending-draft', JSON.stringify(payload))
-      navigate('/criar/checkout')
-    } catch {
-      sessionStorage.setItem('celebre-pending-draft', JSON.stringify(payload))
-      navigate('/criar/checkout')
+    } catch (err: any) {
+      alert(err.message ?? 'Erro ao salvar rascunho. Verifique sua conexão e tente novamente.')
     }
   }, [navigate, setDraftId, state.content, state.draftId, state.eventType, state.templateId, state.theme])
 
