@@ -52,13 +52,13 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount }: S
   type NavId = ActivePage | 'event' | 'settings'
   const main: Array<{ id: NavId; label: string; icon: React.ReactNode; count?: number }> = [
     { id: 'dashboard', label: 'Dashboard',     icon: <Icon.Globe   style={{ width: 17, height: 17 }} /> },
-    { id: 'event',     label: 'Meu evento',    icon: <Icon.Heart   style={{ width: 17, height: 17 }} /> },
+    { id: 'customize', label: 'Meu Evento', icon: <Icon.Heart style={{ width: 17, height: 17 }} /> },
     { id: 'gifts',     label: 'Presentes',     icon: <Icon.Sparkle style={{ width: 17, height: 17 }} />, count: giftCount || undefined },
     { id: 'contrib',   label: 'Contribuições', icon: <Icon.Pix     style={{ width: 17, height: 17 }} />, count: contribCount || undefined },
     { id: 'payouts',   label: 'Saques',        icon: <Icon.Bank    style={{ width: 17, height: 17 }} /> },
   ]
   const account: Array<{ id: NavId; label: string; icon: React.ReactNode }> = [
-    { id: 'customize', label: 'Personalização', icon: <Icon.Camera style={{ width: 17, height: 17 }} /> },
+    
     { id: 'settings',  label: 'Configurações',  icon: <Icon.User   style={{ width: 17, height: 17 }} /> },
   ]
   const navCls = (id: NavId) => 'cd-nav__item' + (id === activePage ? ' cd-nav__item--on' : '')
