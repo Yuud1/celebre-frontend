@@ -88,6 +88,14 @@ export const api = {
       body: form,
     });
   },
+  uploadGiftImage(eventId: string, file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    return request<{ url: string }>(`/upload/events/${eventId}/gift-image`, {
+      method: "POST",
+      body: form,
+    });
+  },
   
   // ─── Events ─────────────────────────────────────────────────
   listEvents() {

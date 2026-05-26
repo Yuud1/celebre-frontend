@@ -5,6 +5,13 @@ import { getTemplateById, getDefaultTemplateByEventType } from '../templates/reg
 import type { EventContent, EventTheme, EventTypeId, LayoutId } from '../types/event'
 import { api } from '../lib/api'
 
+const LAYOUT_LABELS: Record<LayoutId, string> = {
+  wedding: 'Casamento',
+  baby: 'Chá de Bebê',
+  reveal: 'Chá Revelação',
+  home: 'Chá de Panela',
+}
+
 interface ResolvedEvent {
   eventType: EventTypeId
   layout: LayoutId
@@ -36,6 +43,7 @@ function mapApiResponse(event: any): ResolvedEvent {
       description: g.description ?? undefined,
       imageUrl: g.imageUrl ?? undefined,
       featured: false,
+      collected: Number(g.collected ?? 0),
     })),
   }
 
@@ -50,8 +58,13 @@ export function PublicEventPage() {
   useEffect(() => {
     if (!slug) return
     api.getPublicEvent(slug)
-      .then((event: any) => setResolved(mapApiResponse(event)))
+      .then((event: any) => {
+        const r = mapApiResponse(event)
+        setResolved(r)
+        document.title = `${LAYOUT_LABELS[r.layout]} — ${r.content.name}`
+      })
       .catch(() => setNotFound(true))
+    return () => { document.title = 'Celebre' }
   }, [slug])
 
   if (notFound) {

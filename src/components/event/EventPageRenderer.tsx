@@ -20,6 +20,7 @@ interface Props {
   onAddGift?: (type: 'fixed' | 'contribution', placement: 'featured' | 'grid') => void
 }
 
+
 const layoutCopy: Record<LayoutId, {
   eyebrow: string
   promise: string
@@ -62,10 +63,11 @@ const layoutCopy: Record<LayoutId, {
   },
 }
 
-function progressFor(gift: GiftItem, index: number) {
+function progressFor(gift: GiftItem) {
   if (gift.type !== 'contribution') return 100
-  const base = [42, 28, 56, 34, 49][index % 5]
-  return Math.min(base, 92)
+  const goal = gift.meta ?? gift.value
+  if (goal <= 0) return 0
+  return Math.min(100, ((gift.collected ?? 0) / goal) * 100)
 }
 
 function giftAction(gift: GiftItem) {
@@ -86,6 +88,7 @@ export function EventPageRenderer({
   const copy = layoutCopy[layout]
   const featuredGifts = getFeaturedGifts(content.gifts)
   const gridGifts = getGridGifts(content.gifts)
+
   const style = {
     '--theme-primary': theme.primary,
     '--theme-secondary': theme.secondary,
@@ -188,9 +191,12 @@ export function EventPageRenderer({
         <div className="ep-featured-zone">
           {featuredGifts.length > 0 ? (
             <div className="ep-featured-carousel" aria-label={copy.featuredLabel}>
-              {featuredGifts.map((featured, featuredIndex) => (
+              {featuredGifts.map((featured) => (
                 <section className="ep-featured" key={featured.id}>
                   <div className="ep-featured__media">
+                    {featured.imageUrl && (
+                      <img src={featured.imageUrl} alt={featured.name} className="ep-featured__img" />
+                    )}
                     <span>{copy.featuredLabel}</span>
                   </div>
                   <div className="ep-featured__content">
@@ -200,11 +206,11 @@ export function EventPageRenderer({
                     </h2>
                     <p>{featured.description}</p>
                     <div className="ep-progress-row">
-                      <strong>{formatCurrency(Math.round((featured.meta ?? featured.value) * 0.35))}</strong>
+                      <strong>{formatCurrency(featured.collected ?? 0)}</strong>
                       <span>de {formatCurrency(featured.meta ?? featured.value)}</span>
                     </div>
                     <div className="ep-progress">
-                      <div className="ep-progress__fill" style={{ width: `${progressFor(featured, featuredIndex)}%` }} />
+                      <div className="ep-progress__fill" style={{ width: `${progressFor(featured)}%` }} />
                     </div>
                     <button type="button" className="ep-btn">{giftAction(featured)}</button>
                   </div>
@@ -232,7 +238,7 @@ export function EventPageRenderer({
         </div>
 
         <div className="ep-gifts-grid">
-          {gridGifts.map((gift, index) => (
+          {gridGifts.map((gift) => (
             <EditableSpot
               key={gift.id}
               field={giftFieldId(gift.id)}
@@ -255,9 +261,9 @@ export function EventPageRenderer({
                 {gift.type === 'contribution' ? (
                   <>
                     <div className="ep-progress">
-                      <div className="ep-progress__fill" style={{ width: `${progressFor(gift, index)}%` }} />
+                      <div className="ep-progress__fill" style={{ width: `${progressFor(gift)}%` }} />
                     </div>
-                    <small>{progressFor(gift, index)}% da meta</small>
+                    <small>{Math.round(progressFor(gift))}% da meta</small>
                   </>
                 ) : null}
                 <button type="button" className="ep-btn ep-btn--soft">{giftAction(gift)}</button>
