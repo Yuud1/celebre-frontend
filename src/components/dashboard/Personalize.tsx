@@ -113,7 +113,7 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
         }
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20 }}>
+      <div className="cd-grid-personalize" style={{ gap: 20 }}>
         <div className="ca-card" style={{ padding: 0, overflow: 'hidden', height: 'fit-content' }}>
           <div style={{ display: 'flex', borderBottom: '1px solid var(--ca-line-soft)' }}>
             {tabDefs.map(t => (

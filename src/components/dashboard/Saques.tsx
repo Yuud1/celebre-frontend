@@ -30,7 +30,7 @@ export function Saques() {
         }
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gap: 16 }}>
+      <div className="cd-grid-saques" style={{ gap: 16 }}>
         <div className="ca-card" style={{ padding: 28, position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 60%, #312E81 100%)', borderColor: '#1E1B4B', color: '#fff' }}>
           <div style={{ position: 'absolute', width: 280, height: 280, borderRadius: '50%', top: -100, right: -80, background: 'radial-gradient(circle, rgba(139,92,246,0.45), transparent 70%)', filter: 'blur(20px)' }} />
           <div style={{ position: 'absolute', width: 220, height: 220, borderRadius: '50%', bottom: -80, left: -40, background: 'radial-gradient(circle, rgba(99,102,241,0.35), transparent 70%)', filter: 'blur(20px)' }} />
@@ -95,7 +95,8 @@ export function Saques() {
         </div>
       </div>
 
-      <div className="ca-card" style={{ padding: 0, marginTop: 16, overflow: 'hidden' }}>
+      <div className="cd-table-scroll" style={{ marginTop: 16 }}>
+      <div className="ca-card" style={{ padding: 0, overflow: 'hidden', minWidth: 640 }}>
         <div className="ca-row ca-row--between" style={{ padding: '18px 22px 14px' }}>
           <div>
             <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 16, fontWeight: 600 }}>Histórico de transferências</div>
@@ -128,6 +129,7 @@ export function Saques() {
             </div>
           ))}
         </div>
+      </div>
       </div>
 
       <div style={{ marginTop: 16, padding: '14px 18px', background: '#fff', border: '1px solid var(--ca-line)', borderRadius: 14, display: 'flex', alignItems: 'center', gap: 14 }}>

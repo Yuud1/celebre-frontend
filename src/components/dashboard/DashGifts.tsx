@@ -357,7 +357,7 @@ export function DashGifts({ event, onReload }: DashGiftsProps) {
         }
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+      <div className="cd-grid-gifts" style={{ gap: 16 }}>
         {gifts.map((g: any) => (
           <GiftCardItem
             key={g.id}

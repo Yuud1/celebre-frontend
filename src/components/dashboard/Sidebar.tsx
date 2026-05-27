@@ -45,9 +45,11 @@ interface SidebarProps {
   event: any | null
   contribCount: number
   giftCount: number
+  menuOpen?: boolean
+  onClose?: () => void
 }
 
-export function Sidebar({ activePage, onNav, event, contribCount, giftCount }: SidebarProps) {
+export function Sidebar({ activePage, onNav, event, contribCount, giftCount, onClose }: SidebarProps) {
   const { user } = useAuth()
   type NavId = ActivePage | 'event' | 'settings'
   const main: Array<{ id: NavId; label: string; icon: React.ReactNode; count?: number }> = [
@@ -64,6 +66,7 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount }: S
   const navCls = (id: NavId) => 'cd-nav__item' + (id === activePage ? ' cd-nav__item--on' : '')
   const go = (id: NavId) => {
     if (id === 'dashboard' || id === 'gifts' || id === 'contrib' || id === 'payouts' || id === 'customize') {
+      onClose?.()
       onNav(id)
     }
   }

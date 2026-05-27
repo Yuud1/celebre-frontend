@@ -4,14 +4,20 @@ import { nameInitials } from './DashWidgets'
 
 interface TopbarProps {
   eventSlug?: string
+  onMenuToggle?: () => void
 }
 
-export function Topbar({ eventSlug }: TopbarProps) {
+export function Topbar({ eventSlug, onMenuToggle }: TopbarProps) {
   const { user } = useAuth()
   const userInitials = nameInitials(user?.name)
 
   return (
     <div className="cd-top">
+      <button className="cd-top__menu-btn" onClick={onMenuToggle} aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ width: 18, height: 18 }}>
+          <path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="round" />
+        </svg>
+      </button>
       <div className="cd-search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ width: 16, height: 16 }}>
           <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.5-4.5" strokeLinecap="round" />

@@ -81,14 +81,14 @@ export function DashHome({ event, contributions, onNavigate }: DashHomeProps) {
         }
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+      <div className="cd-grid-stats-4" style={{ gap: 16 }}>
         <StatCard icon={<Icon.Pix style={{ color: '#10B981' }} />} label="Total arrecadado" value={totalCollected} currency spark={[8, 12, 10, 18, 14, 22, 20, 28, 26, 34, 30, 38]} />
         <StatCard icon={<Icon.Heart style={{ color: '#EC4899' }} />} label="Contribuições" value={confirmedCount} hint={avgTicket > 0 ? `Média R$ ${avgTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por contribuição` : undefined} />
         <StatCard icon={<Icon.Sparkle style={{ color: '#8B5CF6' }} />} label="Conversão da página" value="—" hint="Dados de visitas indisponíveis" />
         <StatCard icon={<Icon.Bank style={{ color: '#6366F1' }} />} label="Saldo disponível" value={0} currency delta="bloqueado" deltaTone="flat" hint="Configure saques via Asaas" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16, marginTop: 16 }}>
+      <div className="cd-grid-content" style={{ gap: 16, marginTop: 16 }}>
         <div className="ca-card" style={{ padding: 24 }}>
           <div className="ca-row ca-row--between" style={{ marginBottom: 18 }}>
             <div>

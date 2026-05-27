@@ -368,3 +368,82 @@
   50%      { box-shadow: 0 0 0 6px rgba(99,102,241, 0.10); }
 }
 .cd-glow { animation: cd-glow 2.4s ease-in-out infinite; }
+
+/* ─── Responsive layout classes ─────────────────────────── */
+.cd-grid-stats-4    { display: grid; grid-template-columns: repeat(4, 1fr); }
+.cd-grid-stats-3    { display: grid; grid-template-columns: repeat(3, 1fr); }
+.cd-grid-content    { display: grid; grid-template-columns: 1.4fr 1fr; }
+.cd-grid-saques     { display: grid; grid-template-columns: 1.4fr 1fr 1fr; }
+.cd-grid-personalize{ display: grid; grid-template-columns: 340px 1fr; }
+.cd-grid-gifts      { display: grid; grid-template-columns: repeat(3, 1fr); }
+
+.cd-table-scroll { width: 100%; }
+
+.cd-top__menu-btn {
+  display: none;
+  width: 38px; height: 38px; border-radius: 10px;
+  align-items: center; justify-content: center;
+  border: 1px solid var(--ca-line);
+  background: #fff;
+  color: var(--ca-ink-3);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color .15s, background .15s;
+}
+.cd-top__menu-btn:hover { border-color: #CBD5E1; background: var(--ca-bg-soft); }
+
+.cd-side__overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 49;
+}
+
+/* ─── Desktop guard ──────────────────────────────────────── */
+@media (min-width: 900px) {
+  .cd-top__menu-btn { display: none !important; }
+  .cd-side__overlay { display: none !important; }
+}
+
+/* ─── Tablet (640px – 899px) ─────────────────────────────── */
+@media (max-width: 899px) {
+  .cd-shell { grid-template-columns: 1fr; position: relative; }
+
+  .cd-side {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: 280px; z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    border-right: none;
+    box-shadow: none;
+  }
+  .cd-shell--menu-open .cd-side {
+    transform: translateX(0);
+    box-shadow: 4px 0 32px rgba(15, 23, 42, 0.16);
+  }
+  .cd-shell--menu-open .cd-side__overlay { display: block; }
+
+  .cd-top__menu-btn { display: inline-flex; }
+  .cd-search        { display: none; }
+
+  .cd-page       { padding: 20px 20px 32px; }
+  .cd-page__head { flex-wrap: wrap; }
+
+  .cd-grid-stats-4, .cd-grid-stats-3 { grid-template-columns: repeat(2, 1fr); }
+  .cd-grid-content, .cd-grid-saques, .cd-grid-personalize { grid-template-columns: 1fr; }
+  .cd-grid-gifts { grid-template-columns: repeat(2, 1fr); }
+
+  .cd-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* ─── Mobile (< 640px) ───────────────────────────────────── */
+@media (max-width: 639px) {
+  .cd-page  { padding: 16px 16px 28px; }
+  .cd-top   { padding: 12px 16px; gap: 10px; }
+
+  .cd-grid-stats-4, .cd-grid-stats-3 { grid-template-columns: 1fr; }
+  .cd-grid-gifts { grid-template-columns: 1fr; }
+
+  .cd-page__head { flex-direction: column; align-items: flex-start; }
+}

@@ -73,6 +73,7 @@ export function DashboardPage() {
   const [contributions, setContributions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [noEvent, setNoEvent] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const loadData = async () => {
     try {
@@ -103,16 +104,19 @@ export function DashboardPage() {
 
   return (
     <div style={{ position: 'fixed', inset: 0 }} className="ca-root">
-      <div className="cd-shell">
+      <div className={`cd-shell${menuOpen ? ' cd-shell--menu-open' : ''}`}>
+        {menuOpen && <div className="cd-side__overlay" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
         <Sidebar
           activePage={activePage}
           onNav={setActivePage}
           event={event}
           contribCount={confirmedContrib.length}
           giftCount={event?.gifts?.length ?? 0}
+          menuOpen={menuOpen}
+          onClose={() => setMenuOpen(false)}
         />
         <div className="cd-main">
-          <Topbar eventSlug={event?.slug} />
+          <Topbar eventSlug={event?.slug} onMenuToggle={() => setMenuOpen(v => !v)} />
           <div className="cd-page">
             {loading && (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--ca-muted)', fontSize: 14 }}>

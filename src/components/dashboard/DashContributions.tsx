@@ -16,13 +16,14 @@ export function DashContributions({ contributions }: DashContributionsProps) {
         sub={`${contributions.length} contribuição${contributions.length !== 1 ? 'ões' : ''} · ${confirmed.length} confirmada${confirmed.length !== 1 ? 's' : ''}`}
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 20 }}>
+      <div className="cd-grid-stats-3" style={{ gap: 16, marginBottom: 20 }}>
         <StatCard icon={<Icon.Pix style={{ color: '#10B981' }} />} label="Total arrecadado" value={total} currency />
         <StatCard icon={<Icon.Check style={{ color: '#10B981' }} />} label="Confirmadas" value={confirmed.length} />
         <StatCard icon={<Icon.Loader style={{ color: '#F59E0B' }} />} label="Pendentes" value={contributions.length - confirmed.length} />
       </div>
 
-      <div className="ca-card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="cd-table-scroll">
+      <div className="ca-card" style={{ padding: 0, overflow: 'hidden', minWidth: 520 }}>
         <div style={{ padding: '10px 22px', fontSize: 11, color: 'var(--ca-muted-2)', letterSpacing: '0.08em', textTransform: 'uppercase', background: 'var(--ca-bg-soft)', borderBottom: '1px solid var(--ca-line-soft)', display: 'grid', gridTemplateColumns: '1fr 1fr 140px 120px 120px' }}>
           <span>Convidado</span><span>Presente</span><span style={{ textAlign: 'right' }}>Valor</span><span>Método</span><span>Status</span>
         </div>
@@ -51,6 +52,7 @@ export function DashContributions({ contributions }: DashContributionsProps) {
             </div>
           )
         })}
+      </div>
       </div>
     </>
   )
