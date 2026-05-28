@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import type { EventContent, EventTheme, EventTypeId, GiftItem, LayoutId } from '../../types/event'
+import type { GuestMessage } from '../../pages/PublicEventPage'
 import type { EditableField } from '../../types/editor'
 import { giftFieldId } from '../../types/editor'
 import { EditableSpot } from '../builder/EditableSpot'
@@ -18,6 +19,8 @@ interface Props {
   activeField?: EditableField | null
   onEditField?: (field: EditableField) => void
   onAddGift?: (type: 'fixed' | 'contribution', placement: 'featured' | 'grid') => void
+  onGiftAction?: (gift: GiftItem) => void
+  messages?: GuestMessage[]
 }
 
 
@@ -84,6 +87,8 @@ export function EventPageRenderer({
   activeField,
   onEditField,
   onAddGift,
+  onGiftAction,
+  messages,
 }: Props) {
   const copy = layoutCopy[layout]
   const featuredGifts = getFeaturedGifts(content.gifts)
@@ -216,7 +221,14 @@ export function EventPageRenderer({
                     <div className="ep-progress">
                       <div className="ep-progress__fill" style={{ width: `${progressFor(featured)}%` }} />
                     </div>
-                    <button type="button" className="ep-btn">{giftAction(featured)}</button>
+                    <button
+                      type="button"
+                      className="ep-btn"
+                      onClick={() => onGiftAction?.(featured)}
+                      disabled={featured.type === 'fixed' && !!featured.isPurchased}
+                    >
+                      {featured.type === 'fixed' && featured.isPurchased ? 'Presenteado' : giftAction(featured)}
+                    </button>
                   </div>
                 </section>
               ))}
@@ -270,7 +282,14 @@ export function EventPageRenderer({
                     <small>{Math.round(progressFor(gift))}% da meta</small>
                   </>
                 ) : null}
-                <button type="button" className="ep-btn ep-btn--soft">{giftAction(gift)}</button>
+                <button
+                  type="button"
+                  className="ep-btn ep-btn--soft"
+                  onClick={() => onGiftAction?.(gift)}
+                  disabled={gift.type === 'fixed' && !!gift.isPurchased}
+                >
+                  {gift.type === 'fixed' && gift.isPurchased ? 'Presenteado' : giftAction(gift)}
+                </button>
               </article>
             </EditableSpot>
           ))}
@@ -283,20 +302,20 @@ export function EventPageRenderer({
         </div>
       </section>
 
-      <section className="ep-memories">
-        <span className="ep-kicker">Mural</span>
-        <h2>Recados que ficam</h2>
-        <div className="ep-memories__grid">
-          <blockquote>
-            Que alegria fazer parte desse momento. Que venha uma fase linda.
-            <cite>Familia Almeida</cite>
-          </blockquote>
-          <blockquote>
-            Ja deixamos nossa contribuicao e muito amor junto com ela.
-            <cite>Beatriz e Pedro</cite>
-          </blockquote>
-        </div>
-      </section>
+      {messages && messages.length > 0 ? (
+        <section className="ep-memories">
+          <span className="ep-kicker">Mural</span>
+          <h2>Recados que ficam</h2>
+          <div className="ep-memories__grid">
+            {messages.map((m, i) => (
+              <blockquote key={i}>
+                {m.message}
+                <cite>{m.guestName}</cite>
+              </blockquote>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <footer className="ep-footer">
         <h2>{copy.footer}</h2>

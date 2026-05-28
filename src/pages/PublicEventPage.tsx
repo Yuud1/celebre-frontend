@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { EventPageRenderer } from '../components/event/EventPageRenderer'
+import { ContributionModal } from '../components/event/ContributionModal'
 import { getTemplateById, getDefaultTemplateByEventType } from '../templates/registry'
-import type { EventContent, EventTheme, EventTypeId, LayoutId } from '../types/event'
+import type { EventContent, EventTheme, EventTypeId, GiftItem, LayoutId } from '../types/event'
 import { api } from '../lib/api'
 
 const LAYOUT_LABELS: Record<LayoutId, string> = {
@@ -12,11 +13,17 @@ const LAYOUT_LABELS: Record<LayoutId, string> = {
   home: 'Chá de Panela',
 }
 
+export interface GuestMessage {
+  message: string
+  guestName: string
+}
+
 interface ResolvedEvent {
   eventType: EventTypeId
   layout: LayoutId
   theme: EventTheme
   content: EventContent
+  messages: GuestMessage[]
 }
 
 function mapApiResponse(event: any): ResolvedEvent {
@@ -44,16 +51,23 @@ function mapApiResponse(event: any): ResolvedEvent {
       imageUrl: g.imageUrl ?? undefined,
       featured: false,
       collected: Number(g.collected ?? 0),
+      isPurchased: !!g.isPurchased,
     })),
   }
 
-  return { eventType, layout: template.layout, theme, content }
+  const messages: GuestMessage[] = (event.messages ?? []).map((m: any) => ({
+    message: m.message,
+    guestName: m.guestName,
+  }))
+
+  return { eventType, layout: template.layout, theme, content, messages }
 }
 
 export function PublicEventPage() {
   const { slug } = useParams<{ slug: string }>()
   const [resolved, setResolved] = useState<ResolvedEvent | null>(null)
   const [notFound, setNotFound] = useState(false)
+  const [activeGift, setActiveGift] = useState<GiftItem | null>(null)
 
   useEffect(() => {
     if (!slug) return
@@ -84,11 +98,16 @@ export function PublicEventPage() {
   }
 
   return (
-    <EventPageRenderer
-      eventType={resolved.eventType}
-      layout={resolved.layout}
-      theme={resolved.theme}
-      content={resolved.content}
-    />
+    <>
+      <EventPageRenderer
+        eventType={resolved.eventType}
+        layout={resolved.layout}
+        theme={resolved.theme}
+        content={resolved.content}
+        messages={resolved.messages}
+        onGiftAction={setActiveGift}
+      />
+      <ContributionModal gift={activeGift} onClose={() => setActiveGift(null)} />
+    </>
   )
 }

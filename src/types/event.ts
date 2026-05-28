@@ -18,6 +18,7 @@ export interface GiftItem {
   imageUrl?: string
   featured?: boolean
   collected?: number
+  isPurchased?: boolean
 }
 
 export interface EventTheme {

@@ -150,4 +150,20 @@ export const api = {
   getPublicEvent(slug: string) {
     return request<any>(`/p/${slug}`);
   },
+
+  // ─── Contributions ──────────────────────────────────────────
+  createContribution(payload: {
+    giftId: string
+    amount: number
+    guestName: string
+    guestEmail: string
+    guestCpf: string
+    message?: string
+    paymentMethod: 'PIX'
+  }) {
+    return request<{ chargeUrl: string; pixQrCodeUrl?: string }>('/contributions', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  },
 };
