@@ -34,10 +34,10 @@ export const api = {
   logout() {
     return request<{ ok: boolean }>("/auth/logout", { method: "POST" });
   },
-  updatePixKey(pixKey: string) {
+  updatePixKey(pixKey: string, pixKeyType?: string) {
     return request<any>("/auth/pix-key", {
       method: "PATCH",
-      body: JSON.stringify({ pixKey }),
+      body: JSON.stringify({ pixKey, pixKeyType }),
     });
   },
   setupSubconta(payload: {
@@ -168,6 +168,33 @@ export const api = {
       netAmount: number
       status: 'confirmed' | 'pending'
     }>>('/wallet/transactions')
+  },
+  requestWithdrawal(amount: number) {
+    return request<any>('/wallet/withdraw', {
+      method: 'POST',
+      body: JSON.stringify({ amount })
+    })
+  },
+  getWithdrawalHistory() {
+    return request<any[]>('/wallet/withdrawals')
+  },
+
+  // ─── Admin Withdrawals ───────────────────────────────────
+  adminListWithdrawals(params?: { status?: string; page?: number; limit?: number }) {
+    const qs = new URLSearchParams()
+    if (params?.status) qs.append('status', params.status)
+    if (params?.page) qs.append('page', params.page.toString())
+    if (params?.limit) qs.append('limit', params.limit.toString())
+    return request<any>(`/admin/withdrawals?${qs.toString()}`)
+  },
+  adminApproveWithdrawal(id: string) {
+    return request<any>(`/admin/withdrawals/${id}/approve`, { method: 'POST' })
+  },
+  adminRejectWithdrawal(id: string, reason: string) {
+    return request<any>(`/admin/withdrawals/${id}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ reason })
+    })
   },
 
   // ─── Public Event ───────────────────────────────────────────

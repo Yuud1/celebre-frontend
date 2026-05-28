@@ -197,7 +197,13 @@ function KycPixKey({ onNext }: { onNext: () => void }) {
     setLoading(true)
     setError('')
     try {
-      await api.updatePixKey(pixKey)
+      const typeMap: Record<string, string> = {
+        'CPF/CNPJ': pixKey.length > 14 ? 'CNPJ' : 'CPF',
+        'Celular': 'PHONE',
+        'E-mail': 'EMAIL',
+        'Aleatória': 'EVP'
+      }
+      await api.updatePixKey(pixKey, typeMap[pixType])
       await refreshUser()
       onNext()
     } catch (err: any) {

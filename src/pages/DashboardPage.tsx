@@ -75,6 +75,8 @@ export function DashboardPage() {
   const [noEvent, setNoEvent] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
+  const [walletAvailable, setWalletAvailable] = useState<number | null>(null)
+
   const loadData = async () => {
     try {
       document.title = 'Dashboard — Celebre'
@@ -85,12 +87,14 @@ export function DashboardPage() {
         return
       }
       const firstId = events[0].id
-      const [ev, contrib] = await Promise.all([
+      const [ev, contrib, wallet] = await Promise.all([
         api.getEvent(firstId),
         api.getEventContributions(firstId),
+        api.getWalletSummary().catch(() => null),
       ])
       setEvent(ev)
       setContributions(contrib)
+      setWalletAvailable(wallet?.availableBalance ?? null)
       setNoEvent(false)
     } catch {
     } finally {
@@ -126,7 +130,7 @@ export function DashboardPage() {
             {!loading && noEvent && <NoEventState />}
             {!loading && !noEvent && (
               <>
-                {activePage === 'dashboard' && <DashHome event={event} contributions={contributions} onNavigate={setActivePage} />}
+                {activePage === 'dashboard' && <DashHome event={event} contributions={contributions} onNavigate={setActivePage} availableBalance={walletAvailable} />}
                 {activePage === 'gifts'     && <DashGifts event={event} onReload={loadData} />}
                 {activePage === 'contrib'   && <DashContributions contributions={contributions} />}
                 {activePage === 'payouts'   && <Saques eventId={event?.id} />}

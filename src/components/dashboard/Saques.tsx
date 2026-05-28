@@ -69,23 +69,47 @@ interface SaquesProps {
 export function Saques({ eventId: _eventId }: SaquesProps) {
   const [summary, setSummary] = useState<Summary | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [withdrawals, setWithdrawals] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'in' | 'pending'>('all')
+  const [withdrawModal, setWithdrawModal] = useState(false)
+  const [withdrawAmount, setWithdrawAmount] = useState('')
+  const [withdrawing, setWithdrawing] = useState(false)
+  const [withdrawMsg, setWithdrawMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    Promise.all([api.getWalletSummary(), api.getWalletTransactions()])
-      .then(([s, t]) => {
+    Promise.all([api.getWalletSummary(), api.getWalletTransactions(), api.getWithdrawalHistory()])
+      .then(([s, t, w]) => {
         if (cancelled) return
         setSummary(s)
         setTransactions(Array.isArray(t) ? t : [])
+        setWithdrawals(Array.isArray(w) ? w : [])
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [])
 
+  const handleWithdraw = async () => {
+    const amount = parseFloat(withdrawAmount.replace(',', '.'))
+    if (!amount || amount <= 0) return
+    setWithdrawing(true)
+    setWithdrawMsg(null)
+    try {
+      await api.requestWithdrawal(amount)
+      setWithdrawMsg({ type: 'success', text: 'Saque solicitado! Seu pedido está em análise e será processado em breve.' })
+      setWithdrawAmount('')
+      setTimeout(() => { setWithdrawModal(false); setWithdrawMsg(null) }, 3000)
+    } catch (err: any) {
+      setWithdrawMsg({ type: 'error', text: err.message || 'Erro ao solicitar saque.' })
+    } finally {
+      setWithdrawing(false)
+    }
+  }
+
+  const hasPendingWithdrawal = withdrawals.some((w: any) => w.status === 'PENDING')
   const sparkData = useMemo(() => buildSparkData(transactions), [transactions])
 
   const txList = Array.isArray(transactions) ? transactions : []
@@ -106,7 +130,12 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
             <button className="ca-btn ca-btn--ghost" style={{ height: 38, padding: '0 16px', fontSize: 13 }}>
               <Icon.Doc style={{ width: 15, height: 15 }} />Extrato completo
             </button>
-            <button className="ca-btn ca-btn--primary" style={{ height: 38, padding: '0 16px', fontSize: 13 }}>
+            <button
+              className="ca-btn ca-btn--primary"
+              style={{ height: 38, padding: '0 16px', fontSize: 13 }}
+              onClick={() => { setWithdrawAmount(String(summary?.availableBalance?.toFixed(2) ?? '')); setWithdrawModal(true) }}
+              disabled={hasPendingWithdrawal || !summary?.availableBalance || summary.availableBalance <= 0}
+            >
               <Icon.Pix style={{ width: 16, height: 16 }} />Sacar via PIX
             </button>
           </>
@@ -135,11 +164,13 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
               Chave PIX <strong style={{ color: '#fff' }}>{pixMasked}</strong>
             </div>
             <div className="ca-row ca-row--gap" style={{ marginTop: 22 }}>
-              <button className="ca-btn ca-btn--primary ca-btn--lg" style={{ minWidth: 200 }}>
+              <button
+                className="ca-btn ca-btn--primary ca-btn--lg"
+                style={{ minWidth: 200 }}
+                onClick={() => { setWithdrawAmount(String(summary?.availableBalance?.toFixed(2) ?? '')); setWithdrawModal(true) }}
+                disabled={hasPendingWithdrawal || !summary?.availableBalance || summary.availableBalance <= 0}
+              >
                 Sacar para minha conta <Icon.ArrowRight style={{ width: 18, height: 18 }} />
-              </button>
-              <button style={{ height: 56, padding: '0 22px', borderRadius: 14, background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 500, fontSize: 14.5, border: '1px solid rgba(255,255,255,0.18)', cursor: 'pointer' }}>
-                Agendar saque
               </button>
             </div>
             <div className="ca-row" style={{ gap: 18, marginTop: 24, fontSize: 11.5, color: 'rgba(255,255,255,0.6)' }}>
@@ -238,6 +269,87 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
         </div>
       </div>
       </div>
+
+      {withdrawals.length > 0 && (
+        <div className="cd-table-scroll" style={{ marginTop: 16 }}>
+          <div className="ca-card" style={{ padding: 0, overflow: 'hidden', minWidth: 640 }}>
+            <div style={{ padding: '18px 22px 14px' }}>
+              <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 16, fontWeight: 600 }}>Histórico de saques</div>
+              <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 2 }}>Solicitações de saque enviadas à sua conta PIX</div>
+            </div>
+            <div style={{ borderTop: '1px solid var(--ca-line-soft)' }}>
+              <div style={{ padding: '10px 22px', fontSize: 11, color: 'var(--ca-muted-2)', letterSpacing: '0.08em', textTransform: 'uppercase', background: 'var(--ca-bg-soft)', borderBottom: '1px solid var(--ca-line-soft)', display: 'grid', gridTemplateColumns: '160px 140px 1fr 150px' }}>
+                <span>Data</span><span style={{ textAlign: 'right' }}>Valor</span><span style={{ paddingLeft: 24 }}>Chave PIX</span><span>Status</span>
+              </div>
+              {withdrawals.map((w: any) => (
+                <div key={w.id} style={{ padding: '14px 22px', display: 'grid', gridTemplateColumns: '160px 140px 1fr 150px', borderBottom: '1px solid var(--ca-line-soft)', alignItems: 'center', fontSize: 13 }}>
+                  <span style={{ color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{fmtDateShort(w.createdAt)}</span>
+                  <span style={{ textAlign: 'right', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: '#0F172A' }}>
+                    R$ {Number(w.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                  <span style={{ paddingLeft: 24, color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>
+                    {w.pixKey} <span style={{ color: 'var(--ca-muted-2)', fontSize: 11 }}>{w.pixKeyType}</span>
+                  </span>
+                  <span>
+                    {w.status === 'PENDING'  && <span className="ca-badge ca-badge--warn"><Icon.Loader style={{ width: 10, height: 10 }} />Aguardando</span>}
+                    {w.status === 'APPROVED' && <span className="ca-badge ca-badge--success"><Icon.Check style={{ width: 10, height: 10 }} />Aprovado</span>}
+                    {w.status === 'REJECTED' && (
+                      <div>
+                        <span className="ca-badge ca-badge--error">Rejeitado</span>
+                        {w.rejectionReason && <div style={{ fontSize: 11, color: 'var(--ca-muted)', marginTop: 3 }}>{w.rejectionReason}</div>}
+                      </div>
+                    )}
+                    {w.status === 'FAILED'   && <span className="ca-badge ca-badge--error">Falhou</span>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {withdrawModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setWithdrawModal(false)}>
+          <div style={{ background: '#fff', borderRadius: 20, padding: 32, width: 400, maxWidth: '90vw' }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Solicitar saque</div>
+            <div style={{ fontSize: 13, color: 'var(--ca-muted)', marginBottom: 24 }}>
+              O valor será transferido para a chave PIX <strong style={{ color: 'var(--ca-ink)' }}>{pixMasked}</strong>
+            </div>
+
+            <label style={{ fontSize: 12.5, color: 'var(--ca-muted)', fontWeight: 500 }}>Valor (R$)</label>
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              max={summary?.availableBalance ?? 0}
+              value={withdrawAmount}
+              onChange={e => setWithdrawAmount(e.target.value)}
+              style={{ display: 'block', width: '100%', marginTop: 6, marginBottom: 20, padding: '10px 14px', border: '1px solid var(--ca-line)', borderRadius: 10, fontSize: 18, fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, boxSizing: 'border-box' }}
+              autoFocus
+            />
+
+            {withdrawMsg && (
+              <div style={{ padding: '10px 14px', borderRadius: 10, marginBottom: 16, fontSize: 13, background: withdrawMsg.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: withdrawMsg.type === 'success' ? '#065F46' : '#991B1B' }}>
+                {withdrawMsg.text}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="ca-btn ca-btn--ghost" style={{ flex: 1, height: 44 }} onClick={() => setWithdrawModal(false)} disabled={withdrawing}>
+                Cancelar
+              </button>
+              <button
+                className="ca-btn ca-btn--primary"
+                style={{ flex: 2, height: 44 }}
+                onClick={handleWithdraw}
+                disabled={withdrawing || !withdrawAmount || parseFloat(withdrawAmount) <= 0}
+              >
+                {withdrawing ? 'Solicitando…' : 'Confirmar saque'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ marginTop: 16, padding: '14px 18px', background: '#fff', border: '1px solid var(--ca-line)', borderRadius: 14, display: 'flex', alignItems: 'center', gap: 14 }}>
         <span style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--ca-violet-50)', color: 'var(--ca-indigo)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>

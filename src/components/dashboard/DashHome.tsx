@@ -80,9 +80,9 @@ function KycStatusBig() {
   )
 }
 
-interface DashHomeProps { event: any | null; contributions: any[]; onNavigate: (p: ActivePage) => void }
+interface DashHomeProps { event: any | null; contributions: any[]; onNavigate: (p: ActivePage) => void; availableBalance?: number | null }
 
-export function DashHome({ event, contributions, onNavigate }: DashHomeProps) {
+export function DashHome({ event, contributions, onNavigate, availableBalance: availableBalanceProp }: DashHomeProps) {
   const { user } = useAuth()
   const firstName = user?.name?.split(' ')[0] ?? 'você'
   const [period, setPeriod] = useState<Period>('14')
@@ -97,16 +97,16 @@ export function DashHome({ event, contributions, onNavigate }: DashHomeProps) {
     [confirmed, period]
   )
 
-  const totalCollected = confirmed.reduce((s: number, c: any) => s + Number(c.amount), 0)
+  const totalCollected = confirmed.reduce((s: number, c: any) => s + Number(c.netAmount ?? 0), 0)
   const confirmedCount = confirmed.length
   const avgTicket = confirmedCount > 0 ? totalCollected / confirmedCount : 0
   const feed = contributions.slice(0, 5)
 
-  const periodTotal = filteredConfirmed.reduce((s: number, c: any) => s + Number(c.amount), 0)
+  const periodTotal = filteredConfirmed.reduce((s: number, c: any) => s + Number(c.netAmount ?? 0), 0)
   const periodAvgTicket = filteredConfirmed.length > 0 ? periodTotal / filteredConfirmed.length : 0
   const messageCount = filteredConfirmed.filter((c: any) => c.message?.trim()).length
 
-  const availableBalance = confirmed.reduce((s: number, c: any) => s + Number(c.netAmount ?? 0), 0)
+  const availableBalance = availableBalanceProp ?? confirmed.reduce((s: number, c: any) => s + Number(c.netAmount ?? 0), 0)
   const sparkData = useMemo(() => buildSparkData(contributions), [contributions])
   const barData = useMemo(() => buildBarData(contributions, days), [contributions, period])
 
