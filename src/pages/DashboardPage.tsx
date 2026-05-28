@@ -129,7 +129,7 @@ export function DashboardPage() {
                 {activePage === 'dashboard' && <DashHome event={event} contributions={contributions} onNavigate={setActivePage} />}
                 {activePage === 'gifts'     && <DashGifts event={event} onReload={loadData} />}
                 {activePage === 'contrib'   && <DashContributions contributions={contributions} />}
-                {activePage === 'payouts'   && <Saques />}
+                {activePage === 'payouts'   && <Saques eventId={event?.id} />}
                 {activePage === 'customize' && <Personalize event={event} onReload={loadData} onNavigate={setActivePage} />}
               </>
             )}

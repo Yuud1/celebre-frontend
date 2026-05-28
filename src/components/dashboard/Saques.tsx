@@ -1,17 +1,100 @@
+import { useEffect, useState, useMemo } from 'react'
 import { Icon } from '../auth/AuthIcons'
 import { PageHead } from '../../pages/DashboardPage'
 import { Money, Sparkline } from './DashWidgets'
+import { api } from '../../lib/api'
 
-const HISTORY = [
-  { date: '14 Out · 18:42', desc: 'Saque PIX · Banco Inter',     method: 'PIX · CPF ···0-00',   amount: -3200, status: 'paid'    },
-  { date: '13 Out · 09:15', desc: 'Repasse automático',           method: 'PIX · CPF ···0-00',   amount: -1750, status: 'paid'    },
-  { date: '12 Out · 22:08', desc: 'Contribuição · Camila F.',     method: 'Pix recebido',         amount:  1200, status: 'in'      },
-  { date: '12 Out · 11:30', desc: 'Saque PIX · Banco Inter',     method: 'PIX · CPF ···0-00',   amount: -2400, status: 'paid'    },
-  { date: '11 Out · 19:55', desc: 'Contribuição · Letícia S.',    method: 'Cartão · final 4242', amount:   500, status: 'in'      },
-  { date: '10 Out · 14:23', desc: 'Saque PIX · Banco Inter',     method: 'PIX · CPF ···0-00',   amount: -1860, status: 'pending' },
-]
+type Summary = {
+  availableBalance: number
+  pendingBalance: number
+  pendingCount: number
+  totalNetReceived: number
+  confirmedCount: number
+  pixKey: string | null
+  lastConfirmedAt: string | null
+}
 
-export function Saques() {
+type Transaction = {
+  id: string
+  date: string
+  desc: string
+  method: string
+  amount: number
+  netAmount: number
+  status: 'confirmed' | 'pending'
+}
+
+function fmtDateShort(iso: string | null) {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+    + ' · ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+}
+
+function fmtLastDate(iso: string | null) {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+}
+
+function maskPixKey(key: string | null) {
+  if (!key) return '—'
+  if (key.includes('@')) {
+    const [local, domain] = key.split('@')
+    return local.slice(0, 2) + '···@' + domain
+  }
+  if (key.replace(/\D/g, '').length >= 11) {
+    return '···.' + key.slice(-4)
+  }
+  return key.slice(0, 3) + '···' + key.slice(-2)
+}
+
+function buildSparkData(transactions: Transaction[]): number[] {
+  if (!Array.isArray(transactions)) return Array(10).fill(0)
+  const now = Date.now()
+  const buckets: number[] = Array(10).fill(0)
+  for (const t of transactions) {
+    if (t.status !== 'confirmed') continue
+    const diffDays = (now - new Date(t.date).getTime()) / (24 * 60 * 60 * 1000)
+    const bucket = 9 - Math.min(9, Math.floor(diffDays))
+    buckets[bucket] += t.netAmount
+  }
+  return buckets
+}
+
+interface SaquesProps {
+  eventId?: string | null
+}
+
+export function Saques({ eventId: _eventId }: SaquesProps) {
+  const [summary, setSummary] = useState<Summary | null>(null)
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<'all' | 'in' | 'pending'>('all')
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    Promise.all([api.getWalletSummary(), api.getWalletTransactions()])
+      .then(([s, t]) => {
+        if (cancelled) return
+        setSummary(s)
+        setTransactions(Array.isArray(t) ? t : [])
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [])
+
+  const sparkData = useMemo(() => buildSparkData(transactions), [transactions])
+
+  const txList = Array.isArray(transactions) ? transactions : []
+  const filtered = filter === 'all' ? txList
+    : filter === 'in' ? txList.filter((t) => t.status === 'confirmed')
+    : txList.filter((t) => t.status === 'pending')
+
+  const pixMasked = maskPixKey(summary?.pixKey ?? null)
+
   return (
     <>
       <PageHead
@@ -39,13 +122,17 @@ export function Saques() {
               <Icon.Pix style={{ width: 14, height: 14, color: '#A5B4FC' }} />
               Saldo disponível para saque
             </div>
-            <div className="cd-money" style={{ fontSize: 44, color: '#fff', marginTop: 10 }}>
-              <span className="cd-money__currency">R$</span>
-              <span>28.940</span>
-              <span className="cd-money__cents">,50</span>
-            </div>
+            {loading ? (
+              <div style={{ height: 60, marginTop: 10, opacity: 0.4, background: 'rgba(255,255,255,0.2)', borderRadius: 8 }} />
+            ) : (
+              <div className="cd-money" style={{ fontSize: 44, color: '#fff', marginTop: 10 }}>
+                <span className="cd-money__currency">R$</span>
+                <span>{Math.floor(summary?.availableBalance ?? 0).toLocaleString('pt-BR')}</span>
+                <span className="cd-money__cents">,{String(Math.round(((summary?.availableBalance ?? 0) % 1) * 100)).padStart(2, '0')}</span>
+              </div>
+            )}
             <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginTop: 6 }}>
-              Atualizado <span className="ca-mono">há 12 segundos</span> · Chave PIX <strong style={{ color: '#fff' }}>CPF ··· 0-00</strong>
+              Chave PIX <strong style={{ color: '#fff' }}>{pixMasked}</strong>
             </div>
             <div className="ca-row ca-row--gap" style={{ marginTop: 22 }}>
               <button className="ca-btn ca-btn--primary ca-btn--lg" style={{ minWidth: 200 }}>
@@ -68,9 +155,15 @@ export function Saques() {
             <div className="ca-row ca-row--gap-sm" style={{ fontSize: 12.5, color: 'var(--ca-muted)' }}>
               <Icon.Loader style={{ width: 14, height: 14, color: '#F59E0B' }} />Saldo em análise
             </div>
-            <span className="ca-badge ca-badge--warn">3 contribuições</span>
+            {!loading && (summary?.pendingCount ?? 0) > 0 && (
+              <span className="ca-badge ca-badge--warn">{summary!.pendingCount} {summary!.pendingCount === 1 ? 'contribuição' : 'contribuições'}</span>
+            )}
           </div>
-          <Money value={2780} size={28} />
+          {loading ? (
+            <div style={{ height: 36, marginTop: 8, background: 'var(--ca-bg-soft)', borderRadius: 6 }} />
+          ) : (
+            <Money value={summary?.pendingBalance ?? 0} size={28} />
+          )}
           <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 6, lineHeight: 1.5 }}>
             Análise antifraude · disponível em até <strong style={{ color: 'var(--ca-ink)' }}>48h</strong>.
           </div>
@@ -84,14 +177,20 @@ export function Saques() {
         <div className="ca-card" style={{ padding: 22 }}>
           <div className="ca-row ca-row--between">
             <div className="ca-row ca-row--gap-sm" style={{ fontSize: 12.5, color: 'var(--ca-muted)' }}>
-              <Icon.Check style={{ width: 14, height: 14, color: '#10B981' }} />Já transferido
+              <Icon.Check style={{ width: 14, height: 14, color: '#10B981' }} />Total recebido
             </div>
-            <span className="ca-badge ca-badge--success">+12% mês</span>
           </div>
-          <Money value={10660} size={28} />
-          <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 6 }}>6 saques · último em 14/10</div>
+          {loading ? (
+            <div style={{ height: 36, marginTop: 8, background: 'var(--ca-bg-soft)', borderRadius: 6 }} />
+          ) : (
+            <Money value={summary?.totalNetReceived ?? 0} size={28} />
+          )}
+          <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 6 }}>
+            {summary?.confirmedCount ?? 0} {(summary?.confirmedCount ?? 0) === 1 ? 'contribuição' : 'contribuições'} confirmadas
+            {summary?.lastConfirmedAt ? ` · último em ${fmtLastDate(summary.lastConfirmedAt)}` : ''}
+          </div>
           <hr style={{ border: 0, borderTop: '1px solid var(--ca-line-soft)', margin: '14px 0' }} />
-          <div style={{ height: 36 }}><Sparkline data={[2, 4, 3, 6, 5, 8, 7, 10, 9, 12]} /></div>
+          <div style={{ height: 36 }}><Sparkline data={sparkData} /></div>
         </div>
       </div>
 
@@ -99,33 +198,41 @@ export function Saques() {
       <div className="ca-card" style={{ padding: 0, overflow: 'hidden', minWidth: 640 }}>
         <div className="ca-row ca-row--between" style={{ padding: '18px 22px 14px' }}>
           <div>
-            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 16, fontWeight: 600 }}>Histórico de transferências</div>
-            <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 2 }}>Todas as movimentações da sua conta de pagamento</div>
+            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 16, fontWeight: 600 }}>Histórico de recebimentos</div>
+            <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 2 }}>Todas as contribuições recebidas na sua conta</div>
           </div>
           <div className="cd-tabs">
-            <span className="cd-tab cd-tab--on">Todos</span>
-            <span className="cd-tab">Saques</span>
-            <span className="cd-tab">Recebimentos</span>
+            <span className={`cd-tab${filter === 'all' ? ' cd-tab--on' : ''}`} style={{ cursor: 'pointer' }} onClick={() => setFilter('all')}>Todos</span>
+            <span className={`cd-tab${filter === 'in' ? ' cd-tab--on' : ''}`} style={{ cursor: 'pointer' }} onClick={() => setFilter('in')}>Confirmados</span>
+            <span className={`cd-tab${filter === 'pending' ? ' cd-tab--on' : ''}`} style={{ cursor: 'pointer' }} onClick={() => setFilter('pending')}>Em análise</span>
           </div>
         </div>
         <div style={{ borderTop: '1px solid var(--ca-line-soft)' }}>
-          <div style={{ padding: '10px 22px', fontSize: 11, color: 'var(--ca-muted-2)', letterSpacing: '0.08em', textTransform: 'uppercase', background: 'var(--ca-bg-soft)', borderBottom: '1px solid var(--ca-line-soft)', display: 'grid', gridTemplateColumns: '160px 1fr 1fr 140px 120px 80px' }}>
-            <span>Data</span><span>Descrição</span><span>Método</span><span style={{ textAlign: 'right' }}>Valor</span><span>Status</span><span />
+          <div style={{ padding: '10px 22px', fontSize: 11, color: 'var(--ca-muted-2)', letterSpacing: '0.08em', textTransform: 'uppercase', background: 'var(--ca-bg-soft)', borderBottom: '1px solid var(--ca-line-soft)', display: 'grid', gridTemplateColumns: '160px 1fr 1fr 140px 120px' }}>
+            <span>Data</span><span>Descrição</span><span>Método</span><span style={{ textAlign: 'right' }}>Valor</span><span>Status</span>
           </div>
-          {HISTORY.map((r, i) => (
-            <div key={i} style={{ padding: '14px 22px', display: 'grid', gridTemplateColumns: '160px 1fr 1fr 140px 120px 80px', borderBottom: '1px solid var(--ca-line-soft)', alignItems: 'center', fontSize: 13 }}>
-              <span style={{ color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{r.date}</span>
-              <span style={{ fontWeight: 500 }}>{r.desc}</span>
-              <span style={{ color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{r.method}</span>
-              <span style={{ textAlign: 'right', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: r.amount > 0 ? '#047857' : 'var(--ca-ink)' }}>
-                {r.amount > 0 ? '+' : '−'} R$ {Math.abs(r.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          {loading && (
+            <div style={{ padding: '24px 22px', textAlign: 'center', color: 'var(--ca-muted)', fontSize: 13 }}>
+              Carregando…
+            </div>
+          )}
+          {!loading && filtered.length === 0 && (
+            <div style={{ padding: '24px 22px', textAlign: 'center', color: 'var(--ca-muted)', fontSize: 13 }}>
+              Nenhuma movimentação encontrada.
+            </div>
+          )}
+          {!loading && filtered.map((t) => (
+            <div key={t.id} style={{ padding: '14px 22px', display: 'grid', gridTemplateColumns: '160px 1fr 1fr 140px 120px', borderBottom: '1px solid var(--ca-line-soft)', alignItems: 'center', fontSize: 13 }}>
+              <span style={{ color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{fmtDateShort(t.date)}</span>
+              <span style={{ fontWeight: 500 }}>{t.desc}</span>
+              <span style={{ color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{t.method}</span>
+              <span style={{ textAlign: 'right', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: '#047857' }}>
+                + R$ {t.netAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
               <span>
-                {r.status === 'paid'    && <span className="ca-badge ca-badge--success"><Icon.Check style={{ width: 10, height: 10 }} />Concluído</span>}
-                {r.status === 'pending' && <span className="ca-badge ca-badge--warn"><Icon.Loader style={{ width: 10, height: 10 }} />Processando</span>}
-                {r.status === 'in'      && <span className="ca-badge"><Icon.ArrowLeft style={{ width: 10, height: 10, transform: 'rotate(-45deg)' }} />Recebido</span>}
+                {t.status === 'confirmed' && <span className="ca-badge ca-badge--success"><Icon.Check style={{ width: 10, height: 10 }} />Confirmado</span>}
+                {t.status === 'pending'   && <span className="ca-badge ca-badge--warn"><Icon.Loader style={{ width: 10, height: 10 }} />Em análise</span>}
               </span>
-              <button style={{ fontSize: 12, color: 'var(--ca-indigo)', fontWeight: 600, textAlign: 'right' }}>Recibo</button>
             </div>
           ))}
         </div>

@@ -146,6 +146,30 @@ export const api = {
     });
   },
   
+  // ─── Wallet ─────────────────────────────────────────────────
+  getWalletSummary() {
+    return request<{
+      availableBalance: number
+      pendingBalance: number
+      pendingCount: number
+      totalNetReceived: number
+      confirmedCount: number
+      pixKey: string | null
+      lastConfirmedAt: string | null
+    }>('/wallet/summary')
+  },
+  getWalletTransactions() {
+    return request<Array<{
+      id: string
+      date: string
+      desc: string
+      method: string
+      amount: number
+      netAmount: number
+      status: 'confirmed' | 'pending'
+    }>>('/wallet/transactions')
+  },
+
   // ─── Public Event ───────────────────────────────────────────
   getPublicEvent(slug: string) {
     return request<any>(`/p/${slug}`);
