@@ -2,6 +2,7 @@ import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-do
 import { BuilderPublishProvider, useOptionalBuilderPublishHeader } from './contexts/BuilderPublishContext'
 import { AuthProvider } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { AdminRoute } from './components/auth/AdminRoute'
 import { HomePage } from './pages/HomePage'
 import { BuilderPage } from './pages/BuilderPage'
 import { CheckoutPage } from './pages/CheckoutPage'
@@ -10,6 +11,7 @@ import { PublicEventPage } from './pages/PublicEventPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { KycPage } from './pages/KycPage'
+import { AdminWithdrawalsPage } from './pages/AdminWithdrawalsPage'
 import './styles/app.css'
 import './styles/auth.css'
 
@@ -17,7 +19,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation()
   const isBuilder = pathname.startsWith('/criar') && !pathname.startsWith('/criar-conta')
   const isBuilderMain = pathname === '/criar'
-  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/criar-conta') || pathname.startsWith('/verificacao') || pathname.startsWith('/dashboard')
+  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/criar-conta') || pathname.startsWith('/verificacao') || pathname.startsWith('/dashboard') || pathname.startsWith('/admin')
   const publishHeader = useOptionalBuilderPublishHeader()
   const isPublicEvent = pathname.startsWith('/p/')
 
@@ -71,6 +73,7 @@ export default function App() {
             <Route path="/criar/checkout" element={<ProtectedRoute requireKyc><CheckoutPage /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute requireKyc><DashboardPage /></ProtectedRoute>} />
             <Route path="/p/:slug" element={<PublicEventPage />} />
+            <Route path="/admin/saques" element={<AdminRoute><AdminWithdrawalsPage /></AdminRoute>} />
           </Routes>
         </AppLayout>
         </BuilderPublishProvider>
