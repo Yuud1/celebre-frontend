@@ -2,6 +2,7 @@ import type { EventContent, EventTheme } from '../../types/event'
 import type { EditableField } from '../../types/editor'
 import { fieldLabel, giftFieldId } from '../../types/editor'
 import { ImagePicker } from './ImagePicker'
+import { api } from '../../lib/api'
 
 interface Props {
   field: EditableField
@@ -104,6 +105,7 @@ export function FieldEditor({
           value={gift.imageUrl ?? ''}
           onChange={(imageUrl) => onGift(giftId, { imageUrl })}
           hint="Opcional"
+          uploadFn={api.uploadDraftImage}
         />
         <button type="button" className="btn btn-ghost" onClick={() => onRemoveGift(giftId)}>
           Remover presente
@@ -169,6 +171,7 @@ export function FieldEditor({
           value={content.coverUrl}
           onChange={(coverUrl) => onContent({ coverUrl })}
           hint="Importe uma foto do seu dispositivo"
+          uploadFn={api.uploadDraftImage}
         />
       )}
     </div>

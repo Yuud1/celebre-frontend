@@ -1,5 +1,6 @@
 import type { EventContent } from '../../types/event'
 import { ImagePicker } from './ImagePicker'
+import { api } from '../../lib/api'
 
 interface Props {
   content: EventContent
@@ -82,6 +83,7 @@ export function EditSidebar({
         value={content.coverUrl}
         onChange={(coverUrl) => onContent({ coverUrl })}
         hint="Importe uma foto do seu dispositivo"
+        uploadFn={api.uploadDraftImage}
       />
 
       <hr style={{ border: 0, borderTop: '1px solid var(--cb-border)', margin: '0.5rem 0' }} />
@@ -135,6 +137,7 @@ export function EditSidebar({
             label="Foto"
             value={gift.imageUrl ?? ''}
             onChange={(imageUrl) => onGift(gift.id, { imageUrl })}
+            uploadFn={api.uploadDraftImage}
           />
           <button type="button" className="btn btn-ghost" style={{ fontSize: '0.75rem' }} onClick={() => onRemoveGift(gift.id)}>
             Remover

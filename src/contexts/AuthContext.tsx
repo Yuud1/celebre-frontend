@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { api } from '../lib/api'
+import { clearBuilderStorage } from '../hooks/useBuilderState'
 
 interface User {
   id: string
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     await api.logout().catch(() => {})
+    clearBuilderStorage()
     setUser(null)
   }
 

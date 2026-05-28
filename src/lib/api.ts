@@ -96,6 +96,14 @@ export const api = {
       body: form,
     });
   },
+  uploadDraftImage(file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    return request<{ url: string }>("/upload/draft-image", {
+      method: "POST",
+      body: form,
+    });
+  },
   
   // ─── Events ─────────────────────────────────────────────────
   listEvents() {

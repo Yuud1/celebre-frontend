@@ -198,6 +198,23 @@ export function BuilderPage() {
     }
   }, [genMode, state.eventType])
 
+  // Auto-cria draft assim que o builder chega em ready
+  useEffect(() => {
+    if (phase !== 'ready' || state.draftId || !state.eventType || !state.templateId || !state.theme) return
+    const payload = toDraftPayload({ eventType: state.eventType, templateId: state.templateId, theme: state.theme, content: state.content })
+    api.createDraft(payload).then((d) => setDraftId(d.id)).catch(() => {})
+  }, [phase, state.draftId, state.eventType, state.templateId, state.theme]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-save debounced quando conteúdo muda
+  useEffect(() => {
+    if (!state.draftId || phase !== 'ready' || !state.eventType || !state.templateId || !state.theme) return
+    const t = setTimeout(() => {
+      const payload = toDraftPayload({ eventType: state.eventType!, templateId: state.templateId!, theme: state.theme!, content: state.content })
+      api.updateDraft(state.draftId!, payload).catch(() => {})
+    }, 1500)
+    return () => clearTimeout(t)
+  }, [state.content, state.theme, state.draftId, phase]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handlePublish = useCallback(async () => {
     if (!state.eventType || !state.templateId || !state.theme) return
 

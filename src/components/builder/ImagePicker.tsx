@@ -4,11 +4,12 @@ import { readImageFile } from '../../lib/image'
 interface Props {
   label: string
   value: string
-  onChange: (url: string, file?: File) => void
+  onChange: (url: string) => void
   hint?: string
+  uploadFn?: (file: File) => Promise<{ url: string }>
 }
 
-export function ImagePicker({ label, value, onChange, hint }: Props) {
+export function ImagePicker({ label, value, onChange, hint, uploadFn }: Props) {
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
@@ -19,8 +20,13 @@ export function ImagePicker({ label, value, onChange, hint }: Props) {
     setLoading(true)
     setError(null)
     try {
-      const dataUrl = await readImageFile(file)
-      onChange(dataUrl, file)
+      if (uploadFn) {
+        const { url } = await uploadFn(file)
+        onChange(url)
+      } else {
+        const dataUrl = await readImageFile(file)
+        onChange(dataUrl)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao importar imagem.')
     } finally {
