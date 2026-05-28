@@ -362,7 +362,10 @@ function KycSuccess() {
 
 // ─── KycPage ─────────────────────────────────────────────────
 export function KycPage() {
-  const [step, setStep] = useState(0)
+  const { user } = useAuth()
+
+  const initialStep = user?.kycStatus === 'subaccount' ? 1 : 0
+  const [step, setStep] = useState(initialStep)
 
   return (
     <div className="auth-page ca-root">
