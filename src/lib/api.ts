@@ -10,7 +10,16 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       : { "Content-Type": "application/json", ...options.headers },
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error ?? "Erro na requisição");
+  if (!res.ok) {
+    const message =
+      (typeof data.error === "string" && data.error) ||
+      (typeof data.message === "string" && data.message) ||
+      (Array.isArray(data.errors)
+        ? data.errors[0]?.description ?? data.errors[0]?.message
+        : null) ||
+      `Erro na requisição (${res.status})`;
+    throw new Error(message);
+  }
   return data as T;
 }
 
@@ -33,6 +42,12 @@ export const api = {
   },
   logout() {
     return request<{ ok: boolean }>("/auth/logout", { method: "POST" });
+  },
+  forgotPassword(payload: { email: string }) {
+    return request<{ ok: boolean; message: string }>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
   },
   updatePixKey(pixKey: string, pixKeyType?: string) {
     return request<any>("/auth/pix-key", {

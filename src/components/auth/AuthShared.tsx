@@ -1,11 +1,23 @@
 import React from 'react'
 import { Icon } from './AuthIcons'
 
+export function AuthVisualPanel() {
+  return (
+    <aside className="auth-visual" aria-hidden="true">
+      <img src="/login-bg.png" alt="" className="auth-visual__image" />
+    </aside>
+  )
+}
+
 export function AuthLogo({ invert = false, size = 18 }: { invert?: boolean; size?: number }) {
   return (
-    <span className={'ca-logo' + (invert ? ' ca-logo--invert' : '')} style={{ fontSize: size }}>
-      <span className="ca-logo__mark" style={{ width: Math.round(size * 1.55), height: Math.round(size * 1.55) }} />
-      <span>celebre</span>
+    <span className={'ca-logo ca-logo--image' + (invert ? ' ca-logo--invert' : '')}>
+      <img
+        src="/logo-html.png"
+        alt="celebre"
+        className="ca-logo__image"
+        style={{ maxHeight: Math.round(size * 2.15) }}
+      />
     </span>
   )
 }
@@ -17,9 +29,9 @@ interface BtnProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: React.ReactNode
   iconRight?: React.ReactNode
 }
-export function AuthBtn({ variant = 'primary', size = 'md', block, icon, iconRight, children, className = '', style, ...rest }: BtnProps) {
+export function AuthBtn({ variant = 'primary', size = 'md', block, icon, iconRight, children, className = '', style, type = 'button', ...rest }: BtnProps) {
   const cls = `ca-btn ca-btn--${variant}${size === 'lg' ? ' ca-btn--lg' : ''}${block ? ' ca-btn--block' : ''} ${className}`.trim()
-  return <button className={cls} style={style} {...rest}>{icon}{children}{iconRight}</button>
+  return <button type={type} className={cls} style={style} {...rest}>{icon}{children}{iconRight}</button>
 }
 
 export function AuthField({ label, hint, hintTone, children }: { label?: string; hint?: string; hintTone?: string; children: React.ReactNode }) {
