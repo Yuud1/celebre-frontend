@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { EventPageRenderer } from '../components/event/EventPageRenderer'
 import { ContributionModal } from '../components/event/ContributionModal'
-import { getTemplateById, getDefaultTemplateByEventType } from '../templates/registry'
+import { getTemplateById, getDefaultTemplateByEventType, resolveEventContent } from '../templates/registry'
 import type { EventContent, EventTheme, EventTypeId, GiftItem, LayoutId } from '../types/event'
 import { api } from '../lib/api'
 
@@ -26,34 +26,44 @@ interface ResolvedEvent {
   messages: GuestMessage[]
 }
 
+function normalizeDateInput(value: unknown): string {
+  if (!value) return ''
+  return String(value).slice(0, 10)
+}
+
 function mapApiResponse(event: any): ResolvedEvent {
   const data = event.data ?? {}
   const eventType = (data.eventType ?? 'casamento') as EventTypeId
   const template = getTemplateById(data.templateId) ?? getDefaultTemplateByEventType(eventType)
   const theme = data.theme as EventTheme
 
-  const content: EventContent = {
+  const content: EventContent = resolveEventContent(eventType, {
     name: data.name ?? '',
     subtitle: data.subtitle ?? '',
     hosts: data.hosts ?? '',
-    eventDate: data.eventDate ?? event.eventDate ?? '',
+    eventDate: normalizeDateInput(data.eventDate ?? event.eventDate),
     location: data.location ?? '',
     message: data.description ?? '',
     signature: data.signature ?? '',
     coverUrl: data.coverUrl ?? event.coverUrl ?? '',
-    gifts: (event.gifts ?? []).map((g: any) => ({
-      id: g.id,
-      type: g.type,
-      name: g.name,
-      value: Number(g.value),
-      meta: g.meta != null ? Number(g.meta) : undefined,
-      description: g.description ?? undefined,
-      imageUrl: g.imageUrl ?? undefined,
-      featured: false,
-      collected: Number(g.collected ?? 0),
-      isPurchased: !!g.isPurchased,
-    })),
-  }
+    sections: data.sections,
+    gifts: (event.gifts ?? []).map((g: any) => {
+      const draftGift = (data.gifts ?? []).find((dg: { name: string }) => dg.name === g.name)
+      return {
+        id: g.id,
+        type: g.type,
+        name: g.name,
+        value: Number(g.value),
+        meta: g.meta != null ? Number(g.meta) : undefined,
+        description: g.description ?? undefined,
+        imageUrl: g.imageUrl ?? undefined,
+        featured: false,
+        collected: Number(g.collected ?? 0),
+        isPurchased: !!g.isPurchased,
+        room: draftGift?.room ?? data.sections?.giftRoomByName?.[g.name],
+      }
+    }),
+  })
 
   const messages: GuestMessage[] = (event.messages ?? []).map((m: any) => ({
     message: m.message,
@@ -105,6 +115,7 @@ export function PublicEventPage() {
         theme={resolved.theme}
         content={resolved.content}
         messages={resolved.messages}
+        eventSlug={slug}
         onGiftAction={setActiveGift}
       />
       <ContributionModal gift={activeGift} onClose={() => setActiveGift(null)} />

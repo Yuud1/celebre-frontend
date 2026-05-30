@@ -6,6 +6,7 @@ import type {
   PaletteDefinition,
   TemplateDefinition,
 } from '../types/event'
+import { applyGiftRooms, createDefaultSections, mergeSections } from '../data/defaultSections'
 
 export const EVENT_TYPES: EventTypeDefinition[] = [
   {
@@ -102,10 +103,10 @@ const giftsByType: Record<EventTypeId, EventContent['gifts']> = {
     { id: 'g4', type: 'contribution', name: 'Primeiros cuidados', value: 2500, meta: 2500, description: 'Farmacinha, bolsas, manta e banho.' },
   ],
   'cha-panela': [
-    { id: 'g1', type: 'fixed', name: 'Jogo de panelas', value: 890, description: 'O primeiro jantar da casa nova.' },
-    { id: 'g2', type: 'contribution', name: 'Moveis da cozinha', value: 6500, meta: 6500, description: 'Armarios, bancada e uma mesa cheia.', featured: true },
-    { id: 'g3', type: 'fixed', name: 'Liquidificador premium', value: 320, description: 'Para receitas de todo dia.' },
-    { id: 'g4', type: 'fixed', name: 'Jogo de cama', value: 540, description: 'Aconchego para inaugurar a fase nova.' },
+    { id: 'g1', type: 'fixed', name: 'Jogo de panelas', value: 890, description: 'O primeiro jantar da casa nova.', room: 'cozinha' },
+    { id: 'g2', type: 'contribution', name: 'Moveis da cozinha', value: 6500, meta: 6500, description: 'Armarios, bancada e uma mesa cheia.', featured: true, room: 'cozinha' },
+    { id: 'g3', type: 'fixed', name: 'Liquidificador premium', value: 320, description: 'Para receitas de todo dia.', room: 'cozinha' },
+    { id: 'g4', type: 'fixed', name: 'Jogo de cama', value: 540, description: 'Aconchego para inaugurar a fase nova.', room: 'quarto' },
   ],
 }
 
@@ -212,7 +213,23 @@ export function getPaletteById(id: string) {
 }
 
 export function createDefaultContent(eventType: EventTypeId): EventContent {
-  return structuredClone(contentByType[eventType])
+  const content = structuredClone(contentByType[eventType])
+  content.sections = createDefaultSections(eventType, content)
+  return applyGiftRooms(content)
+}
+
+export function resolveEventContent(
+  eventType: EventTypeId,
+  partial: Partial<EventContent>,
+): EventContent {
+  const base = createDefaultContent(eventType)
+  const merged: EventContent = {
+    ...base,
+    ...partial,
+    gifts: partial.gifts ?? base.gifts,
+    sections: mergeSections(eventType, { ...base, ...partial }, partial.sections),
+  }
+  return applyGiftRooms(merged)
 }
 
 export function createThemeFromPalette(paletteId: string): EventTheme {
@@ -246,6 +263,7 @@ export function toDraftPayload(state: {
     subtitle: state.content.subtitle,
     location: state.content.location,
     signature: state.content.signature,
+    sections: state.content.sections,
     gifts: state.content.gifts.map((g) => ({
       type: g.type,
       name: g.name,
@@ -253,6 +271,7 @@ export function toDraftPayload(state: {
       meta: g.type === 'contribution' ? g.meta ?? g.value : undefined,
       description: g.description,
       imageUrl: g.imageUrl,
+      room: g.room,
     })),
   }
 }

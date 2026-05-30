@@ -5,6 +5,7 @@ import {
   createDefaultContent,
   createThemeFromPalette,
   getDefaultTemplateByEventType,
+  resolveEventContent,
 } from '../templates/registry'
 
 const STORAGE_KEY = 'celebre-builder-v2'
@@ -64,6 +65,10 @@ function normalizeState(raw: Partial<BuilderState>): BuilderState {
   }
 
   if (merged.step > MAX_STEP) merged.step = MAX_STEP
+
+  if (merged.eventType && merged.content) {
+    merged.content = resolveEventContent(merged.eventType, merged.content)
+  }
 
   if (!merged.eventType || !merged.templateId) {
     merged.step = 0

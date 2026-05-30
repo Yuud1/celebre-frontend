@@ -7,7 +7,18 @@ import { EditableSpot } from '../builder/EditableSpot'
 import { formatCurrency, formatDate, formatShortDate } from '../../lib/format'
 import { getFeaturedGifts, getGridGifts } from '../../lib/gifts'
 import { SectionAddButton } from './SectionAddButton'
+import { CountdownSection } from './sections/CountdownSection'
+import { CoupleStorySection } from './sections/CoupleStorySection'
+import { CeremonySection } from './sections/CeremonySection'
+import { PregnancySection } from './sections/PregnancySection'
+import { BabyMemorialSection } from './sections/BabyMemorialSection'
+import { GenderPollSection } from './sections/GenderPollSection'
+import { GuessWallSection } from './sections/GuessWallSection'
+import { HomeStatsSection } from './sections/HomeStatsSection'
+import { HomeChecklistSection } from './sections/HomeChecklistSection'
+import { RoomWishlistSection } from './sections/RoomWishlistSection'
 import './event-page.css'
+import './event-sections.css'
 
 interface Props {
   eventType: EventTypeId | null
@@ -21,8 +32,8 @@ interface Props {
   onAddGift?: (type: 'fixed' | 'contribution', placement: 'featured' | 'grid') => void
   onGiftAction?: (gift: GiftItem) => void
   messages?: GuestMessage[]
+  eventSlug?: string
 }
-
 
 const layoutCopy: Record<LayoutId, {
   eyebrow: string
@@ -77,6 +88,10 @@ function giftAction(gift: GiftItem) {
   return gift.type === 'fixed' ? 'Presentear' : 'Contribuir'
 }
 
+function scrollToGifts() {
+  document.getElementById('ep-gifts-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
 export function EventPageRenderer({
   eventType,
   layout,
@@ -89,10 +104,18 @@ export function EventPageRenderer({
   onAddGift,
   onGiftAction,
   messages,
+  eventSlug,
 }: Props) {
   const copy = layoutCopy[layout]
+  const sections = content.sections
   const featuredGifts = getFeaturedGifts(content.gifts)
   const gridGifts = getGridGifts(content.gifts)
+  const interactKey = eventSlug ?? `preview-${eventType ?? 'event'}`
+  const isPanela = eventType === 'cha-panela'
+  const isBebe = eventType === 'cha-bebe'
+  const isReveal = eventType === 'cha-revelacao'
+  const isCasamento = eventType === 'casamento'
+  const showGenericMural = !isBebe && !isReveal && messages && messages.length > 0
 
   const style = {
     '--theme-primary': theme.primary,
@@ -146,8 +169,12 @@ export function EventPageRenderer({
             {spot('eventDate', <span>{formatDate(content.eventDate) || 'Data a definir'}</span>)}
           </div>
           <div className="ep-hero__actions">
-            <button type="button" className="ep-btn">{preview ? 'Ver checkout' : 'Contribuir agora'}</button>
-            <button type="button" className="ep-btn ep-btn--soft">Ver presentes</button>
+            <button type="button" className="ep-btn" onClick={scrollToGifts}>
+              {preview ? 'Ver checkout' : 'Contribuir agora'}
+            </button>
+            <button type="button" className="ep-btn ep-btn--soft" onClick={scrollToGifts}>
+              Ver presentes
+            </button>
           </div>
         </div>
 
@@ -175,6 +202,35 @@ export function EventPageRenderer({
         </EditableSpot>
       </header>
 
+      {isCasamento ? (
+        <CountdownSection
+          targetDate={content.eventDate}
+          kicker="Contagem regressiva"
+          title="Faltam poucos dias para o grande dia"
+          doneLabel="O grande dia chegou!"
+        />
+      ) : null}
+
+      {isBebe && sections?.pregnancy ? (
+        <PregnancySection data={sections.pregnancy} babyName={content.name} />
+      ) : null}
+
+      {isReveal ? (
+        <>
+          <GenderPollSection storageKey={interactKey} preview={preview} />
+          <CountdownSection
+            targetDate={content.eventDate}
+            kicker="Grande revelação"
+            title="A surpresa será revelada em"
+            doneLabel="A surpresa foi revelada!"
+          />
+        </>
+      ) : null}
+
+      {isPanela && sections?.homeStats ? (
+        <HomeStatsSection data={sections.homeStats} hosts={content.hosts} />
+      ) : null}
+
       <section className="ep-story">
         <div>
           <span className="ep-kicker">{copy.noteTitle}</span>
@@ -195,6 +251,18 @@ export function EventPageRenderer({
           {spot('location', <small>{content.location || 'Local a definir'}</small>, 'block')}
         </aside>
       </section>
+
+      {isCasamento && sections?.coupleStory ? (
+        <CoupleStorySection data={sections.coupleStory} />
+      ) : null}
+
+      {isCasamento && sections?.ceremony ? (
+        <CeremonySection data={sections.ceremony} />
+      ) : null}
+
+      {isPanela && sections?.checklist ? (
+        <HomeChecklistSection items={sections.checklist} gifts={content.gifts} />
+      ) : null}
 
       {featuredGifts.length > 0 || (editable && onAddGift) ? (
         <div className="ep-featured-zone">
@@ -246,68 +314,90 @@ export function EventPageRenderer({
         </div>
       ) : null}
 
-      <section className="ep-gifts">
-        <div className="ep-section-heading">
-          <span className="ep-kicker">Lista</span>
-          <h2>{copy.giftTitle}</h2>
-          <p>Escolha um presente unico ou participe de uma cota coletiva.</p>
+      {isPanela && sections?.homeRooms ? (
+        <div id="ep-gifts-anchor">
+          <RoomWishlistSection
+            rooms={sections.homeRooms}
+            gifts={content.gifts}
+            onGiftAction={onGiftAction}
+          />
         </div>
+      ) : (
+        <section className="ep-gifts" id="ep-gifts-anchor">
+          <div className="ep-section-heading">
+            <span className="ep-kicker">Lista</span>
+            <h2>{copy.giftTitle}</h2>
+            <p>Escolha um presente unico ou participe de uma cota coletiva.</p>
+          </div>
 
-        <div className="ep-gifts-grid">
-          {gridGifts.map((gift) => (
-            <EditableSpot
-              key={gift.id}
-              field={giftFieldId(gift.id)}
-              editable={editable}
-              active={activeField === giftFieldId(gift.id)}
-              onSelect={onEditField}
-              as="block"
-              className="ep-gift-card-wrap"
-            >
-              <article className="ep-gift-card">
-                {gift.imageUrl ? (
-                  <img src={gift.imageUrl} alt="" className="ep-gift-card__image" />
-                ) : null}
-                <div className="ep-gift-card__top">
-                  <span>{gift.type === 'fixed' ? 'Presente' : 'Vaquinha'}</span>
-                  <strong>{gift.type === 'fixed' ? formatCurrency(gift.value) : formatCurrency(gift.meta ?? gift.value)}</strong>
-                </div>
-                <h3>{gift.name}</h3>
-                {gift.description ? <p>{gift.description}</p> : null}
-                {gift.type === 'contribution' ? (
-                  <>
-                    <div className="ep-progress">
-                      <div className="ep-progress__fill" style={{ width: `${progressFor(gift)}%` }} />
-                    </div>
-                    <small>{Math.round(progressFor(gift))}% da meta</small>
-                  </>
-                ) : null}
-                <button
-                  type="button"
-                  className="ep-btn ep-btn--soft"
-                  onClick={() => onGiftAction?.(gift)}
-                  disabled={gift.type === 'fixed' && !!gift.isPurchased}
-                >
-                  {gift.type === 'fixed' && gift.isPurchased ? 'Presenteado' : giftAction(gift)}
-                </button>
-              </article>
-            </EditableSpot>
-          ))}
-          {editable && onAddGift ? (
-            <>
-              <SectionAddButton label="Adicionar presente" onClick={() => onAddGift('fixed', 'grid')} />
-              <SectionAddButton label="Adicionar vaquinha" onClick={() => onAddGift('contribution', 'grid')} />
-            </>
-          ) : null}
-        </div>
-      </section>
+          <div className="ep-gifts-grid">
+            {gridGifts.map((gift) => (
+              <EditableSpot
+                key={gift.id}
+                field={giftFieldId(gift.id)}
+                editable={editable}
+                active={activeField === giftFieldId(gift.id)}
+                onSelect={onEditField}
+                as="block"
+                className="ep-gift-card-wrap"
+              >
+                <article className="ep-gift-card">
+                  {gift.imageUrl ? (
+                    <img src={gift.imageUrl} alt="" className="ep-gift-card__image" />
+                  ) : null}
+                  <div className="ep-gift-card__top">
+                    <span>{gift.type === 'fixed' ? 'Presente' : 'Vaquinha'}</span>
+                    <strong>{gift.type === 'fixed' ? formatCurrency(gift.value) : formatCurrency(gift.meta ?? gift.value)}</strong>
+                  </div>
+                  <h3>{gift.name}</h3>
+                  {gift.description ? <p>{gift.description}</p> : null}
+                  {gift.type === 'contribution' ? (
+                    <>
+                      <div className="ep-progress">
+                        <div className="ep-progress__fill" style={{ width: `${progressFor(gift)}%` }} />
+                      </div>
+                      <small>{Math.round(progressFor(gift))}% da meta</small>
+                    </>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="ep-btn ep-btn--soft"
+                    onClick={() => onGiftAction?.(gift)}
+                    disabled={gift.type === 'fixed' && !!gift.isPurchased}
+                  >
+                    {gift.type === 'fixed' && gift.isPurchased ? 'Presenteado' : giftAction(gift)}
+                  </button>
+                </article>
+              </EditableSpot>
+            ))}
+            {editable && onAddGift ? (
+              <>
+                <SectionAddButton label="Adicionar presente" onClick={() => onAddGift('fixed', 'grid')} />
+                <SectionAddButton label="Adicionar vaquinha" onClick={() => onAddGift('contribution', 'grid')} />
+              </>
+            ) : null}
+          </div>
+        </section>
+      )}
 
-      {messages && messages.length > 0 ? (
+      {isBebe ? (
+        <BabyMemorialSection
+          messages={messages ?? []}
+          babyName={content.name}
+          preview={preview || editable}
+        />
+      ) : null}
+
+      {isReveal ? (
+        <GuessWallSection storageKey={interactKey} preview={preview || editable} />
+      ) : null}
+
+      {showGenericMural ? (
         <section className="ep-memories">
           <span className="ep-kicker">Mural</span>
           <h2>Recados que ficam</h2>
           <div className="ep-memories__grid">
-            {messages.map((m, i) => (
+            {messages!.map((m, i) => (
               <blockquote key={i}>
                 {m.message}
                 <cite>{m.guestName}</cite>
@@ -319,7 +409,7 @@ export function EventPageRenderer({
 
       <footer className="ep-footer">
         <h2>{copy.footer}</h2>
-        <button type="button" className="ep-btn">Contribuir</button>
+        <button type="button" className="ep-btn" onClick={scrollToGifts}>Contribuir</button>
         {!preview ? (
           <span>pagamentos seguros via Pix e cartao · feito com celebre</span>
         ) : null}

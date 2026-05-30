@@ -8,6 +8,8 @@ export type LayoutId = 'wedding' | 'baby' | 'reveal' | 'home'
 
 export type GiftType = 'fixed' | 'contribution'
 
+export type HomeRoomId = 'cozinha' | 'sala' | 'quarto' | 'banheiro' | 'lavanderia'
+
 export interface GiftItem {
   id: string
   type: GiftType
@@ -19,6 +21,63 @@ export interface GiftItem {
   featured?: boolean
   collected?: number
   isPurchased?: boolean
+  room?: HomeRoomId
+}
+
+export interface TimelineItem {
+  year: string
+  title: string
+  text: string
+}
+
+export interface CeremonyBlock {
+  ceremonyTime?: string
+  ceremonyPlace: string
+  ceremonyAddress?: string
+  receptionTime?: string
+  receptionPlace?: string
+  receptionAddress?: string
+  dressCode?: string
+}
+
+export interface CoupleStoryBlock {
+  intro?: string
+  timeline: TimelineItem[]
+}
+
+export interface PregnancyBlock {
+  dueDate?: string
+  currentWeek?: number
+}
+
+export interface HomeRoom {
+  id: HomeRoomId
+  name: string
+  icon: string
+}
+
+export interface ChecklistItem {
+  id: string
+  label: string
+  giftId?: string
+}
+
+export interface HomeStatsBlock {
+  rooms: number
+  city: string
+  moveInDate?: string
+  tagline?: string
+}
+
+export interface EventSections {
+  coupleStory?: CoupleStoryBlock
+  ceremony?: CeremonyBlock
+  pregnancy?: PregnancyBlock
+  homeStats?: HomeStatsBlock
+  homeRooms?: HomeRoom[]
+  checklist?: ChecklistItem[]
+  /** Mapeamento nome do presente → cômodo (persiste após publicação) */
+  giftRoomByName?: Partial<Record<string, HomeRoomId>>
 }
 
 export interface EventTheme {
@@ -42,6 +101,7 @@ export interface EventContent {
   signature: string
   coverUrl: string
   gifts: GiftItem[]
+  sections?: EventSections
 }
 
 export interface BuilderState {

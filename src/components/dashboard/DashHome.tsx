@@ -8,11 +8,6 @@ import { Money, StatCard, BarChart, Donut, AVATAR_COLORS, fmtDate, nameInitials 
 
 type Period = '7' | '14' | '30' | 'all'
 
-function dayKey(date: string | Date) {
-  const d = new Date(date)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
 function buildBarData(contributions: any[], days: number | null) {
   const now = new Date()
   const cutoff = days ? new Date(now.getTime() - days * 24 * 60 * 60 * 1000) : null

@@ -1,0 +1,497 @@
+
+/* ── Sprint 1: sections exclusivas por tipo ── */
+
+.ep-section,
+.ep-countdown {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: clamp(2rem, 6cqw, 4rem) clamp(1rem, 4cqw, 3rem);
+}
+
+.ep-section-lead {
+  margin: 0.75rem 0 0;
+  max-width: 42ch;
+  color: var(--ep-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.ep-section h2 {
+  margin: 0.35rem 0 0;
+  font-family: var(--ep-display);
+  font-size: clamp(1.75rem, 4.5cqw, 2.75rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+/* Countdown */
+.ep-countdown__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  max-width: 28rem;
+}
+
+.ep-countdown__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem 0.5rem;
+  border: 1px solid var(--ep-line);
+  border-radius: 16px;
+  background: var(--ep-card);
+}
+
+.ep-countdown__cell strong {
+  font-family: var(--ep-display);
+  font-size: clamp(1.5rem, 4cqw, 2.25rem);
+  line-height: 1;
+  color: var(--ep-primary);
+}
+
+.ep-countdown__cell span {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ep-muted);
+}
+
+.ep-countdown__done {
+  margin: 1rem 0 0;
+  font-family: var(--ep-display);
+  font-size: 1.5rem;
+  color: var(--ep-primary);
+}
+
+.event-page--wedding .ep-countdown {
+  border-top: 1px solid var(--ep-line);
+  border-bottom: 1px solid var(--ep-line);
+  background: color-mix(in srgb, var(--ep-secondary), transparent 92%);
+}
+
+.event-page--reveal .ep-countdown {
+  text-align: center;
+}
+
+.event-page--reveal .ep-countdown__grid {
+  margin-inline: auto;
+}
+
+/* Couple story / timeline */
+.ep-timeline {
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.ep-timeline__item {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--ep-line);
+  border-radius: 18px;
+  background: var(--ep-card);
+}
+
+.ep-timeline__year {
+  font-family: var(--ep-display);
+  font-size: 1.35rem;
+  color: var(--ep-primary);
+}
+
+.ep-timeline__item h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ep-timeline__item p {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ep-muted);
+  line-height: 1.5;
+}
+
+/* Ceremony */
+.ep-ceremony__grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+@container event-page (min-width: 640px) {
+  .ep-ceremony__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.ep-ceremony__card {
+  padding: 1.25rem;
+  border: 1px solid var(--ep-line);
+  border-radius: 20px;
+  background: var(--ep-card);
+}
+
+.ep-ceremony__icon {
+  font-size: 1.5rem;
+}
+
+.ep-ceremony__card h3 {
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+}
+
+.ep-ceremony__card strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--ep-primary);
+}
+
+.ep-ceremony__card p,
+.ep-ceremony__card small {
+  margin: 0.35rem 0 0;
+  display: block;
+  color: var(--ep-muted);
+  font-size: 0.85rem;
+}
+
+.ep-ceremony__dress {
+  margin: 1.25rem 0 0;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ep-accent), transparent 88%);
+  font-size: 0.9rem;
+}
+
+.ep-ceremony__dress span {
+  font-weight: 600;
+  margin-right: 0.35rem;
+}
+
+/* Pregnancy */
+.ep-pregnancy {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@container event-page (min-width: 720px) {
+  .ep-pregnancy {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.ep-pregnancy__gestation,
+.ep-pregnancy__size-card {
+  padding: 1.25rem;
+  border: 1px solid var(--ep-line);
+  border-radius: 22px;
+  background: var(--ep-card);
+}
+
+.ep-pregnancy__size-card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.ep-pregnancy__emoji {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.ep-pregnancy__size-card h3 {
+  margin: 0;
+  font-family: var(--ep-display);
+  font-size: 1.35rem;
+}
+
+.ep-pregnancy__size-card p {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ep-muted);
+}
+
+.ep-progress--tall {
+  height: 8px;
+  margin-top: 1rem;
+}
+
+/* Baby memorial */
+.ep-baby-memorial__card {
+  position: relative;
+  padding-top: 1.75rem !important;
+}
+
+.ep-baby-memorial__to {
+  position: absolute;
+  top: 1rem;
+  left: 1.25rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ep-primary);
+}
+
+.event-page--baby .ep-baby-memorial blockquote {
+  border-color: color-mix(in srgb, var(--ep-accent), transparent 60%);
+}
+
+/* Gender poll */
+.ep-gender-poll {
+  text-align: center;
+}
+
+.event-page--reveal .ep-gender-poll .ep-section-lead {
+  margin-inline: auto;
+}
+
+.ep-gender-poll__bar {
+  display: flex;
+  height: 14px;
+  margin-top: 1.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--ep-line);
+}
+
+.ep-gender-poll__boy {
+  background: linear-gradient(90deg, #6b9bd1, #4a7fb8);
+  transition: width 0.4s ease;
+}
+
+.ep-gender-poll__girl {
+  background: linear-gradient(90deg, #e889a8, #d45d87);
+  transition: width 0.4s ease;
+}
+
+.ep-gender-poll__stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.65rem;
+  font-size: 0.78rem;
+  color: var(--ep-muted);
+}
+
+.ep-gender-poll__form {
+  margin-top: 1.5rem;
+  max-width: 28rem;
+  margin-inline: auto;
+  display: grid;
+  gap: 0.65rem;
+  text-align: left;
+}
+
+.ep-input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--ep-line);
+  border-radius: 12px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.ep-gender-poll__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.ep-btn--boy {
+  background: #4a7fb8;
+  color: #fff;
+}
+
+.ep-btn--girl {
+  background: #d45d87;
+  color: #fff;
+}
+
+/* Guess wall */
+.ep-guess-wall__grid {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+}
+
+@container event-page (min-width: 640px) {
+  .ep-guess-wall__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ep-guess-wall__card {
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--ep-line);
+  border-radius: 16px;
+  background: var(--ep-card);
+}
+
+.ep-guess-wall__card--boy {
+  border-left: 3px solid #4a7fb8;
+}
+
+.ep-guess-wall__card--girl {
+  border-left: 3px solid #d45d87;
+}
+
+.ep-guess-wall__badge {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.ep-guess-wall__card p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.ep-guess-wall__card cite {
+  display: block;
+  margin-top: 0.65rem;
+  font-size: 0.78rem;
+  font-style: normal;
+  color: var(--ep-muted);
+}
+
+/* Home stats */
+.ep-home-stats__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.ep-home-stats__grid article {
+  padding: 1rem;
+  border: 1px solid var(--ep-line);
+  border-radius: 16px;
+  background: var(--ep-card);
+  text-align: center;
+}
+
+.ep-home-stats__grid strong {
+  display: block;
+  font-family: var(--ep-display);
+  font-size: clamp(1.25rem, 3cqw, 1.75rem);
+  line-height: 1.1;
+}
+
+.ep-home-stats__grid span {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ep-muted);
+}
+
+/* Checklist */
+.ep-home-checklist__list {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ep-home-checklist__list li {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ep-line);
+  border-radius: 12px;
+  background: var(--ep-card);
+  font-size: 0.92rem;
+}
+
+.ep-home-checklist__list li.is-done {
+  opacity: 0.72;
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--ep-primary), transparent 40%);
+}
+
+.ep-home-checklist__check {
+  flex-shrink: 0;
+  width: 1.25rem;
+  text-align: center;
+  color: var(--ep-primary);
+  font-weight: 700;
+}
+
+/* Room wishlist */
+.ep-room-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.ep-room-tabs button {
+  border: 1px solid var(--ep-line);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  background: var(--ep-card);
+  color: var(--ep-ink);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.ep-room-tabs button.is-active {
+  border-color: var(--ep-primary);
+  background: color-mix(in srgb, var(--ep-primary), transparent 88%);
+  color: var(--ep-primary);
+  font-weight: 600;
+}
+
+.ep-room-wishlist__grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+}
+
+.ep-gift-card--room {
+  padding: 1rem;
+  border: 1px solid var(--ep-line);
+  border-radius: 14px;
+  background: var(--ep-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ep-gift-card--room h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.ep-gift-card--room p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ep-muted);
+  flex: 1;
+}
+
+.ep-gift-card--room .ep-gift-card__top span {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ep-primary);
+}

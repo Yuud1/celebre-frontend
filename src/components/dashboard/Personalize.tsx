@@ -153,7 +153,7 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
               <ImagePicker
                 label="Foto de capa"
                 value={coverPreview}
-                onChange={(dataUrl, file) => { setCoverPreview(dataUrl); setCoverFile(file ?? null) }}
+                onChange={(dataUrl) => { setCoverPreview(dataUrl); setCoverFile(null) }}
                 hint="JPG, PNG ou WebP · até 5 MB"
               />
             )}
