@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { AuthLogo, AuthBtn, AuthField, AuthInput, AuthVisualPanel } from '../components/auth/AuthShared'
 import { Icon } from '../components/auth/AuthIcons'
 import { maskCEP, maskCPF, maskPhone } from '../lib/mask'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
+import { isCheckoutPublishRedirect } from '../lib/builderDraft'
 
 function getPasswordStrength(password: string) {
   if (!password) return { score: 0, label: '', color: '#94A3B8' }
@@ -81,9 +82,16 @@ function StepAccount({
   setForm: React.Dispatch<React.SetStateAction<AccountFormState>>
   onNext: () => void
 }) {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { setUser } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const redirect = searchParams.get('redirect')
+  const publishFlow = isCheckoutPublishRedirect(redirect)
+  const loginHref = redirect
+    ? `/login?redirect=${encodeURIComponent(redirect)}`
+    : '/login'
 
   const { name, email, cpf, password, confirmPassword, terms, showPass, showConfirmPass } = form
   const strength = getPasswordStrength(password)
@@ -119,6 +127,10 @@ function StepAccount({
       const res = await api.register({ name, email: email.trim().toLowerCase(), cpfCnpj: cpf, password })
       if (!res?.user) throw new Error('Resposta inválida ao criar conta')
       setUser(res.user)
+      if (publishFlow && redirect) {
+        navigate(redirect, { replace: true })
+        return
+      }
       onNext()
     } catch (err: any) {
       const message = err?.message || 'Erro ao criar conta'
@@ -148,7 +160,7 @@ function StepAccount({
       <h2 className="ca-display register-headline">Comece gratuitamente</h2>
       <p className="register-lead">Crie sua conta e monte sua página em minutos.</p>
       <p className="register-auth-switch">
-        Já tem conta? <Link to="/login">Entrar</Link>
+        Já tem conta? <Link to={loginHref}>Entrar</Link>
       </p>
 
       <form className="register-form" onSubmit={handleSubmit} noValidate>

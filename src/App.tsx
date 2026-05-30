@@ -37,7 +37,7 @@ function HeaderNavLinks({ user, onNavigate }: { user: ReturnType<typeof useAuth>
 
   return (
     <>
-      <Link to="/login" className="btn btn-ghost" onClick={close}>
+      <Link to="/criar" className="btn btn-ghost" onClick={close}>
         Login
       </Link>
       <Link to="/criar" className="btn btn-primary app-header__cta" onClick={close}>
@@ -78,7 +78,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="app-shell">
       <header className={'app-header' + (isBuilder ? ' app-header--builder' : '')}>
         <Link to="/" className="app-logo" onClick={() => setMenuOpen(false)}>
-          <AuthLogo size={17} />
+          <AuthLogo size={18} />
           <span className="app-logo__word">
             cele<span>bre</span>
           </span>
@@ -151,8 +151,8 @@ export default function App() {
             <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
             <Route path="/criar-conta" element={<RegisterPage />} />
             <Route path="/verificacao" element={<ProtectedRoute><KycPage /></ProtectedRoute>} />
-            <Route path="/criar" element={<ProtectedRoute requireKyc><BuilderPage /></ProtectedRoute>} />
-            <Route path="/criar/checkout" element={<ProtectedRoute requireKyc><CheckoutPage /></ProtectedRoute>} />
+            <Route path="/criar" element={<BuilderPage />} />
+            <Route path="/criar/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute requireKyc><DashboardPage /></ProtectedRoute>} />
             <Route path="/p/:slug" element={<PublicEventPage />} />
             <Route path="/admin/saques" element={<AdminRoute><AdminWithdrawalsPage /></AdminRoute>} />

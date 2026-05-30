@@ -11,25 +11,25 @@ export const EVENT_TYPES: EventTypeDefinition[] = [
   {
     id: 'casamento',
     label: 'Casamento',
-    emoji: 'Casamento',
+    emoji: '💍',
     description: 'Uma lista elegante para presentes, cotas e lua de mel.',
   },
   {
     id: 'cha-bebe',
-    label: 'Cha de bebe',
-    emoji: 'Bebe',
-    description: 'Uma pagina delicada para enxoval, quarto e recadinhos.',
+    label: 'Chá de bebê',
+    emoji: '👶',
+    description: 'Uma página delicada para enxoval, quarto e recadinhos.',
   },
   {
     id: 'cha-revelacao',
-    label: 'Cha revelacao',
-    emoji: 'Revelacao',
-    description: 'Uma experiencia leve para celebrar a descoberta com todos.',
+    label: 'Chá revelação',
+    emoji: '🎀',
+    description: 'Uma experiência leve para celebrar a descoberta com todos.',
   },
   {
     id: 'cha-panela',
-    label: 'Cha de panela',
-    emoji: 'Casa nova',
+    label: 'Chá de panela',
+    emoji: '🏠',
     description: 'Presentes e vaquinhas para montar o primeiro lar.',
   },
 ]
@@ -124,7 +124,7 @@ const contentByType: Record<EventTypeId, EventContent> = {
   },
   'cha-bebe': {
     name: 'Olivia',
-    subtitle: 'Cha de bebe',
+    subtitle: 'Chá de bebê',
     hosts: 'Ana e Lucas',
     eventDate: '2026-03-07',
     location: 'Vila Madalena, SP',
@@ -148,7 +148,7 @@ const contentByType: Record<EventTypeId, EventContent> = {
   },
   'cha-panela': {
     name: 'Casa da Julia e do Rafa',
-    subtitle: 'Cha de panela',
+    subtitle: 'Chá de panela',
     hosts: 'Julia e Rafael',
     eventDate: '2026-08-22',
     location: 'Pinheiros, SP',

@@ -13,7 +13,12 @@ export function ProtectedRoute({ children, requireKyc }: Props) {
   if (loading) return null
 
   if (!user) {
-    return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace />
+    return (
+      <Navigate
+        to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
+        replace
+      />
+    )
   }
 
   if (requireKyc && user.kycStatus !== 'pix_configured') {

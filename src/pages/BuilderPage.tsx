@@ -19,7 +19,9 @@ import type { EventTypeId } from '../types/event'
 import type { EditableField } from '../types/editor'
 import { giftFieldId } from '../types/editor'
 import { useBuilderPublishHeader } from '../contexts/BuilderPublishContext'
+import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
+import { CHECKOUT_PUBLISH_REDIRECT } from '../lib/builderDraft'
 
 type GenMode = null | 'type' | 'palette'
 type PreviewSize = 'mobile' | 'tablet' | 'full'
@@ -66,6 +68,7 @@ const THINK_MS = 900
 
 export function BuilderPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { setPublishState } = useBuilderPublishHeader()
   const [searchParams, setSearchParams] = useSearchParams()
   const isMobile = useMediaQuery('(max-width: 899px)')
@@ -151,15 +154,15 @@ export function BuilderPage() {
 
   const canvasMessage = showPreview
     ? isMobile
-      ? 'Sua pagina esta pronta. Abra a aba Preview para revisar.'
-      : 'Sua pagina esta pronta ao lado.'
+      ? 'Sua página está pronta. Abra a aba Preview para revisar.'
+      : 'Sua página está pronta ao lado.'
     : phase === 'welcome'
       ? isMobile
-        ? 'Escolha o tipo de celebracao na aba Chat.'
-        : 'Escolha o tipo de celebracao no chat ao lado.'
+        ? 'Escolha o tipo de celebração na aba Chat.'
+        : 'Escolha o tipo de celebração no chat ao lado.'
       : isMobile
-        ? 'Acompanhe a criacao na aba Chat.'
-        : 'Acompanhe a criacao no chat ao lado.'
+        ? 'Acompanhe a criação na aba Chat.'
+        : 'Acompanhe a criação no chat ao lado.'
 
   useEffect(() => {
     if (!genMode) return
@@ -198,16 +201,16 @@ export function BuilderPage() {
     }
   }, [genMode, state.eventType])
 
-  // Auto-cria draft assim que o builder chega em ready
+  // Auto-cria draft assim que o builder chega em ready (usuário logado)
   useEffect(() => {
-    if (phase !== 'ready' || state.draftId || !state.eventType || !state.templateId || !state.theme) return
+    if (!user || phase !== 'ready' || state.draftId || !state.eventType || !state.templateId || !state.theme) return
     const payload = toDraftPayload({ eventType: state.eventType, templateId: state.templateId, theme: state.theme, content: state.content })
     api.createDraft(payload).then((d) => setDraftId(d.id)).catch(() => {})
-  }, [phase, state.draftId, state.eventType, state.templateId, state.theme]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, phase, state.draftId, state.eventType, state.templateId, state.theme]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-save debounced quando conteúdo muda
+  // Auto-save debounced quando conteúdo muda (usuário logado)
   useEffect(() => {
-    if (!state.draftId || phase !== 'ready' || !state.eventType || !state.templateId || !state.theme) return
+    if (!user || !state.draftId || phase !== 'ready' || !state.eventType || !state.templateId || !state.theme) return
     const t = setTimeout(() => {
       const payload = toDraftPayload({ eventType: state.eventType!, templateId: state.templateId!, theme: state.theme!, content: state.content })
       api.updateDraft(state.draftId!, payload).catch(() => {})
@@ -217,6 +220,11 @@ export function BuilderPage() {
 
   const handlePublish = useCallback(async () => {
     if (!state.eventType || !state.templateId || !state.theme) return
+
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(CHECKOUT_PUBLISH_REDIRECT)}`)
+      return
+    }
 
     const payload = toDraftPayload({
       eventType: state.eventType,
@@ -237,7 +245,7 @@ export function BuilderPage() {
     } catch (err: any) {
       alert(err.message ?? 'Erro ao salvar rascunho. Verifique sua conexão e tente novamente.')
     }
-  }, [navigate, setDraftId, state.content, state.draftId, state.eventType, state.templateId, state.theme])
+  }, [navigate, setDraftId, state.content, state.draftId, state.eventType, state.templateId, state.theme, user])
 
   useEffect(() => {
     setPublishState({
@@ -342,15 +350,15 @@ export function BuilderPage() {
   return (
     <div
       className={
-        'ai-builder' +
+        'ai-builder builder-theme--celebre' +
         (showPreview && !isMobile ? ' ai-builder--fit ai-builder--chat-hidden' : '') +
         (isMobile ? ' ai-builder--mobile ai-builder--panel-' + mobilePanel : '')
       }
     >
       {showStuckState ? (
-        <div className="wizard-empty">
+        <div className="builder-empty">
           <p>O rascunho salvo no navegador ficou incompleto. Comece de novo para continuar.</p>
-          <button type="button" className="btn btn-primary" onClick={reset}>
+          <button type="button" className="home-btn home-btn--grad" onClick={reset}>
             Comecar do zero
           </button>
         </div>
@@ -379,7 +387,7 @@ export function BuilderPage() {
             />
           ) : null}
 
-          <section className="ai-canvas" aria-label="Preview da pagina">
+          <section className="ai-canvas" aria-label="Preview da página">
             {!showPreview ? <CanvasIdle message={canvasMessage} /> : null}
 
             {showPreview ? (

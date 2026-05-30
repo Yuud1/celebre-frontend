@@ -63,13 +63,6 @@ const TESTIMONIALS = [
   { name: 'Rafael S.', role: 'Aniversário', text: 'Interface limpa, fácil de usar. Até minha mãe conseguiu presentear sem ajuda.', stars: 5, photo: '/casais/casal-07.png' },
 ]
 
-const HERO_FLOATS = [
-  { name: 'Julia & Marcos', meta: 'Casamento · R$ 8.420', pos: 'tl' },
-  { name: 'Olivia', meta: 'Chá de bebê · 48 presentes', pos: 'tr' },
-  { name: 'Ana & Pedro', meta: 'Nova contribuição ✓', pos: 'bl' },
-  { name: 'Revelação', meta: 'R$ 2.150 hoje', pos: 'br' },
-]
-
 type Testimonial = (typeof TESTIMONIALS)[number]
 
 function TestimonialAvatar({
@@ -156,19 +149,88 @@ export function HomePage() {
         </div>
 
         <div className="home-hero__visual" aria-hidden="true">
-          <div className="home-hero__orb" />
-          <div className="home-hero__globe">
-            <AuthLogoMark />
+          <div className="home-hero__glow">
+            <div className="home-hero__orb home-hero__orb--lilac" />
+            <div className="home-hero__orb home-hero__orb--rose" />
+            <div className="home-hero__orb home-hero__orb--core" />
           </div>
-          {HERO_FLOATS.map(card => (
-            <div key={card.name} className={`home-float home-float--${card.pos}`}>
-              <div className="home-float__avatar">{card.name[0]}</div>
+          <div className="home-hero__center">
+            <img
+              src="/img08.png"
+              alt=""
+              className="home-hero__center-img"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+
+          <div className="home-hero__feature home-hero__feature--tl">
+            <img
+              src="/img06.png"
+              alt=""
+              className="home-hero__feature-img"
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="home-float home-float--overlay">
+              <div className="home-float__avatar">J</div>
               <div>
-                <strong>{card.name}</strong>
-                <span>{card.meta}</span>
+                <strong>Julia &amp; Marcos</strong>
+                <span>Casamento · R$ 8.420</span>
               </div>
             </div>
-          ))}
+          </div>
+
+          <div className="home-hero__feature home-hero__feature--tr">
+            <img
+              src="/img05.png"
+              alt=""
+              className="home-hero__feature-img"
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="home-float home-float--overlay">
+              <div className="home-float__avatar">O</div>
+              <div>
+                <strong>Olivia</strong>
+                <span>Chá de bebê · 48 presentes</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="home-hero__feature home-hero__feature--br">
+            <img
+              src="/img07.png"
+              alt=""
+              className="home-hero__feature-img"
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="home-float home-float--overlay">
+              <div className="home-float__avatar">R</div>
+              <div>
+                <strong>Revelação</strong>
+                <span>R$ 2.150 hoje</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="home-hero__feature home-hero__feature--bl">
+            <img
+              src="/img04.png"
+              alt=""
+              className="home-hero__feature-img"
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="home-float home-float--overlay">
+              <div className="home-float__avatar">A</div>
+              <div>
+                <strong>Ana &amp; Pedro</strong>
+                <span>Nova contribuição ✓</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -222,7 +284,6 @@ export function HomePage() {
           {PLANS.map(plan => (
             <article key={plan.name} className={'home-price-card' + (plan.popular ? ' home-price-card--popular' : '')}>
               {plan.popular && <span className="home-price-card__tag">Popular</span>}
-              <div className="home-price-card__icon">{plan.name[0]}</div>
               <h3>{plan.name}</h3>
               <div className="home-price-card__price">
                 <strong>{plan.price}</strong>
@@ -279,8 +340,4 @@ export function HomePage() {
       </footer>
     </div>
   )
-}
-
-function AuthLogoMark() {
-  return <img src="/logo-html.png" alt="" className="home-hero__logo-mark" />
 }

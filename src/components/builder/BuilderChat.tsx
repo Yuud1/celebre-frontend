@@ -171,7 +171,7 @@ export function BuilderChat({
           onClick={onRestart}
           disabled={disabled}
         >
-          Recomecar
+          Recomeçar
         </button>
       </div>
       <div className="ai-chat__scroll" ref={scrollRef}>
@@ -190,7 +190,6 @@ export function BuilderChat({
                     disabled={disabled}
                     onClick={() => onSelectEventType(et.id as EventTypeId)}
                   >
-                    <span>{et.emoji}</span>
                     <strong>{et.label}</strong>
                   </button>
                 ))}
@@ -291,7 +290,7 @@ export function BuilderChat({
                   ) : null}
                   {askingQuestions ? (
                     <p>
-                      Perfeito. Agora vou fazer algumas perguntas rapidas para personalizar a pagina.
+                      Perfeito. Agora vou fazer algumas perguntas rápidas para personalizar a página.
                     </p>
                   ) : null}
                   {paletteDone ? (
@@ -344,7 +343,7 @@ export function BuilderChat({
                     min={currentQuestion.inputType === 'number' ? 1 : undefined}
                   />
                 )}
-                <button type="submit" className="btn btn-primary" disabled={!draftAnswer.trim()}>
+                <button type="submit" className="home-btn home-btn--grad ai-chat__submit" disabled={!draftAnswer.trim()}>
                   Responder
                 </button>
               </form>

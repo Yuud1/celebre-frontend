@@ -4,6 +4,7 @@ import { AuthLogo, AuthBtn, AuthField, AuthInput, AuthVisualPanel } from '../com
 import { Icon } from '../components/auth/AuthIcons'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
+import { isCheckoutPublishRedirect } from '../lib/builderDraft'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -15,6 +16,11 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const redirect = searchParams.get('redirect')
+  const publishFlow = isCheckoutPublishRedirect(redirect)
+  const registerHref = redirect
+    ? `/criar-conta?redirect=${encodeURIComponent(redirect)}`
+    : '/criar-conta'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,7 +31,8 @@ export function LoginPage() {
       const { user } = await api.login({ email, password })
       setUser(user)
       const redirect = searchParams.get('redirect')
-      if (user.kycStatus !== 'pix_configured') {
+      const publishFlow = isCheckoutPublishRedirect(redirect)
+      if (!publishFlow && user.kycStatus !== 'pix_configured') {
         navigate('/verificacao', { replace: true })
       } else {
         navigate(redirect ?? '/dashboard', { replace: true })
@@ -45,10 +52,12 @@ export function LoginPage() {
           <div style={{ marginBottom: 36 }}>
             <AuthLogo size={18} />
             <div style={{ marginTop: 28 }}>
-              <h1 className="ca-display login-headline">Bem-vindo de volta</h1>
+              <h1 className="ca-display login-headline">
+                {publishFlow ? 'Entre para publicar' : 'Bem-vindo de volta'}
+              </h1>
               <p className="register-auth-switch">
                 Não tem conta?{' '}
-                <Link to="/criar-conta">Criar gratuitamente</Link>
+                <Link to={registerHref}>Criar gratuitamente</Link>
               </p>
             </div>
           </div>

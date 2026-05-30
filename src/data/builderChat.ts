@@ -39,12 +39,12 @@ const copyByType: Record<EventTypeId, Omit<BuilderChatCopy, 'userPrompt'>> = {
       { icon: 'code', label: 'Editando', tag: 'styles' },
       { icon: 'code', label: 'Ajustando', tag: 'tipografia' },
     ],
-    palettePrompt: 'Qual paleta combina com o clima do casamento? Toque em uma opcao:',
-    readyLine: 'Pronto. Toque nos textos da pagina para personalizar antes de publicar.',
+    palettePrompt: 'Qual paleta combina com o clima do casamento? Toque em uma opção:',
+    readyLine: 'Pronto. Toque nos textos da página para personalizar antes de publicar.',
   },
   'cha-bebe': {
     intro:
-      'Vou criar uma landing page delicada para o cha de bebe, com contagem regressiva, detalhes do evento, lista de presentes e RSVP.',
+      'Vou criar uma landing page delicada para o chá de bebê, com contagem regressiva, detalhes do evento, lista de presentes e RSVP.',
     tasksAfterType: [
       { icon: 'image', label: 'Imagem gerada', tag: 'Hero Image' },
       { icon: 'image', label: 'Imagem gerada', tag: 'Floral Decoration' },
@@ -55,14 +55,14 @@ const copyByType: Record<EventTypeId, Omit<BuilderChatCopy, 'userPrompt'>> = {
     tasksAfterPalette: [
       { icon: 'palette', label: 'Aplicando', tag: 'paleta' },
       { icon: 'code', label: 'Editando', tag: 'styles' },
-      { icon: 'code', label: 'Refinando', tag: 'espacamentos' },
+      { icon: 'code', label: 'Refinando', tag: 'espaçamentos' },
     ],
-    palettePrompt: 'Escolha as cores que definem o clima da pagina:',
-    readyLine: 'Sua pagina esta pronta para revisar. Ajuste textos e fotos tocando na preview.',
+    palettePrompt: 'Escolha as cores que definem o clima da página:',
+    readyLine: 'Sua página está pronta para revisar. Ajuste textos e fotos tocando na preview.',
   },
   'cha-revelacao': {
     intro:
-      'Vou montar uma pagina leve para o cha revelacao, com destaque para a data, mensagem e lista de presentes.',
+      'Vou montar uma página leve para o chá revelação, com destaque para a data, mensagem e lista de presentes.',
     tasksAfterType: [
       { icon: 'image', label: 'Imagem gerada', tag: 'Reveal Hero' },
       { icon: 'code', label: 'Escrevendo', tag: 'Countdown' },
@@ -73,12 +73,12 @@ const copyByType: Record<EventTypeId, Omit<BuilderChatCopy, 'userPrompt'>> = {
       { icon: 'palette', label: 'Aplicando', tag: 'cores' },
       { icon: 'code', label: 'Editando', tag: 'theme' },
     ],
-    palettePrompt: 'Qual tom visual voce prefere para a revelacao?',
-    readyLine: 'Revise a pagina e publique quando estiver satisfeito.',
+    palettePrompt: 'Qual tom visual você prefere para a revelação?',
+    readyLine: 'Revise a página e publique quando estiver satisfeito.',
   },
   'cha-panela': {
     intro:
-      'Vou criar uma pagina acolhedora para o cha de panela, com presentes fixos, vaquinhas e detalhes do evento.',
+      'Vou criar uma página acolhedora para o chá de panela, com presentes fixos, vaquinhas e detalhes do evento.',
     tasksAfterType: [
       { icon: 'image', label: 'Imagem gerada', tag: 'Kitchen Hero' },
       { icon: 'code', label: 'Escrevendo', tag: 'Gift grid' },
@@ -90,7 +90,7 @@ const copyByType: Record<EventTypeId, Omit<BuilderChatCopy, 'userPrompt'>> = {
       { icon: 'code', label: 'Editando', tag: 'styles' },
     ],
     palettePrompt: 'Escolha a paleta que combina com a casa nova:',
-    readyLine: 'Pagina montada. Personalize conteudos e siga para publicacao.',
+    readyLine: 'Página montada. Personalize conteúdos e siga para publicação.',
   },
 }
 
@@ -103,36 +103,36 @@ export function getBuilderChatCopy(eventType: EventTypeId | null): BuilderChatCo
 
   return {
     userPrompt: et
-      ? `Quero criar uma pagina para ${et.label.toLowerCase()}.`
-      : 'Quero criar uma pagina para minha celebracao.',
+      ? `Quero criar uma página para ${et.label.toLowerCase()}.`
+      : 'Quero criar uma página para minha celebração.',
     ...base,
   }
 }
 
 export const WELCOME_ASSISTANT =
-  'Oi! Sou a assistente do Celebre. Me conta qual celebracao voce esta organizando — cada tipo ja vem com um layout pensado para o momento.'
+  'Oi! Sou a assistente do Celebre. Me conta qual celebração você está organizando. Cada tipo já vem com um layout pensado para o momento.'
 
 export const questionsByType: Record<EventTypeId, BuilderQuestion[]> = {
   casamento: [
     {
       id: 'name',
-      prompt: 'Qual e o nome do casal?',
+      prompt: 'Qual é o nome do casal?',
       placeholder: 'Ex: Ana & Lucas',
     },
     {
       id: 'date',
-      prompt: 'Qual e a data do casamento?',
+      prompt: 'Qual é a data do casamento?',
       placeholder: 'Selecione a data',
       inputType: 'date',
     },
     {
       id: 'location',
-      prompt: 'Onde sera a celebracao?',
+      prompt: 'Onde será a celebração?',
       placeholder: 'Ex: Trancoso, BA',
     },
     {
       id: 'message',
-      prompt: 'Que mensagem voce quer deixar para os convidados?',
+      prompt: 'Que mensagem você quer deixar para os convidados?',
       placeholder: 'Escreva uma mensagem curta e carinhosa',
       inputType: 'textarea',
     },
@@ -140,19 +140,19 @@ export const questionsByType: Record<EventTypeId, BuilderQuestion[]> = {
   'cha-bebe': [
     {
       id: 'name',
-      prompt: 'Qual e o nome do bebe ou da familia?',
+      prompt: 'Qual é o nome do bebê ou da família?',
       placeholder: 'Ex: Olivia',
     },
     {
       id: 'date',
-      prompt: 'Qual e a data do cha de bebe?',
+      prompt: 'Qual é a data do chá de bebê?',
       placeholder: 'Selecione a data',
       inputType: 'date',
     },
     {
       id: 'location',
-      prompt: 'Onde sera o cha?',
-      placeholder: 'Ex: Casa da vovo, Sao Paulo',
+      prompt: 'Onde será o chá?',
+      placeholder: 'Ex: Casa da vovó, São Paulo',
     },
     {
       id: 'message',
@@ -164,12 +164,12 @@ export const questionsByType: Record<EventTypeId, BuilderQuestion[]> = {
   'cha-revelacao': [
     {
       id: 'name',
-      prompt: 'Como voce quer chamar essa pagina?',
-      placeholder: 'Ex: Bebe da Mari e do Leo',
+      prompt: 'Como você quer chamar essa página?',
+      placeholder: 'Ex: Bebê da Mari e do Leo',
     },
     {
       id: 'date',
-      prompt: 'Qual e a data do cha revelacao?',
+      prompt: 'Qual é a data do chá revelação?',
       placeholder: 'Selecione a data',
       inputType: 'date',
     },
@@ -181,31 +181,31 @@ export const questionsByType: Record<EventTypeId, BuilderQuestion[]> = {
     },
     {
       id: 'location',
-      prompt: 'Onde sera a revelacao?',
-      placeholder: 'Ex: Jardim da familia',
+      prompt: 'Onde será a revelação?',
+      placeholder: 'Ex: Jardim da família',
     },
     {
       id: 'message',
-      prompt: 'Que mensagem voce quer mostrar antes da revelacao?',
-      placeholder: 'Ex: Menino ou menina, o amor ja esta completo',
+      prompt: 'Que mensagem você quer mostrar antes da revelação?',
+      placeholder: 'Ex: Menino ou menina, o amor já está completo',
       inputType: 'textarea',
     },
   ],
   'cha-panela': [
     {
       id: 'name',
-      prompt: 'Qual nome deve aparecer na pagina?',
+      prompt: 'Qual nome deve aparecer na página?',
       placeholder: 'Ex: Ana & Lucas',
     },
     {
       id: 'date',
-      prompt: 'Qual e a data do cha de panela?',
+      prompt: 'Qual é a data do chá de panela?',
       placeholder: 'Selecione a data',
       inputType: 'date',
     },
     {
       id: 'location',
-      prompt: 'Onde sera o encontro?',
+      prompt: 'Onde será o encontro?',
       placeholder: 'Ex: Apartamento novo, Curitiba',
     },
     {

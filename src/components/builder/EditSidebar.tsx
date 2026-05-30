@@ -19,7 +19,7 @@ export function EditSidebar({
 }: Props) {
   return (
     <aside className="edit-panel">
-      <h3 style={{ margin: 0, fontSize: '1rem' }}>Personalizar</h3>
+      <h3 className="edit-panel__title">Personalizar</h3>
 
       <label>
         Nome do evento

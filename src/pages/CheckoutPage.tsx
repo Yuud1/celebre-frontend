@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
+import { useAuth } from '../contexts/AuthContext'
+import { syncBuilderDraftFromStorage } from '../lib/builderDraft'
 
 const PUBLICATION_FEE = 49
 
@@ -11,13 +13,35 @@ const UPSELLS = [
 ]
 
 export function CheckoutPage() {
-  const [params] = useSearchParams()
+  const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth()
   const draftId = params.get('draft')
+  const publishIntent = params.get('publish') === '1'
 
+  const [syncingDraft, setSyncingDraft] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [chargeUrl, setChargeUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (authLoading || !user || draftId || !publishIntent) return
+
+    setSyncingDraft(true)
+    setError(null)
+    syncBuilderDraftFromStorage()
+      .then((id) => {
+        if (id) {
+          setParams({ draft: id }, { replace: true })
+        } else {
+          setError('Não foi possível carregar o rascunho. Volte ao editor e tente novamente.')
+        }
+      })
+      .catch((err: Error) => {
+        setError(err.message ?? 'Erro ao salvar rascunho.')
+      })
+      .finally(() => setSyncingDraft(false))
+  }, [authLoading, user, draftId, publishIntent, setParams])
 
   // Poll for publication after payment is initiated
   useEffect(() => {
@@ -53,6 +77,8 @@ export function CheckoutPage() {
     }
   }
 
+  const busy = syncingDraft || authLoading
+
   return (
     <div className="checkout-box">
       <h1 style={{ margin: '0 0 0.5rem', fontSize: '1.5rem' }}>Publicar seu evento</h1>
@@ -83,13 +109,15 @@ export function CheckoutPage() {
         className="btn btn-primary"
         style={{ width: '100%' }}
         onClick={handlePublish}
-        disabled={publishing || !draftId || !!chargeUrl}
+        disabled={busy || publishing || !draftId || !!chargeUrl}
       >
-        {publishing
-          ? 'Gerando cobrança...'
-          : chargeUrl
-            ? 'Aguardando pagamento...'
-            : 'Pagar e publicar'}
+        {busy
+          ? 'Preparando rascunho...'
+          : publishing
+            ? 'Gerando cobrança...'
+            : chargeUrl
+              ? 'Aguardando pagamento...'
+              : 'Pagar e publicar'}
       </button>
 
       {chargeUrl && (
@@ -105,7 +133,7 @@ export function CheckoutPage() {
         <p style={{ fontSize: '0.85rem', color: '#c0392b', marginTop: 8 }}>{error}</p>
       )}
 
-      {!draftId && (
+      {!draftId && !busy && !publishIntent && (
         <p style={{ fontSize: '0.85rem', color: 'var(--cb-muted)', marginTop: 8 }}>
           Rascunho não encontrado.{' '}
           <Link to="/criar">Voltar ao editor</Link>
