@@ -1,8 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AuthLogo } from '../components/auth/AuthShared'
-
-const LOGOS = ['Casamentos', 'Chá de bebê', 'Revelação', 'Panelas', 'Aniversários']
 
 const FEATURE_CARDS = [
   {
@@ -84,12 +82,14 @@ function TestimonialAvatar({
 function TestimonialCard({
   item,
   className = 'home-testimonial',
+  stack,
 }: {
   item: Testimonial
   className?: string
+  stack?: number
 }) {
   return (
-    <article className={className}>
+    <article className={className} data-stack={stack}>
       <div className="home-testimonial__head">
         <TestimonialAvatar photo={item.photo} name={item.name} className="home-testimonial__avatar" />
         <div className="home-testimonial__who">
@@ -108,6 +108,48 @@ function CheckIcon() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <polyline points="20 6 9 17 4 12" />
     </svg>
+  )
+}
+
+function TestimonialsSection() {
+  const [active, setActive] = useState(0)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 900px)')
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (!mq.matches || reduced.matches) return
+
+    const id = window.setInterval(() => {
+      setActive(current => (current + 1) % TESTIMONIALS.length)
+    }, 4500)
+
+    return () => window.clearInterval(id)
+  }, [])
+
+  return (
+    <div className="home-testimonials">
+      <div className="home-testimonials__grid home-testimonials__grid--desktop">
+        {TESTIMONIALS.map(item => (
+          <TestimonialCard key={item.name} item={item} />
+        ))}
+      </div>
+
+      <div className="home-testimonials-carousel" aria-live="polite" aria-atomic="true">
+        {TESTIMONIALS.map((item, index) => {
+          const stack =
+            (index - active + TESTIMONIALS.length) % TESTIMONIALS.length
+
+          return (
+            <TestimonialCard
+              key={item.name}
+              item={item}
+              className="home-testimonial home-testimonial--stack"
+              stack={stack}
+            />
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -234,15 +276,6 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="home-logos">
-        <p>Usado em celebrações como</p>
-        <div className="home-logos__row">
-          {LOGOS.map(name => (
-            <span key={name}>{name}</span>
-          ))}
-        </div>
-      </section>
-
       <section className="home-section" id="recursos">
         <div className="home-section__head">
           <span className="home-badge">Recursos</span>
@@ -313,13 +346,7 @@ export function HomePage() {
           <p>Famílias e casais que transformaram convites em experiências bonitas e práticas.</p>
         </div>
 
-        <div className="home-testimonials">
-          <div className="home-testimonials__grid">
-            {TESTIMONIALS.map(item => (
-              <TestimonialCard key={item.name} item={item} />
-            ))}
-          </div>
-        </div>
+        <TestimonialsSection />
       </section>
 
       <footer className="home-footer">
