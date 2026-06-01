@@ -8,10 +8,11 @@ import { DashGifts } from '../components/dashboard/DashGifts'
 import { DashContributions } from '../components/dashboard/DashContributions'
 import { Saques } from '../components/dashboard/Saques'
 import { Personalize } from '../components/dashboard/Personalize'
+import { Settings } from '../components/dashboard/Settings'
 import { Sidebar } from '../components/dashboard/Sidebar'
 import { Topbar } from '../components/dashboard/Topbar'
 
-export type ActivePage = 'dashboard' | 'gifts' | 'contrib' | 'payouts' | 'customize'
+export type ActivePage = 'dashboard' | 'gifts' | 'contrib' | 'payouts' | 'customize' | 'settings'
 
 interface PageHeadProps {
   eyebrow?: string
@@ -135,6 +136,7 @@ export function DashboardPage() {
                 {activePage === 'contrib'   && <DashContributions contributions={contributions} />}
                 {activePage === 'payouts'   && <Saques eventId={event?.id} />}
                 {activePage === 'customize' && <Personalize event={event} onReload={loadData} onNavigate={setActivePage} />}
+                {activePage === 'settings' && <Settings />}
               </>
             )}
           </div>

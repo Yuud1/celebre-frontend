@@ -65,7 +65,7 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, onC
   ]
   const navCls = (id: NavId) => 'cd-nav__item' + (id === activePage ? ' cd-nav__item--on' : '')
   const go = (id: NavId) => {
-    if (id === 'dashboard' || id === 'gifts' || id === 'contrib' || id === 'payouts' || id === 'customize') {
+    if (id === 'dashboard' || id === 'gifts' || id === 'contrib' || id === 'payouts' || id === 'customize' || id === 'settings') {
       onClose?.()
       onNav(id)
     }
