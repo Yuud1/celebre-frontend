@@ -14,6 +14,8 @@
   color: var(--ep-muted);
   font-size: 0.95rem;
   line-height: 1.55;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-section h2 {
@@ -23,6 +25,8 @@
   font-weight: 400;
   letter-spacing: -0.03em;
   line-height: 1.05;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Countdown */
@@ -91,31 +95,41 @@
 
 .ep-timeline__item {
   display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr);
-  gap: 1rem;
-  padding: 1.25rem;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
   border: 1px solid var(--ep-line);
   border-radius: 18px;
   background: var(--ep-card);
+  text-align: center;
 }
 
 .ep-timeline__year {
   font-family: var(--ep-display);
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   color: var(--ep-primary);
+  display: block;
+  text-align: center;
 }
 
 .ep-timeline__item h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
+  text-align: center;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-timeline__item p {
-  margin: 0.35rem 0 0;
-  font-size: 0.9rem;
+  margin: 0.25rem 0 0;
+  font-size: 0.86rem;
   color: var(--ep-muted);
   line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Ceremony */
@@ -123,6 +137,7 @@
   display: grid;
   gap: 1rem;
   margin-top: 1.5rem;
+  margin-bottom: 2.2rem;
 }
 
 @container event-page (min-width: 640px) {
@@ -159,19 +174,37 @@
   display: block;
   color: var(--ep-muted);
   font-size: 0.85rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-ceremony__dress {
-  margin: 1.25rem 0 0;
+  margin: 0;
   padding: 0.85rem 1rem;
   border-radius: 12px;
   background: color-mix(in srgb, var(--ep-accent), transparent 88%);
   font-size: 0.9rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-ceremony__dress span {
   font-weight: 600;
   margin-right: 0.35rem;
+}
+
+.event-page--wedding .ep-ceremony__dress {
+  margin-top: 2rem;
+}
+
+@container event-page (max-width: 640px) {
+  .ep-ceremony__grid {
+    margin-bottom: 2.8rem;
+  }
+
+  .event-page--wedding .ep-ceremony__dress {
+    margin-top: 2.6rem;
+  }
 }
 
 /* Pregnancy */
@@ -217,6 +250,8 @@
   margin: 0.35rem 0 0;
   font-size: 0.85rem;
   color: var(--ep-muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-progress--tall {
@@ -357,6 +392,8 @@
   margin: 0;
   font-size: 0.92rem;
   line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-guess-wall__card cite {
@@ -480,6 +517,8 @@
 .ep-gift-card--room h3 {
   margin: 0;
   font-size: 1rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-gift-card--room p {
@@ -487,6 +526,8 @@
   font-size: 0.82rem;
   color: var(--ep-muted);
   flex: 1;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-gift-card--room .ep-gift-card__top span {

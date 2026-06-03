@@ -159,6 +159,30 @@
   max-width: 9ch;
 }
 
+.event-page--reveal .ep-hero h1 {
+  font-size: clamp(2rem, 10.5cqw, 4.6rem);
+  line-height: 0.96;
+}
+
+.event-page--reveal .ep-hero__promise {
+  max-width: 30ch;
+}
+
+@container event-page (min-width: 720px) and (max-width: 980px) {
+  .event-page--reveal .ep-hero {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: auto;
+  }
+
+  .event-page--reveal .ep-hero__copy {
+    padding: 1.1rem 1rem 1.2rem;
+  }
+
+  .event-page--reveal .ep-hero__visual {
+    min-height: 300px;
+  }
+}
+
 .event-page--baby .ep-nav {
   position: sticky;
   top: 0;
@@ -643,12 +667,6 @@
   }
 }
 
-.event-page--home .ep-hero h1 {
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-weight: 760;
-  letter-spacing: -0.08em;
-}
-
 .ep-hero__promise {
   max-width: 34rem;
   margin: 1.4rem 0 0;
@@ -669,6 +687,9 @@
   padding: 0.5rem 0.75rem;
   border: 1px solid currentColor;
   border-radius: 999px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-hero__actions {
@@ -788,6 +809,11 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+.ep-story > div,
+.ep-story aside {
+  min-width: 0;
+}
+
 @container event-page (min-width: 680px) {
   .ep-story {
     grid-template-columns: minmax(0, 1fr) minmax(0, 240px);
@@ -802,6 +828,8 @@
   line-height: 1.08;
   letter-spacing: -0.04em;
   text-wrap: pretty;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-story strong {
@@ -822,11 +850,24 @@
 .ep-story aside small {
   display: block;
   color: var(--ep-muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-story aside strong {
   margin: 0.35rem 0;
   color: var(--ep-ink);
+  display: block;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.ep-story aside small {
+  margin-top: 0.35rem;
+  line-height: 1.4;
+  max-width: 100%;
 }
 
 .ep-featured-zone {
@@ -850,7 +891,7 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     scroll-padding-inline: 0;
-    padding-inline-end: 0.25rem;
+    padding-inline-end: 0;
   }
 
   .ep-featured-carousel::-webkit-scrollbar {
@@ -858,10 +899,15 @@
   }
 
   .ep-featured-carousel > .ep-featured {
-    flex: 0 0 calc(100% - 3.25rem);
-    width: calc(100% - 3.25rem);
+    flex: 0 0 100%;
+    width: 100%;
     min-width: 0;
     scroll-snap-align: start;
+  }
+
+  .ep-featured-carousel.ep-featured-carousel--peek > .ep-featured {
+    flex: 0 0 calc(100% - 3.25rem);
+    width: calc(100% - 3.25rem);
   }
 
   .ep-featured-carousel > .ep-featured:last-child {
@@ -964,12 +1010,16 @@
   letter-spacing: -0.055em;
   line-height: 0.95;
   text-wrap: balance;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-featured p {
   max-width: 34rem;
   margin: 0;
   color: var(--ep-muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-progress-row {
@@ -988,6 +1038,10 @@
   overflow: hidden;
   border-radius: 999px;
   background: color-mix(in srgb, var(--ep-primary), transparent 88%);
+}
+
+.ep-gift-card .ep-progress {
+  margin-top: auto;
 }
 
 .ep-progress__fill {
@@ -1012,6 +1066,7 @@
   display: grid;
   gap: 1rem;
   grid-template-columns: 1fr;
+  align-items: stretch;
 }
 
 @container event-page (min-width: 520px) {
@@ -1030,6 +1085,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
+  height: 100%;
   min-height: 260px;
   padding: 1.1rem;
   border: 1px solid var(--ep-line);
@@ -1060,6 +1116,8 @@
   margin: 0;
   font-size: 1.2rem;
   letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-gift-card__image {
@@ -1074,10 +1132,16 @@
   margin: 0;
   color: var(--ep-muted);
   font-size: 0.93rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-gift-card small {
   color: var(--ep-muted);
+}
+
+.ep-gift-card .ep-btn {
+  margin-top: auto;
 }
 
 .ep-section-add-wrap {
@@ -1183,6 +1247,8 @@
   background: color-mix(in srgb, #fff, var(--ep-bg) 20%);
   color: var(--ep-ink);
   text-align: left;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-memories blockquote::before,
@@ -1215,6 +1281,8 @@
   margin-top: 1rem;
   color: var(--ep-muted);
   font-style: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ep-footer {
@@ -1297,6 +1365,10 @@
 
 .ep-gift-card-wrap {
   display: block;
+  height: 100%;
+}
+
+.ep-gifts-grid > * {
   height: 100%;
 }
 

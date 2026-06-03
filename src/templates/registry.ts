@@ -39,11 +39,11 @@ export const PALETTES: PaletteDefinition[] = [
   {
     id: 'linen',
     name: 'Linen',
-    primary: '#7c4f3f',
-    secondary: '#2d2723',
-    background: '#f7f2ea',
-    accent: '#c77b5a',
-    ink: '#211b17',
+    primary: '#6f675a',
+    secondary: '#2f2a24',
+    background: '#f7f4ee',
+    accent: '#b9a587',
+    ink: '#201c18',
   },
   {
     id: 'sage',
@@ -57,11 +57,11 @@ export const PALETTES: PaletteDefinition[] = [
   {
     id: 'blush',
     name: 'Blush',
-    primary: '#bc7467',
-    secondary: '#4a3735',
-    background: '#fbf4f1',
-    accent: '#e4a08f',
-    ink: '#2a2020',
+    primary: '#b66f8f',
+    secondary: '#4a3240',
+    background: '#fcf2f7',
+    accent: '#e2a9c1',
+    ink: '#2b1f28',
   },
   {
     id: 'mist',
@@ -75,11 +75,11 @@ export const PALETTES: PaletteDefinition[] = [
   {
     id: 'clay',
     name: 'Clay',
-    primary: '#9a5f43',
-    secondary: '#3a2a22',
-    background: '#f8f1ea',
-    accent: '#d39a71',
-    ink: '#241a15',
+    primary: '#a05f3d',
+    secondary: '#3b271c',
+    background: '#f9efe5',
+    accent: '#dda176',
+    ink: '#24170f',
   },
 ]
 

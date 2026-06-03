@@ -61,6 +61,29 @@ const TESTIMONIALS = [
   { name: 'Rafael S.', role: 'Aniversário', text: 'Interface limpa, fácil de usar. Até minha mãe conseguiu presentear sem ajuda.', stars: 5, photo: '/casais/casal-07.png' },
 ]
 
+const FAQ_ITEMS = [
+  {
+    q: 'Como funciona o Celebre?',
+    a: 'Você escolhe o tipo de celebração, personaliza a página, publica o link e começa a receber presentes e contribuições dos convidados.',
+  },
+  {
+    q: 'Posso editar minha página depois de publicar?',
+    a: 'Sim. Você pode ajustar textos, fotos, lista de presentes e aparência sempre que precisar antes e durante o evento.',
+  },
+  {
+    q: 'Quais formas de pagamento os convidados podem usar?',
+    a: 'Atualmente o checkout aceita PIX e gera o link/QR para pagamento com segurança.',
+  },
+  {
+    q: 'Preciso saber design para criar minha página?',
+    a: 'Não. Os templates já vêm prontos e você só personaliza o conteúdo principal da forma mais simples possível.',
+  },
+  {
+    q: 'Em quanto tempo minha página fica pronta?',
+    a: 'Em poucos minutos. O fluxo guiado ajuda a configurar tipo de evento, paleta, tipografia e conteúdo rapidamente.',
+  },
+]
+
 type Testimonial = (typeof TESTIMONIALS)[number]
 
 function TestimonialAvatar({
@@ -347,6 +370,23 @@ export function HomePage() {
         </div>
 
         <TestimonialsSection />
+      </section>
+
+      <section className="home-section" id="faq">
+        <div className="home-section__head">
+          <span className="home-badge">FAQ</span>
+          <h2>Perguntas frequentes</h2>
+          <p>Respostas rápidas para te ajudar a criar, publicar e gerir sua celebração no Celebre.</p>
+        </div>
+
+        <div className="home-faq" aria-label="Perguntas frequentes">
+          {FAQ_ITEMS.map((item) => (
+            <details key={item.q} className="home-faq__item">
+              <summary>{item.q}</summary>
+              <p>{item.a}</p>
+            </details>
+          ))}
+        </div>
       </section>
 
       <footer className="home-footer">

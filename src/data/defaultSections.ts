@@ -36,6 +36,23 @@ export function createDefaultSections(eventType: EventTypeId, content: Partial<E
 
     case 'cha-bebe':
       return {
+        coupleStory: {
+          intro: 'Alguns capítulos de amor até a chegada desse bebê.',
+          timeline: [
+            { year: '2021', title: 'Sonho em família', text: 'Começamos a imaginar como seria esse novo capítulo.' },
+            { year: '2025', title: 'Notícia especial', text: 'Descobrimos a gravidez e a casa inteira mudou de ritmo.' },
+            { year: '2026', title: 'Contagem regressiva', text: 'Cada semana traz mais expectativa e carinho.' },
+          ],
+        },
+        ceremony: {
+          ceremonyTime: '15h',
+          ceremonyPlace: location || 'Chá de bebê',
+          ceremonyAddress: location,
+          receptionTime: '16h',
+          receptionPlace: 'Confraternização',
+          receptionAddress: location,
+          dressCode: 'Traje leve',
+        },
         pregnancy: {
           dueDate: content.eventDate ? offsetDate(content.eventDate, 56) : undefined,
           currentWeek: 32,
@@ -44,6 +61,23 @@ export function createDefaultSections(eventType: EventTypeId, content: Partial<E
 
     case 'cha-revelacao':
       return {
+        coupleStory: {
+          intro: 'Pequenos marcos até o momento da grande surpresa.',
+          timeline: [
+            { year: '2024', title: 'Primeiros planos', text: 'A ideia de aumentar a família começou a tomar forma.' },
+            { year: '2025', title: 'Coração acelerado', text: 'O positivo chegou e o amor ganhou um novo tamanho.' },
+            { year: '2026', title: 'Dia da revelação', text: 'Agora todo mundo conta os dias para descobrir juntos.' },
+          ],
+        },
+        ceremony: {
+          ceremonyTime: '14h',
+          ceremonyPlace: location || 'Chá revelação',
+          ceremonyAddress: location,
+          receptionTime: '16h',
+          receptionPlace: 'Momento da revelação',
+          receptionAddress: location,
+          dressCode: 'Traje casual',
+        },
         pregnancy: {
           dueDate: content.eventDate ? offsetDate(content.eventDate, 84) : undefined,
           currentWeek: 24,
@@ -52,6 +86,23 @@ export function createDefaultSections(eventType: EventTypeId, content: Partial<E
 
     case 'cha-panela':
       return {
+        coupleStory: {
+          intro: 'Capítulos que estão construindo nosso primeiro lar.',
+          timeline: [
+            { year: '2022', title: 'Primeiro endereço juntos', text: 'Começamos a sonhar com um espaço que tivesse a nossa cara.' },
+            { year: '2025', title: 'Chaves na mão', text: 'A casa chegou e com ela uma lista enorme de planos.' },
+            { year: '2026', title: 'Casa nova, fase nova', text: 'Agora estamos montando cada canto com muito carinho.' },
+          ],
+        },
+        ceremony: {
+          ceremonyTime: '17h',
+          ceremonyPlace: location || 'Chá de panela',
+          ceremonyAddress: location,
+          receptionTime: '18h',
+          receptionPlace: 'Brinde da casa nova',
+          receptionAddress: location,
+          dressCode: 'Traje confortável',
+        },
         homeStats: {
           rooms: 3,
           city: city || 'São Paulo',

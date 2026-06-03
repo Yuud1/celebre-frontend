@@ -4,12 +4,14 @@ import { EVENT_TYPES, PALETTES } from '../../templates/registry'
 import type { BuilderQuestion, BuilderTask } from '../../data/builderChat'
 import { WELCOME_ASSISTANT } from '../../data/builderChat'
 import type { EventTypeId } from '../../types/event'
+import { FONT_OPTIONS } from '../../data/fontOptions'
 
 export type BuilderChatPhase =
   | 'welcome'
   | 'generating-type'
   | 'palette'
   | 'generating-palette'
+  | 'font'
   | 'questions'
   | 'ready'
 
@@ -31,9 +33,13 @@ interface BuilderChatProps {
   genReveal: 'thinking' | 'working' | null
   answeredQuestions: BuilderQuestionAnswer[]
   currentQuestion: BuilderQuestion | null
+  isFinalizingPreview?: boolean
   selectedPaletteId?: string
+  selectedFontFamily?: string
+  fontUserPrompt: string | null
   onSelectEventType: (id: EventTypeId) => void
   onSelectPalette: (id: string) => void
+  onSelectFont: (fontFamily: string) => void
   onAnswerQuestion: (answer: string) => void
   onRestart: () => void
   disabled?: boolean
@@ -95,9 +101,17 @@ function TaskList({ tasks, completedCount }: { tasks: BuilderTask[]; completedCo
 }
 
 function Avatar() {
+  const [imageError, setImageError] = useState(false)
+
   return (
-    <div className="ai-chat__avatar" aria-hidden="true">
-      c<span>b</span>
+    <div className={'ai-chat__avatar' + (imageError ? ' is-fallback' : '')} aria-hidden="true">
+      {!imageError ? (
+        <img src="/chatbot.png" alt="" onError={() => setImageError(true)} />
+      ) : (
+        <>
+          c<span>b</span>
+        </>
+      )}
     </div>
   )
 }
@@ -124,9 +138,13 @@ export function BuilderChat({
   genReveal,
   answeredQuestions,
   currentQuestion,
+  isFinalizingPreview,
   selectedPaletteId,
+  selectedFontFamily,
+  fontUserPrompt,
   onSelectEventType,
   onSelectPalette,
+  onSelectFont,
   onAnswerQuestion,
   onRestart,
   disabled,
@@ -137,7 +155,8 @@ export function BuilderChat({
   const typeGenerating = phase === 'generating-type'
   const typeDone = pastWelcome && !typeGenerating
   const paletteGenerating = phase === 'generating-palette'
-  const paletteDone = phase === 'ready'
+  const choosingFont = phase === 'font' && !disabled
+  const isReadyPhase = phase === 'ready' && !isFinalizingPreview
   const askingQuestions = phase === 'questions'
   const showPaletteGrid = phase === 'palette' && !disabled
   const selectedPalette = selectedPaletteId
@@ -152,7 +171,7 @@ export function BuilderChat({
     const el = scrollRef.current
     if (!el) return
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
-  }, [phase, genReveal, completedTaskCount, paletteUserPrompt, answeredQuestions, currentQuestion])
+  }, [phase, genReveal, completedTaskCount, paletteUserPrompt, fontUserPrompt, answeredQuestions, currentQuestion])
 
   function submitAnswer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -273,7 +292,48 @@ export function BuilderChat({
           </div>
         ) : null}
 
-        {paletteGenerating || askingQuestions || paletteDone ? (
+        {choosingFont ? (
+          <div className="ai-chat__message ai-chat__message--follow">
+            <Avatar />
+            <div className="ai-chat__body">
+              <strong className="ai-chat__name">Celebre</strong>
+              <p>Agora escolha a tipografia da página:</p>
+              <div className="ai-chat__palette-grid">
+                {FONT_OPTIONS.map((font) => (
+                  <button
+                    key={font.label}
+                    type="button"
+                    className={'ai-chat__palette-btn' + ((selectedFontFamily ?? '') === font.value ? ' is-selected' : '')}
+                    disabled={disabled}
+                    onClick={() => onSelectFont(font.value)}
+                    style={{ fontFamily: font.value || "Inter, system-ui, -apple-system, 'Segoe UI', sans-serif" }}
+                  >
+                    <span>{font.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {fontUserPrompt ? (
+          <div className="ai-chat__bubble ai-chat__bubble--user">
+            <p>{fontUserPrompt}</p>
+          </div>
+        ) : null}
+
+        {isFinalizingPreview ? (
+          <div className="ai-chat__message ai-chat__message--follow">
+            <Avatar />
+            <div className="ai-chat__body">
+              <strong className="ai-chat__name">Celebre</strong>
+              <p>Perfeito. Fazendo os ajustes finais para abrir a preview…</p>
+              <Thinking label="fazendo..." />
+            </div>
+          </div>
+        ) : null}
+
+        {paletteGenerating || askingQuestions || isReadyPhase ? (
           <div className="ai-chat__message ai-chat__message--follow">
             <Avatar />
             <div className="ai-chat__body">
@@ -293,7 +353,7 @@ export function BuilderChat({
                       Perfeito. Agora vou fazer algumas perguntas rápidas para personalizar a página.
                     </p>
                   ) : null}
-                  {paletteDone ? (
+                  {isReadyPhase ? (
                     <>
                       <p>{readyLine}</p>
                       <span className="ai-chat__time">agora mesmo</span>

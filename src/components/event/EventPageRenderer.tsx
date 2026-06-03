@@ -252,12 +252,36 @@ export function EventPageRenderer({
         </aside>
       </section>
 
-      {isCasamento && sections?.coupleStory ? (
-        <CoupleStorySection data={sections.coupleStory} />
+      {sections?.coupleStory ? (
+        editable ? (
+          <EditableSpot
+            field="coupleStory"
+            editable
+            active={activeField === 'coupleStory'}
+            onSelect={onEditField}
+            as="block"
+          >
+            <CoupleStorySection data={sections.coupleStory} />
+          </EditableSpot>
+        ) : (
+          <CoupleStorySection data={sections.coupleStory} />
+        )
       ) : null}
 
-      {isCasamento && sections?.ceremony ? (
-        <CeremonySection data={sections.ceremony} />
+      {sections?.ceremony ? (
+        editable ? (
+          <EditableSpot
+            field="ceremony"
+            editable
+            active={activeField === 'ceremony'}
+            onSelect={onEditField}
+            as="block"
+          >
+            <CeremonySection data={sections.ceremony} />
+          </EditableSpot>
+        ) : (
+          <CeremonySection data={sections.ceremony} />
+        )
       ) : null}
 
       {isPanela && sections?.checklist ? (
@@ -267,7 +291,10 @@ export function EventPageRenderer({
       {featuredGifts.length > 0 || (editable && onAddGift) ? (
         <div className="ep-featured-zone">
           {featuredGifts.length > 0 ? (
-            <div className="ep-featured-carousel" aria-label={copy.featuredLabel}>
+            <div
+              className={`ep-featured-carousel${featuredGifts.length > 1 ? ' ep-featured-carousel--peek' : ''}`}
+              aria-label={copy.featuredLabel}
+            >
               {featuredGifts.map((featured) => (
                 <section className="ep-featured" key={featured.id}>
                   <div className="ep-featured__media">

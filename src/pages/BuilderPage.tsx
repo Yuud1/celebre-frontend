@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { BuilderChat } from '../components/builder/BuilderChat'
 import { BuilderMobileTabs } from '../components/builder/BuilderMobileTabs'
@@ -9,6 +9,7 @@ import { EventPageRenderer } from '../components/event/EventPageRenderer'
 import { useBuilderState } from '../hooks/useBuilderState'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { getBuilderChatCopy, getBuilderQuestions } from '../data/builderChat'
+import { FONT_OPTIONS } from '../data/fontOptions'
 import {
   getDefaultTemplateByEventType,
   getTemplateById,
@@ -78,10 +79,14 @@ export function BuilderPage() {
   const [genReveal, setGenReveal] = useState<'thinking' | 'working' | null>(null)
   const [completedTaskCount, setCompletedTaskCount] = useState(0)
   const [paletteUserPrompt, setPaletteUserPrompt] = useState<string | null>(null)
+  const [fontUserPrompt, setFontUserPrompt] = useState<string | null>(null)
+  const [fontChosen, setFontChosen] = useState(false)
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answeredQuestions, setAnsweredQuestions] = useState<QuestionAnswer[]>([])
   const [personalizationDone, setPersonalizationDone] = useState(false)
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('chat')
+  const [isFinalizingPreview, setIsFinalizingPreview] = useState(false)
+  const finalizeTimerRef = useRef<number | null>(null)
 
   const {
     state,
@@ -106,9 +111,10 @@ export function BuilderPage() {
     if (genMode === 'palette') return 'generating-palette' as const
     if (state.step === 0) return 'welcome' as const
     if (state.step === 1) return 'palette' as const
+    if (state.step === 2 && state.theme && !fontChosen) return 'font' as const
     if (!personalizationDone && questions.length > 0) return 'questions' as const
     return 'ready' as const
-  }, [genMode, personalizationDone, questions.length, state.step])
+  }, [fontChosen, genMode, personalizationDone, questions.length, state.step, state.theme])
 
   const activeTasks =
     genMode === 'type'
@@ -123,6 +129,8 @@ export function BuilderPage() {
     setGenReveal(null)
     setCompletedTaskCount(0)
     setPaletteUserPrompt(null)
+    setFontUserPrompt(null)
+    setFontChosen(false)
     setQuestionIndex(0)
     setAnsweredQuestions([])
     setPersonalizationDone(false)
@@ -133,20 +141,33 @@ export function BuilderPage() {
     setSearchParams(next, { replace: true })
   }, [searchParams, setSearchParams])
 
+  useEffect(() => {
+    return () => {
+      if (finalizeTimerRef.current) window.clearTimeout(finalizeTimerRef.current)
+    }
+  }, [])
+
   function handleRestart() {
+    if (finalizeTimerRef.current) {
+      window.clearTimeout(finalizeTimerRef.current)
+      finalizeTimerRef.current = null
+    }
     reset()
     setGenMode(null)
     setGenReveal(null)
     setCompletedTaskCount(0)
     setPaletteUserPrompt(null)
+    setFontUserPrompt(null)
+    setFontChosen(false)
     setQuestionIndex(0)
     setAnsweredQuestions([])
     setPersonalizationDone(false)
+    setIsFinalizingPreview(false)
     setActiveField(null)
     setMobilePanel('chat')
   }
 
-  const showPreview = phase === 'ready' && state.theme && template && state.eventType
+  const showPreview = phase === 'ready' && state.theme && template && state.eventType && !isFinalizingPreview
   const hideChatOnDesktop = !isMobile && !!showPreview
   const showStuckState =
     state.step === 2 && (!state.theme || !template || !state.eventType)
@@ -156,6 +177,10 @@ export function BuilderPage() {
     ? isMobile
       ? 'Sua página está pronta. Abra a aba Preview para revisar.'
       : 'Sua página está pronta ao lado.'
+    : isFinalizingPreview
+      ? isMobile
+        ? 'Finalizando sua página...'
+        : 'Finalizando sua página para abrir a preview...'
     : phase === 'welcome'
       ? isMobile
         ? 'Escolha o tipo de celebração na aba Chat.'
@@ -257,11 +282,18 @@ export function BuilderPage() {
 
   function handleSelectEventType(eventType: EventTypeId) {
     if (genMode) return
+    if (finalizeTimerRef.current) {
+      window.clearTimeout(finalizeTimerRef.current)
+      finalizeTimerRef.current = null
+    }
     selectEventType(eventType)
     setQuestionIndex(0)
     setAnsweredQuestions([])
     setPersonalizationDone(false)
+    setIsFinalizingPreview(false)
     setPaletteUserPrompt(null)
+    setFontUserPrompt(null)
+    setFontChosen(false)
     sessionStorage.setItem(
       'celebre-template-preview',
       getDefaultTemplateByEventType(eventType).id,
@@ -271,13 +303,28 @@ export function BuilderPage() {
 
   function handleSelectPalette(paletteId: string) {
     if (genMode) return
+    if (finalizeTimerRef.current) {
+      window.clearTimeout(finalizeTimerRef.current)
+      finalizeTimerRef.current = null
+    }
     const palette = PALETTES.find((p) => p.id === paletteId)
     setPaletteUserPrompt(`Quero usar a paleta ${palette?.name ?? paletteId}.`)
     setQuestionIndex(0)
     setAnsweredQuestions([])
     setPersonalizationDone(false)
+    setIsFinalizingPreview(false)
+    setFontChosen(false)
+    setFontUserPrompt(null)
     selectPalette(paletteId)
     setGenMode('palette')
+  }
+
+  function handleSelectFont(fontFamily: string) {
+    const chosen = FONT_OPTIONS.find((f) => f.value === fontFamily)
+    updateTheme({ fontFamily: fontFamily || undefined })
+    setFontUserPrompt(`Quero usar a tipografia ${chosen?.label ?? 'Padrão do tema'}.`)
+    setFontChosen(true)
+    if (questions.length === 0) setPersonalizationDone(true)
   }
 
   function formatDateLabel(value: string) {
@@ -325,7 +372,16 @@ export function BuilderPage() {
     if (nextIndex >= questions.length) {
       setPersonalizationDone(true)
       setQuestionIndex(nextIndex)
-      if (isMobile) setMobilePanel('preview')
+      setIsFinalizingPreview(true)
+      if (isMobile) setMobilePanel('chat')
+      if (finalizeTimerRef.current) window.clearTimeout(finalizeTimerRef.current)
+      finalizeTimerRef.current = window.setTimeout(() => {
+        if (isMobile) {
+          setMobilePanel('preview')
+        }
+        setIsFinalizingPreview(false)
+        finalizeTimerRef.current = null
+      }, isMobile ? 850 : 700)
       return
     }
 
@@ -352,7 +408,8 @@ export function BuilderPage() {
       className={
         'ai-builder builder-theme--celebre' +
         (showPreview && !isMobile ? ' ai-builder--fit ai-builder--chat-hidden' : '') +
-        (isMobile ? ' ai-builder--mobile ai-builder--panel-' + mobilePanel : '')
+        (isMobile ? ' ai-builder--mobile ai-builder--panel-' + mobilePanel : '') +
+        (isMobile && activeField ? ' ai-builder--sheet-open' : '')
       }
     >
       {showStuckState ? (
@@ -370,6 +427,7 @@ export function BuilderPage() {
               eventType={state.eventType}
               userPrompt={chatCopy.userPrompt}
               paletteUserPrompt={paletteUserPrompt}
+              fontUserPrompt={fontUserPrompt}
               intro={chatCopy.intro}
               palettePrompt={chatCopy.palettePrompt}
               readyLine={chatCopy.readyLine}
@@ -378,9 +436,12 @@ export function BuilderPage() {
               genReveal={genReveal}
               answeredQuestions={answeredQuestions}
               currentQuestion={currentQuestion}
+              isFinalizingPreview={isFinalizingPreview}
               selectedPaletteId={state.theme?.paletteId}
+              selectedFontFamily={state.theme?.fontFamily ?? ''}
               onSelectEventType={handleSelectEventType}
               onSelectPalette={handleSelectPalette}
+              onSelectFont={handleSelectFont}
               onAnswerQuestion={handleAnswerQuestion}
               onRestart={handleRestart}
               disabled={isGenerating}
@@ -395,8 +456,11 @@ export function BuilderPage() {
                 <div className="preview-layout">
                   {!isMobile ? (
                     <EditSidebar
+                      eventType={state.eventType!}
                       content={state.content}
+                      theme={state.theme!}
                       onContent={updateContent}
+                      onTheme={updateTheme}
                       onGift={updateGift}
                       onAddGift={addGift}
                       onRemoveGift={removeGift}

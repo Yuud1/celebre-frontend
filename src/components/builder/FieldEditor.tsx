@@ -3,6 +3,7 @@ import type { EditableField } from '../../types/editor'
 import { fieldLabel, giftFieldId } from '../../types/editor'
 import { ImagePicker } from './ImagePicker'
 import { api } from '../../lib/api'
+import { FONT_OPTIONS } from '../../data/fontOptions'
 
 interface Props {
   field: EditableField
@@ -38,6 +39,23 @@ export function FieldEditor({
         <label>
           Fundo da pagina
           <input type="color" value={theme.background} onChange={(e) => onTheme({ background: e.target.value })} />
+        </label>
+        <label>
+          Cor do texto
+          <input type="color" value={theme.ink} onChange={(e) => onTheme({ ink: e.target.value })} />
+        </label>
+        <label>
+          Tipografia
+          <select
+            value={theme.fontFamily ?? ''}
+            onChange={(e) => onTheme({ fontFamily: e.target.value || undefined })}
+          >
+            {FONT_OPTIONS.map((font) => (
+              <option key={font.label} value={font.value}>
+                {font.label}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           Tamanho do texto ({Math.round(theme.fontScale * 100)}%)
@@ -110,6 +128,152 @@ export function FieldEditor({
         <button type="button" className="btn btn-ghost" onClick={() => onRemoveGift(giftId)}>
           Remover presente
         </button>
+      </div>
+    )
+  }
+
+  if (field === 'coupleStory') {
+    const coupleStory = content.sections?.coupleStory
+    const timeline = coupleStory?.timeline ?? []
+
+    function updateCoupleStory(patch: Partial<NonNullable<EventContent['sections']>['coupleStory']>) {
+      onContent({
+        sections: {
+          ...content.sections,
+          coupleStory: {
+            intro: coupleStory?.intro ?? '',
+            timeline: timeline,
+            ...coupleStory,
+            ...patch,
+          },
+        },
+      })
+    }
+
+    function updateTimelineItem(index: number, patch: { year?: string; title?: string; text?: string }) {
+      const next = [...timeline]
+      const current = next[index]
+      if (!current) return
+      next[index] = { ...current, ...patch }
+      updateCoupleStory({ timeline: next })
+    }
+
+    function addTimelineItem() {
+      const next = [...timeline, { year: '2026', title: 'Novo momento', text: 'Conte aqui esse capítulo.' }]
+      updateCoupleStory({ timeline: next })
+    }
+
+    function removeTimelineItem(index: number) {
+      const next = timeline.filter((_, i) => i !== index)
+      updateCoupleStory({ timeline: next })
+    }
+
+    return (
+      <div className="field-editor">
+        <label>
+          Introdução
+          <textarea
+            value={coupleStory?.intro ?? ''}
+            onChange={(e) => updateCoupleStory({ intro: e.target.value })}
+            autoFocus
+          />
+        </label>
+
+        {timeline.map((item, index) => (
+          <div key={`${item.year}-${item.title}-${index}`} className="gift-editor">
+            <label>
+              Ano
+              <input value={item.year} onChange={(e) => updateTimelineItem(index, { year: e.target.value })} />
+            </label>
+            <label>
+              Título
+              <input value={item.title} onChange={(e) => updateTimelineItem(index, { title: e.target.value })} />
+            </label>
+            <label>
+              Texto
+              <textarea value={item.text} onChange={(e) => updateTimelineItem(index, { text: e.target.value })} />
+            </label>
+            <button type="button" className="btn btn-ghost" onClick={() => removeTimelineItem(index)}>
+              Remover momento
+            </button>
+          </div>
+        ))}
+
+        <button type="button" className="btn btn-secondary" onClick={addTimelineItem}>
+          + Adicionar momento
+        </button>
+      </div>
+    )
+  }
+
+  if (field === 'ceremony') {
+    const ceremony = content.sections?.ceremony
+
+    function updateCeremony(patch: Partial<NonNullable<EventContent['sections']>['ceremony']>) {
+      onContent({
+        sections: {
+          ...content.sections,
+          ceremony: {
+            ceremonyPlace: ceremony?.ceremonyPlace ?? content.location,
+            ...ceremony,
+            ...patch,
+          },
+        },
+      })
+    }
+
+    return (
+      <div className="field-editor">
+        <label>
+          Horário da cerimônia
+          <input
+            value={ceremony?.ceremonyTime ?? ''}
+            onChange={(e) => updateCeremony({ ceremonyTime: e.target.value })}
+            autoFocus
+          />
+        </label>
+        <label>
+          Local da cerimônia
+          <input
+            value={ceremony?.ceremonyPlace ?? ''}
+            onChange={(e) => updateCeremony({ ceremonyPlace: e.target.value })}
+          />
+        </label>
+        <label>
+          Endereço da cerimônia
+          <input
+            value={ceremony?.ceremonyAddress ?? ''}
+            onChange={(e) => updateCeremony({ ceremonyAddress: e.target.value })}
+          />
+        </label>
+        <label>
+          Horário da recepção
+          <input
+            value={ceremony?.receptionTime ?? ''}
+            onChange={(e) => updateCeremony({ receptionTime: e.target.value })}
+          />
+        </label>
+        <label>
+          Local da recepção
+          <input
+            value={ceremony?.receptionPlace ?? ''}
+            onChange={(e) => updateCeremony({ receptionPlace: e.target.value })}
+          />
+        </label>
+        <label>
+          Endereço da recepção
+          <input
+            value={ceremony?.receptionAddress ?? ''}
+            onChange={(e) => updateCeremony({ receptionAddress: e.target.value })}
+          />
+        </label>
+        <label>
+          Traje
+          <input
+            value={ceremony?.dressCode ?? ''}
+            onChange={(e) => updateCeremony({ dressCode: e.target.value })}
+          />
+        </label>
       </div>
     )
   }

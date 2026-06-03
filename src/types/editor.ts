@@ -7,6 +7,8 @@ export type EditableField =
   | 'message'
   | 'signature'
   | 'coverUrl'
+  | 'coupleStory'
+  | 'ceremony'
   | 'appearance'
   | `gift:${string}`
 
@@ -19,6 +21,8 @@ export const EDIT_FIELD_LABELS: Record<string, string> = {
   message: 'Mensagem',
   signature: 'Assinatura',
   coverUrl: 'Foto de capa',
+  coupleStory: 'Nossa historia',
+  ceremony: 'Cerimonia e recepcao',
   appearance: 'Cores e tipografia',
 }
 
