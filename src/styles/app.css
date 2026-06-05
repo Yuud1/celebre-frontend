@@ -809,6 +809,15 @@ select {
     0 10px 32px rgba(26, 26, 26, 0.1);
 }
 
+.preview-frame--tablet .event-page .ep-hero,
+.preview-frame--tablet .event-page .ep-story {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.preview-frame--tablet .event-page .ep-hero {
+  min-height: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .preview-frame,
   .preview-toolbar button {

@@ -1368,8 +1368,18 @@
   height: 100%;
 }
 
+.ep-featured-wrap {
+  display: block;
+  height: 100%;
+}
+
 .ep-gifts-grid > * {
   height: 100%;
+}
+
+.ep-featured-wrap.ep-editable.is-active .ep-featured__content,
+.ep-featured-wrap.ep-editable:active .ep-featured__content {
+  border-color: var(--ep-primary);
 }
 
 .ep-gift-card-wrap.ep-editable.is-active .ep-gift-card,

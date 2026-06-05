@@ -210,7 +210,7 @@ export function HomePage() {
         </p>
 
         <div className="home-hero__cta">
-          <Link to="/criar" className="home-btn home-btn--grad">Criar evento</Link>
+          <Link to="/criar" className="home-btn home-btn--grad">Criar minha página grátis</Link>
         </div>
 
         <div className="home-hero__visual" aria-hidden="true">

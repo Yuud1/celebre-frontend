@@ -390,9 +390,9 @@ export function BuilderPage() {
 
   const handleEditField = useCallback(
     (field: EditableField) => {
-      if (isMobile) setActiveField(field)
+      setActiveField(field)
     },
-    [isMobile],
+    [],
   )
 
   function handleAddGiftMobile(
@@ -459,6 +459,7 @@ export function BuilderPage() {
                       eventType={state.eventType!}
                       content={state.content}
                       theme={state.theme!}
+                      activeField={activeField}
                       onContent={updateContent}
                       onTheme={updateTheme}
                       onGift={updateGift}
@@ -496,7 +497,7 @@ export function BuilderPage() {
                         theme={state.theme!}
                         content={state.content}
                         preview
-                        editable={isMobile}
+                        editable
                         activeField={activeField}
                         onEditField={handleEditField}
                         onAddGift={isMobile ? handleAddGiftMobile : undefined}

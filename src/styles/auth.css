@@ -868,7 +868,177 @@
 }
 
 @media (min-width: 901px) and (max-width: 1180px) {
+  .login-page {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+  }
+
+  .login-page__form {
+    padding: clamp(12px, 2.3vw, 20px) clamp(14px, 2.8vw, 28px);
+  }
+
+  .login-page__form-inner {
+    max-width: 360px;
+  }
+
+  .login-headline {
+    font-size: clamp(1.28rem, 2.25vw, 1.52rem);
+    margin-bottom: 4px;
+  }
+
+  .login-page .register-auth-switch {
+    margin: 0 0 12px;
+    font-size: 13px;
+  }
+
+  .login-page .ca-or {
+    margin-bottom: 14px !important;
+    font-size: 10.5px;
+    gap: 10px;
+  }
+
+  .login-page form {
+    gap: 12px !important;
+  }
+
+  .login-page .ca-field {
+    gap: 5px;
+  }
+
+  .login-page .ca-label {
+    font-size: 12px;
+  }
+
+  .login-page .ca-input {
+    height: 46px;
+    font-size: 14px;
+    padding: 0 12px;
+  }
+
+  .login-page .ca-input--has-icon {
+    padding-left: 38px;
+  }
+
+  .login-page .ca-input-wrap__icon {
+    left: 11px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .login-page .ca-btn,
+  .login-page .ca-btn--lg {
+    height: 46px;
+    padding: 0 16px;
+    font-size: 13.5px;
+  }
+
+  .login-trust {
+    margin-top: 14px;
+    gap: 10px;
+  }
+
+  .login-trust__item {
+    font-size: 11px;
+  }
+
+  .login-page .auth-visual {
+    padding: 10px;
+  }
+
+  .login-page .auth-visual__image {
+    transform: scale(0.95);
+    transform-origin: center;
+  }
+
+  .register-shell {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+  }
+
+  .register-main {
+    padding: clamp(12px, 2.3vw, 20px) clamp(14px, 2.8vw, 28px);
+  }
+
+  .register-main__inner {
+    max-width: 520px;
+  }
+
+  .register-form-logo {
+    margin-bottom: 12px;
+  }
+
+  .register-headline {
+    font-size: clamp(1.28rem, 2.2vw, 1.48rem);
+    margin-bottom: 4px;
+  }
+
+  .register-lead {
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .register-auth-switch {
+    margin: 0 0 12px;
+    font-size: 13px;
+  }
+
+  .register-form {
+    gap: 12px;
+  }
+
+  .register-form__row {
+    gap: 10px;
+  }
+
   .register-form__row:not(.register-form__row--full) {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .register-shell .ca-field {
+    gap: 5px;
+  }
+
+  .register-shell .ca-label {
+    font-size: 12px;
+  }
+
+  .register-shell .ca-input,
+  .register-shell .register-select {
+    height: 46px;
+    font-size: 14px;
+  }
+
+  .register-shell .ca-input {
+    padding: 0 12px;
+  }
+
+  .register-shell .ca-input--has-icon {
+    padding-left: 38px;
+  }
+
+  .register-shell .ca-input-wrap__icon {
+    left: 11px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .register-shell .ca-btn,
+  .register-shell .ca-btn--lg {
+    height: 46px;
+    padding: 0 16px;
+    font-size: 13.5px;
+  }
+
+  .register-shell .register-terms__text {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .register-shell .auth-visual {
+    padding: 10px;
+  }
+
+  .register-shell .auth-visual__image {
+    transform: scale(0.95);
+    transform-origin: center;
   }
 }

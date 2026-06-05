@@ -296,36 +296,44 @@ export function EventPageRenderer({
               aria-label={copy.featuredLabel}
             >
               {featuredGifts.map((featured) => (
-                <section className="ep-featured" key={featured.id}>
-                  <div className="ep-featured__media">
-                    {featured.imageUrl && (
-                      <img src={featured.imageUrl} alt={featured.name} className="ep-featured__img" />
-                    )}
-                    <span>{copy.featuredLabel}</span>
-                  </div>
-                  <div className="ep-featured__content">
-                    <span className="ep-kicker">{copy.featuredLabel}</span>
-                    <h2>
-                      {spot(giftFieldId(featured.id), featured.name, 'block')}
-                    </h2>
-                    <p>{featured.description}</p>
-                    <div className="ep-progress-row">
-                      <strong>{formatCurrency(featured.collected ?? 0)}</strong>
-                      <span>de {formatCurrency(featured.meta ?? featured.value)}</span>
+                <EditableSpot
+                  key={featured.id}
+                  field={giftFieldId(featured.id)}
+                  editable={editable}
+                  active={activeField === giftFieldId(featured.id)}
+                  onSelect={onEditField}
+                  as="block"
+                  className="ep-featured-wrap"
+                >
+                  <section className="ep-featured">
+                    <div className="ep-featured__media">
+                      {featured.imageUrl && (
+                        <img src={featured.imageUrl} alt={featured.name} className="ep-featured__img" />
+                      )}
+                      <span>{copy.featuredLabel}</span>
                     </div>
-                    <div className="ep-progress">
-                      <div className="ep-progress__fill" style={{ width: `${progressFor(featured)}%` }} />
+                    <div className="ep-featured__content">
+                      <span className="ep-kicker">{copy.featuredLabel}</span>
+                      <h2>{featured.name}</h2>
+                      <p>{featured.description}</p>
+                      <div className="ep-progress-row">
+                        <strong>{formatCurrency(featured.collected ?? 0)}</strong>
+                        <span>de {formatCurrency(featured.meta ?? featured.value)}</span>
+                      </div>
+                      <div className="ep-progress">
+                        <div className="ep-progress__fill" style={{ width: `${progressFor(featured)}%` }} />
+                      </div>
+                      <button
+                        type="button"
+                        className="ep-btn"
+                        onClick={() => onGiftAction?.(featured)}
+                        disabled={featured.type === 'fixed' && !!featured.isPurchased}
+                      >
+                        {featured.type === 'fixed' && featured.isPurchased ? 'Presenteado' : giftAction(featured)}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      className="ep-btn"
-                      onClick={() => onGiftAction?.(featured)}
-                      disabled={featured.type === 'fixed' && !!featured.isPurchased}
-                    >
-                      {featured.type === 'fixed' && featured.isPurchased ? 'Presenteado' : giftAction(featured)}
-                    </button>
-                  </div>
-                </section>
+                  </section>
+                </EditableSpot>
               ))}
             </div>
           ) : null}

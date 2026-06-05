@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { EventContent, EventTheme, EventTypeId, HomeRoomId } from '../../types/event'
+import type { EditableField } from '../../types/editor'
 import { ImagePicker } from './ImagePicker'
 import { api } from '../../lib/api'
 import { FONT_OPTIONS } from '../../data/fontOptions'
@@ -8,6 +9,7 @@ interface Props {
   eventType: EventTypeId
   content: EventContent
   theme: EventTheme
+  activeField?: EditableField | null
   onContent: (patch: Partial<EventContent>) => void
   onTheme: (patch: Partial<EventTheme>) => void
   onGift: (id: string, patch: Partial<EventContent['gifts'][0]>) => void
@@ -15,17 +17,48 @@ interface Props {
   onRemoveGift: (id: string) => void
 }
 
+type EditTab = 'geral' | 'sections' | 'presentes' | 'aparencia'
+type FocusGroup =
+  | 'main'
+  | 'letter'
+  | 'cover'
+  | 'coupleStory'
+  | 'ceremony'
+  | 'pregnancy'
+  | 'preReveal'
+  | 'revealSchedule'
+  | 'homeStats'
+  | 'checklist'
+  | 'all'
+
+function mapFieldToFocus(field: EditableField | null): { tab: EditTab; group: FocusGroup } | null {
+  if (!field) return null
+  if (field.startsWith('gift:')) return { tab: 'presentes', group: 'all' }
+  if (field === 'appearance') return { tab: 'aparencia', group: 'all' }
+  if (field === 'coupleStory') return { tab: 'sections', group: 'coupleStory' }
+  if (field === 'ceremony') return { tab: 'sections', group: 'ceremony' }
+  if (field === 'message' || field === 'signature') return { tab: 'geral', group: 'letter' }
+  if (field === 'coverUrl') return { tab: 'geral', group: 'cover' }
+  return { tab: 'geral', group: 'main' }
+}
+
 export function EditSidebar({
   eventType,
   content,
   theme,
+  activeField,
   onContent,
   onTheme,
   onGift,
   onAddGift,
   onRemoveGift,
 }: Props) {
-  const [activeTab, setActiveTab] = useState<'geral' | 'sections' | 'presentes' | 'aparencia'>('geral')
+  const [activeTab, setActiveTab] = useState<EditTab>('geral')
+  const focus = mapFieldToFocus(activeField ?? null)
+
+  useEffect(() => {
+    if (focus) setActiveTab(focus.tab)
+  }, [focus])
 
   const giftsByRoom = useMemo(() => {
     const map: Record<HomeRoomId, number> = {
@@ -109,256 +142,29 @@ export function EditSidebar({
     onGift(giftId, { room: room || undefined })
   }
 
-  function renderGeneral() {
+  function renderGeneral(group: FocusGroup | null) {
+    const showMain = !group || group === 'main'
+    const showLetter = !group || group === 'letter'
+    const showCover = !group || group === 'cover'
     return (
       <>
-        <div className="edit-panel__group">
-          <h4>Informações principais</h4>
-          <label>
-            Nome do evento
-            <input value={content.name} onChange={(e) => onContent({ name: e.target.value })} />
-          </label>
-          <label>
-            Subtítulo
-            <input value={content.subtitle} onChange={(e) => onContent({ subtitle: e.target.value })} />
-          </label>
-          <label>
-            Anfitriões
-            <input value={content.hosts} onChange={(e) => onContent({ hosts: e.target.value })} />
-          </label>
-          <label>
-            Data
-            <input type="date" value={content.eventDate} onChange={(e) => onContent({ eventDate: e.target.value })} />
-          </label>
-          <label>
-            Local
-            <input value={content.location} onChange={(e) => onContent({ location: e.target.value })} />
-          </label>
-        </div>
-
-        <div className="edit-panel__group">
-          <h4>Carta / História</h4>
-          <label>
-            Mensagem principal
-            <textarea value={content.message} onChange={(e) => onContent({ message: e.target.value })} />
-          </label>
-          <label>
-            Assinatura
-            <input value={content.signature} onChange={(e) => onContent({ signature: e.target.value })} />
-          </label>
-        </div>
-
-        <div className="edit-panel__group">
-          <h4>Capa</h4>
-          <ImagePicker
-            label="Foto de capa"
-            value={content.coverUrl}
-            onChange={(coverUrl) => onContent({ coverUrl })}
-            hint="Importe uma foto do seu dispositivo"
-            uploadFn={api.uploadDraftImage}
-          />
-        </div>
-      </>
-    )
-  }
-
-  function renderEventSections() {
-    if (eventType === 'casamento') {
-      return (
-        <>
+        {showMain ? (
           <div className="edit-panel__group">
-            <h4>História do casal</h4>
+            <h4>Informações principais</h4>
             <label>
-              Introdução da timeline
-              <textarea
-                value={content.sections?.coupleStory?.intro ?? ''}
-                onChange={(e) =>
-                  onSections({
-                    coupleStory: {
-                      ...content.sections?.coupleStory,
-                      intro: e.target.value,
-                      timeline: content.sections?.coupleStory?.timeline ?? [],
-                    },
-                  })}
-              />
-            </label>
-
-            {(content.sections?.coupleStory?.timeline ?? []).map((item, index) => (
-              <div key={`${item.year}-${index}`} className="edit-panel__nested">
-                <div className="edit-panel__nested-head">
-                  <strong>Momento {index + 1}</strong>
-                  <button type="button" className="btn btn-ghost" onClick={() => removeTimelineItem(index)}>
-                    Remover
-                  </button>
-                </div>
-                <label>
-                  Ano
-                  <input value={item.year} onChange={(e) => onCoupleTimeline(index, { year: e.target.value })} />
-                </label>
-                <label>
-                  Título
-                  <input value={item.title} onChange={(e) => onCoupleTimeline(index, { title: e.target.value })} />
-                </label>
-                <label>
-                  Texto
-                  <textarea value={item.text} onChange={(e) => onCoupleTimeline(index, { text: e.target.value })} />
-                </label>
-              </div>
-            ))}
-            <button type="button" className="btn btn-secondary edit-panel__add-btn" onClick={addTimelineItem}>
-              + Adicionar momento
-            </button>
-          </div>
-
-          <div className="edit-panel__group">
-            <h4>Cerimônia & recepção</h4>
-            <label>
-              Horário da cerimônia
-              <input
-                value={content.sections?.ceremony?.ceremonyTime ?? ''}
-                onChange={(e) =>
-                  onSections({
-                    ceremony: {
-                      ...content.sections?.ceremony,
-                      ceremonyTime: e.target.value,
-                      ceremonyPlace: content.sections?.ceremony?.ceremonyPlace ?? content.location,
-                    },
-                  })}
-              />
-            </label>
-            <label>
-              Local da cerimônia
-              <input
-                value={content.sections?.ceremony?.ceremonyPlace ?? ''}
-                onChange={(e) =>
-                  onSections({
-                    ceremony: {
-                      ...content.sections?.ceremony,
-                      ceremonyPlace: e.target.value,
-                    },
-                  })}
-              />
-            </label>
-            <label>
-              Horário da recepção
-              <input
-                value={content.sections?.ceremony?.receptionTime ?? ''}
-                onChange={(e) =>
-                  onSections({
-                    ceremony: {
-                      ...content.sections?.ceremony,
-                      receptionTime: e.target.value,
-                      ceremonyPlace: content.sections?.ceremony?.ceremonyPlace ?? content.location,
-                    },
-                  })}
-              />
-            </label>
-            <label>
-              Local da recepção
-              <input
-                value={content.sections?.ceremony?.receptionPlace ?? ''}
-                onChange={(e) =>
-                  onSections({
-                    ceremony: {
-                      ...content.sections?.ceremony,
-                      receptionPlace: e.target.value,
-                      ceremonyPlace: content.sections?.ceremony?.ceremonyPlace ?? content.location,
-                    },
-                  })}
-              />
-            </label>
-            <label>
-              Traje
-              <input
-                value={content.sections?.ceremony?.dressCode ?? ''}
-                onChange={(e) =>
-                  onSections({
-                    ceremony: {
-                      ...content.sections?.ceremony,
-                      dressCode: e.target.value,
-                      ceremonyPlace: content.sections?.ceremony?.ceremonyPlace ?? content.location,
-                    },
-                  })}
-              />
-            </label>
-          </div>
-        </>
-      )
-    }
-
-    if (eventType === 'cha-bebe') {
-      return (
-        <>
-          <div className="edit-panel__group">
-            <h4>Gestação</h4>
-            <label>
-              Data prevista do parto
-              <input
-                type="date"
-                value={content.sections?.pregnancy?.dueDate ?? ''}
-                onChange={(e) =>
-                  onSections({
-                    pregnancy: {
-                      ...content.sections?.pregnancy,
-                      dueDate: e.target.value,
-                    },
-                  })}
-              />
-            </label>
-            <label>
-              Semana atual
-              <input
-                type="number"
-                min={1}
-                max={40}
-                value={content.sections?.pregnancy?.currentWeek ?? 32}
-                onChange={(e) =>
-                  onSections({
-                    pregnancy: {
-                      ...content.sections?.pregnancy,
-                      currentWeek: Number(e.target.value),
-                    },
-                  })}
-              />
-            </label>
-          </div>
-          <div className="edit-panel__group">
-            <h4>Texto da carta para o bebê</h4>
-            <label>
-              Mensagem da seção história
-              <textarea value={content.message} onChange={(e) => onContent({ message: e.target.value })} />
-            </label>
-            <label>
-              Assinatura da família
-              <input value={content.signature} onChange={(e) => onContent({ signature: e.target.value })} />
-            </label>
-          </div>
-        </>
-      )
-    }
-
-    if (eventType === 'cha-revelacao') {
-      return (
-        <>
-          <div className="edit-panel__group">
-            <h4>Pré-revelação</h4>
-            <label>
-              Título/tema
+              Nome do evento
               <input value={content.name} onChange={(e) => onContent({ name: e.target.value })} />
             </label>
             <label>
-              Linha de apoio
+              Subtítulo
               <input value={content.subtitle} onChange={(e) => onContent({ subtitle: e.target.value })} />
             </label>
             <label>
-              Mensagem antes da revelação
-              <textarea value={content.message} onChange={(e) => onContent({ message: e.target.value })} />
+              Anfitriões
+              <input value={content.hosts} onChange={(e) => onContent({ hosts: e.target.value })} />
             </label>
-          </div>
-          <div className="edit-panel__group">
-            <h4>Cronograma da revelação</h4>
             <label>
-              Data da revelação (contador)
+              Data
               <input type="date" value={content.eventDate} onChange={(e) => onContent({ eventDate: e.target.value })} />
             </label>
             <label>
@@ -366,110 +172,376 @@ export function EditSidebar({
               <input value={content.location} onChange={(e) => onContent({ location: e.target.value })} />
             </label>
           </div>
-        </>
-      )
-    }
+        ) : null}
 
-    return (
-      <>
-        <div className="edit-panel__group">
-          <h4>Nossa casa em números</h4>
-          <label>
-            Quantidade de cômodos
-            <input
-              type="number"
-              min={1}
-              value={content.sections?.homeStats?.rooms ?? 3}
-              onChange={(e) =>
-                onSections({
-                  homeStats: {
-                    ...content.sections?.homeStats,
-                    rooms: Number(e.target.value),
-                    city: content.sections?.homeStats?.city ?? '',
-                  },
-                })}
-            />
-          </label>
-          <label>
-            Cidade
-            <input
-              value={content.sections?.homeStats?.city ?? ''}
-              onChange={(e) =>
-                onSections({
-                  homeStats: {
-                    ...content.sections?.homeStats,
-                    city: e.target.value,
-                    rooms: content.sections?.homeStats?.rooms ?? 3,
-                  },
-                })}
-            />
-          </label>
-          <label>
-            Frase da seção
-            <textarea
-              value={content.sections?.homeStats?.tagline ?? ''}
-              onChange={(e) =>
-                onSections({
-                  homeStats: {
-                    ...content.sections?.homeStats,
-                    tagline: e.target.value,
-                    rooms: content.sections?.homeStats?.rooms ?? 3,
-                    city: content.sections?.homeStats?.city ?? '',
-                  },
-                })}
-            />
-          </label>
-        </div>
+        {showLetter ? (
+          <div className="edit-panel__group">
+            <h4>Carta / História</h4>
+            <label>
+              Mensagem principal
+              <textarea value={content.message} onChange={(e) => onContent({ message: e.target.value })} />
+            </label>
+            <label>
+              Assinatura
+              <input value={content.signature} onChange={(e) => onContent({ signature: e.target.value })} />
+            </label>
+          </div>
+        ) : null}
 
-        <div className="edit-panel__group">
-          <h4>Checklist da casa</h4>
-          {(content.sections?.checklist ?? []).map((item, index) => (
-            <div key={item.id} className="edit-panel__nested edit-panel__nested--compact">
-              <label>
-                Item {index + 1}
-                <input value={item.label} onChange={(e) => onChecklist(index, e.target.value)} />
-              </label>
-              <button type="button" className="btn btn-ghost" onClick={() => removeChecklistItem(index)}>
-                Remover
-              </button>
-            </div>
-          ))}
-          <button type="button" className="btn btn-secondary edit-panel__add-btn" onClick={addChecklistItem}>
-            + Adicionar item
-          </button>
-        </div>
+        {showCover ? (
+          <div className="edit-panel__group">
+            <h4>Capa</h4>
+            <ImagePicker
+              label="Foto de capa"
+              value={content.coverUrl}
+              onChange={(coverUrl) => onContent({ coverUrl })}
+              hint="Importe uma foto do seu dispositivo"
+              uploadFn={api.uploadDraftImage}
+            />
+          </div>
+        ) : null}
       </>
     )
   }
 
-  function renderGifts() {
-    return (
-      <>
-        <div className="edit-panel__group">
-          <div className="edit-panel__group-head">
-            <h4>Presentes</h4>
-            <div className="edit-panel__actions-inline">
-              <button type="button" className="btn btn-secondary" onClick={() => onAddGift('fixed')}>
-                + Fixo
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={() => onAddGift('contribution')}>
-                + Vaquinha
-              </button>
-            </div>
-          </div>
+  function renderEventSections(group: FocusGroup | null) {
+    if (eventType === 'casamento') {
+      const showCoupleStory = !group || group === 'coupleStory'
+      const showCeremony = !group || group === 'ceremony'
+      return (
+        <>
+          {showCoupleStory ? (
+            <div className="edit-panel__group">
+              <h4>História do casal</h4>
+              <label>
+                Introdução da timeline
+                <textarea
+                  value={content.sections?.coupleStory?.intro ?? ''}
+                  onChange={(e) =>
+                    onSections({
+                      coupleStory: {
+                        ...content.sections?.coupleStory,
+                        intro: e.target.value,
+                        timeline: content.sections?.coupleStory?.timeline ?? [],
+                      },
+                    })}
+                />
+              </label>
 
-          {eventType === 'cha-panela' ? (
-            <div className="edit-panel__room-summary">
-              <span>Cozinha: {giftsByRoom.cozinha}</span>
-              <span>Sala: {giftsByRoom.sala}</span>
-              <span>Quarto: {giftsByRoom.quarto}</span>
-              <span>Banheiro: {giftsByRoom.banheiro}</span>
-              <span>Lavanderia: {giftsByRoom.lavanderia}</span>
+              {(content.sections?.coupleStory?.timeline ?? []).map((item, index) => (
+                <div key={`${item.year}-${index}`} className="edit-panel__nested">
+                  <div className="edit-panel__nested-head">
+                    <strong>Momento {index + 1}</strong>
+                    <button type="button" className="btn btn-ghost" onClick={() => removeTimelineItem(index)}>
+                      Remover
+                    </button>
+                  </div>
+                  <label>
+                    Ano
+                    <input value={item.year} onChange={(e) => onCoupleTimeline(index, { year: e.target.value })} />
+                  </label>
+                  <label>
+                    Título
+                    <input value={item.title} onChange={(e) => onCoupleTimeline(index, { title: e.target.value })} />
+                  </label>
+                  <label>
+                    Texto
+                    <textarea value={item.text} onChange={(e) => onCoupleTimeline(index, { text: e.target.value })} />
+                  </label>
+                </div>
+              ))}
+              <button type="button" className="btn btn-secondary edit-panel__add-btn" onClick={addTimelineItem}>
+                + Adicionar momento
+              </button>
             </div>
           ) : null}
-        </div>
 
-        {content.gifts.map((gift) => (
+          {showCeremony ? (
+            <div className="edit-panel__group">
+              <h4>Cerimônia & recepção</h4>
+              <label>
+                Horário da cerimônia
+                <input
+                  value={content.sections?.ceremony?.ceremonyTime ?? ''}
+                  onChange={(e) =>
+                    onSections({
+                      ceremony: {
+                        ...content.sections?.ceremony,
+                        ceremonyTime: e.target.value,
+                        ceremonyPlace: content.sections?.ceremony?.ceremonyPlace ?? content.location,
+                      },
+                    })}
+                />
+              </label>
+              <label>
+                Local da cerimônia
+                <input
+                  value={content.sections?.ceremony?.ceremonyPlace ?? ''}
+                  onChange={(e) =>
+                    onSections({
+                      ceremony: {
+                        ...content.sections?.ceremony,
+                        ceremonyPlace: e.target.value,
+                      },
+                    })}
+                />
+              </label>
+              <label>
+                Horário da recepção
+                <input
+                  value={content.sections?.ceremony?.receptionTime ?? ''}
+                  onChange={(e) =>
+                    onSections({
+                      ceremony: {
+                        ...content.sections?.ceremony,
+                        receptionTime: e.target.value,
+                        ceremonyPlace: content.sections?.ceremony?.ceremonyPlace ?? content.location,
+                      },
+                    })}
+                />
+              </label>
+              <label>
+                Local da recepção
+                <input
+                  value={content.sections?.ceremony?.receptionPlace ?? ''}
+                  onChange={(e) =>
+                    onSections({
+                      ceremony: {
+                        ...content.sections?.ceremony,
+                        receptionPlace: e.target.value,
+                        ceremonyPlace: content.sections?.ceremony?.ceremonyPlace ?? content.location,
+                      },
+                    })}
+                />
+              </label>
+              <label>
+                Traje
+                <input
+                  value={content.sections?.ceremony?.dressCode ?? ''}
+                  onChange={(e) =>
+                    onSections({
+                      ceremony: {
+                        ...content.sections?.ceremony,
+                        dressCode: e.target.value,
+                        ceremonyPlace: content.sections?.ceremony?.ceremonyPlace ?? content.location,
+                      },
+                    })}
+                />
+              </label>
+            </div>
+          ) : null}
+        </>
+      )
+    }
+
+    if (eventType === 'cha-bebe') {
+      const showPregnancy = !group || group === 'pregnancy'
+      const showLetter = !group || group === 'letter'
+      return (
+        <>
+          {showPregnancy ? (
+            <div className="edit-panel__group">
+              <h4>Gestação</h4>
+              <label>
+                Data prevista do parto
+                <input
+                  type="date"
+                  value={content.sections?.pregnancy?.dueDate ?? ''}
+                  onChange={(e) =>
+                    onSections({
+                      pregnancy: {
+                        ...content.sections?.pregnancy,
+                        dueDate: e.target.value,
+                      },
+                    })}
+                />
+              </label>
+              <label>
+                Semana atual
+                <input
+                  type="number"
+                  min={1}
+                  max={40}
+                  value={content.sections?.pregnancy?.currentWeek ?? 32}
+                  onChange={(e) =>
+                    onSections({
+                      pregnancy: {
+                        ...content.sections?.pregnancy,
+                        currentWeek: Number(e.target.value),
+                      },
+                    })}
+                />
+              </label>
+            </div>
+          ) : null}
+          {showLetter ? (
+            <div className="edit-panel__group">
+              <h4>Texto da carta para o bebê</h4>
+              <label>
+                Mensagem da seção história
+                <textarea value={content.message} onChange={(e) => onContent({ message: e.target.value })} />
+              </label>
+              <label>
+                Assinatura da família
+                <input value={content.signature} onChange={(e) => onContent({ signature: e.target.value })} />
+              </label>
+            </div>
+          ) : null}
+        </>
+      )
+    }
+
+    if (eventType === 'cha-revelacao') {
+      const showPreReveal = !group || group === 'preReveal'
+      const showSchedule = !group || group === 'revealSchedule'
+      return (
+        <>
+          {showPreReveal ? (
+            <div className="edit-panel__group">
+              <h4>Pré-revelação</h4>
+              <label>
+                Título/tema
+                <input value={content.name} onChange={(e) => onContent({ name: e.target.value })} />
+              </label>
+              <label>
+                Linha de apoio
+                <input value={content.subtitle} onChange={(e) => onContent({ subtitle: e.target.value })} />
+              </label>
+              <label>
+                Mensagem antes da revelação
+                <textarea value={content.message} onChange={(e) => onContent({ message: e.target.value })} />
+              </label>
+            </div>
+          ) : null}
+          {showSchedule ? (
+            <div className="edit-panel__group">
+              <h4>Cronograma da revelação</h4>
+              <label>
+                Data da revelação (contador)
+                <input type="date" value={content.eventDate} onChange={(e) => onContent({ eventDate: e.target.value })} />
+              </label>
+              <label>
+                Local
+                <input value={content.location} onChange={(e) => onContent({ location: e.target.value })} />
+              </label>
+            </div>
+          ) : null}
+        </>
+      )
+    }
+
+    const showHomeStats = !group || group === 'homeStats'
+    const showChecklist = !group || group === 'checklist'
+    return (
+      <>
+        {showHomeStats ? (
+          <div className="edit-panel__group">
+            <h4>Nossa casa em números</h4>
+            <label>
+              Quantidade de cômodos
+              <input
+                type="number"
+                min={1}
+                value={content.sections?.homeStats?.rooms ?? 3}
+                onChange={(e) =>
+                  onSections({
+                    homeStats: {
+                      ...content.sections?.homeStats,
+                      rooms: Number(e.target.value),
+                      city: content.sections?.homeStats?.city ?? '',
+                    },
+                  })}
+              />
+            </label>
+            <label>
+              Cidade
+              <input
+                value={content.sections?.homeStats?.city ?? ''}
+                onChange={(e) =>
+                  onSections({
+                    homeStats: {
+                      ...content.sections?.homeStats,
+                      city: e.target.value,
+                      rooms: content.sections?.homeStats?.rooms ?? 3,
+                    },
+                  })}
+              />
+            </label>
+            <label>
+              Frase da seção
+              <textarea
+                value={content.sections?.homeStats?.tagline ?? ''}
+                onChange={(e) =>
+                  onSections({
+                    homeStats: {
+                      ...content.sections?.homeStats,
+                      tagline: e.target.value,
+                      rooms: content.sections?.homeStats?.rooms ?? 3,
+                      city: content.sections?.homeStats?.city ?? '',
+                    },
+                  })}
+              />
+            </label>
+          </div>
+        ) : null}
+
+        {showChecklist ? (
+          <div className="edit-panel__group">
+            <h4>Checklist da casa</h4>
+            {(content.sections?.checklist ?? []).map((item, index) => (
+              <div key={item.id} className="edit-panel__nested edit-panel__nested--compact">
+                <label>
+                  Item {index + 1}
+                  <input value={item.label} onChange={(e) => onChecklist(index, e.target.value)} />
+                </label>
+                <button type="button" className="btn btn-ghost" onClick={() => removeChecklistItem(index)}>
+                  Remover
+                </button>
+              </div>
+            ))}
+            <button type="button" className="btn btn-secondary edit-panel__add-btn" onClick={addChecklistItem}>
+              + Adicionar item
+            </button>
+          </div>
+        ) : null}
+      </>
+    )
+  }
+
+  function renderGifts(focusedGiftId: string | null) {
+    const visibleGifts = focusedGiftId
+      ? content.gifts.filter((gift) => gift.id === focusedGiftId)
+      : content.gifts
+
+    return (
+      <>
+        {!focusedGiftId ? (
+          <div className="edit-panel__group">
+            <div className="edit-panel__group-head">
+              <h4>Presentes</h4>
+              <div className="edit-panel__actions-inline">
+                <button type="button" className="btn btn-secondary" onClick={() => onAddGift('fixed')}>
+                  + Fixo
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={() => onAddGift('contribution')}>
+                  + Vaquinha
+                </button>
+              </div>
+            </div>
+
+            {eventType === 'cha-panela' ? (
+              <div className="edit-panel__room-summary">
+                <span>Cozinha: {giftsByRoom.cozinha}</span>
+                <span>Sala: {giftsByRoom.sala}</span>
+                <span>Quarto: {giftsByRoom.quarto}</span>
+                <span>Banheiro: {giftsByRoom.banheiro}</span>
+                <span>Lavanderia: {giftsByRoom.lavanderia}</span>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {visibleGifts.map((gift) => (
           <div key={gift.id} className="gift-editor">
             <div className="edit-panel__nested-head">
               <strong>{gift.name || 'Presente'}</strong>
@@ -541,6 +613,10 @@ export function EditSidebar({
             />
           </div>
         ))}
+
+        {focusedGiftId && visibleGifts.length === 0 ? (
+          <p className="field-editor__empty">Presente nao encontrado.</p>
+        ) : null}
       </>
     )
   }
@@ -595,11 +671,6 @@ export function EditSidebar({
 
   return (
     <aside className="edit-panel">
-      <div className="edit-panel__header">
-        <h3 className="edit-panel__title">Personalizar</h3>
-        <span className="edit-panel__type">{eventType.replace('cha-', 'Chá ').replace('casamento', 'Casamento')}</span>
-      </div>
-
       <div className="edit-panel__tabs" role="tablist" aria-label="Seções do painel">
         <button type="button" role="tab" aria-selected={activeTab === 'geral'} className={activeTab === 'geral' ? 'is-active' : ''} onClick={() => setActiveTab('geral')}>
           Geral
@@ -616,9 +687,9 @@ export function EditSidebar({
       </div>
 
       <div className="edit-panel__body">
-        {activeTab === 'geral' ? renderGeneral() : null}
-        {activeTab === 'sections' ? renderEventSections() : null}
-        {activeTab === 'presentes' ? renderGifts() : null}
+        {activeTab === 'geral' ? renderGeneral(focus?.tab === 'geral' ? focus.group : null) : null}
+        {activeTab === 'sections' ? renderEventSections(focus?.tab === 'sections' ? focus.group : null) : null}
+        {activeTab === 'presentes' ? renderGifts(activeField?.startsWith('gift:') ? activeField.slice(5) : null) : null}
         {activeTab === 'aparencia' ? renderAppearance() : null}
       </div>
     </aside>
