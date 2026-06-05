@@ -247,7 +247,7 @@ export function BuilderPage() {
     if (!state.eventType || !state.templateId || !state.theme) return
 
     if (!user) {
-      navigate(`/login?redirect=${encodeURIComponent(CHECKOUT_PUBLISH_REDIRECT)}`)
+      navigate(`/criar-conta?redirect=${encodeURIComponent(CHECKOUT_PUBLISH_REDIRECT)}`)
       return
     }
 

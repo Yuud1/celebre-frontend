@@ -3414,6 +3414,8 @@ select {
   }
 
   .ai-builder--mobile {
+    --builder-mobile-header-offset: calc(88px + env(safe-area-inset-top, 0px));
+    --builder-mobile-sheet-gap: 14px;
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: minmax(0, 1fr) auto;
@@ -3512,8 +3514,24 @@ select {
   }
 
   .ai-builder--sheet-open .ai-mobile-tabs {
-    opacity: 0;
-    pointer-events: none;
+    display: none;
+  }
+
+  .ai-builder--mobile .edit-sheet-root {
+    inset: var(--builder-mobile-header-offset) 0 0;
+  }
+
+  .ai-builder--mobile .edit-sheet-backdrop {
+    background: rgba(20, 16, 14, 0.28);
+    top: calc(var(--builder-mobile-sheet-gap) + 18px);
+  }
+
+  .ai-builder--mobile .edit-sheet {
+    top: var(--builder-mobile-sheet-gap);
+    bottom: 0;
+    height: auto;
+    max-height: none;
+    box-shadow: none;
   }
 
   .ai-mobile-tabs__btn {

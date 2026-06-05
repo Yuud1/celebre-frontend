@@ -117,7 +117,15 @@ export const api = {
     return request<{ url: string }>("/upload/draft-image", {
       method: "POST",
       body: form,
-    });
+    }).catch((error) => {
+      const message = error instanceof Error ? error.message : ''
+      // Some environments proxy only /upload/events/* and can return 502 on /upload/draft-image.
+      if (!message.includes('(502)')) throw error
+      return request<{ url: string }>("/upload/events/draft-image", {
+        method: "POST",
+        body: form,
+      })
+    })
   },
   
   // ─── Events ─────────────────────────────────────────────────

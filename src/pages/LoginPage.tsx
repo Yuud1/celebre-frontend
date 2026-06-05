@@ -31,9 +31,9 @@ export function LoginPage() {
       const { user } = await api.login({ email, password })
       setUser(user)
       const redirect = searchParams.get('redirect')
-      const publishFlow = isCheckoutPublishRedirect(redirect)
-      if (!publishFlow && user.kycStatus !== 'pix_configured') {
-        navigate('/verificacao', { replace: true })
+      if (user.kycStatus !== 'pix_configured') {
+        const next = redirect ? `/verificacao?redirect=${encodeURIComponent(redirect)}` : '/verificacao'
+        navigate(next, { replace: true })
       } else {
         navigate(redirect ?? '/dashboard', { replace: true })
       }

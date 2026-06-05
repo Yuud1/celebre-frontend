@@ -127,8 +127,9 @@ function StepAccount({
       const res = await api.register({ name, email: email.trim().toLowerCase(), cpfCnpj: cpf, password })
       if (!res?.user) throw new Error('Resposta inválida ao criar conta')
       setUser(res.user)
-      if (publishFlow && redirect) {
-        navigate(redirect, { replace: true })
+      if (publishFlow) {
+        const next = redirect ? `/verificacao?redirect=${encodeURIComponent(redirect)}` : '/verificacao'
+        navigate(next, { replace: true })
         return
       }
       onNext()

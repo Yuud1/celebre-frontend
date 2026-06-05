@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AuthLogo, AuthBtn, AuthField, AuthInput } from '../components/auth/AuthShared'
 import { Icon } from '../components/auth/AuthIcons'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
+import { isCheckoutPublishRedirect } from '../lib/builderDraft'
 
 // ─── Screen 1: Dados da conta Asaas ──────────────────────────
 function KycSubconta({ onNext }: { onNext: () => void }) {
@@ -184,7 +185,7 @@ function KycSubconta({ onNext }: { onNext: () => void }) {
 }
 
 // ─── Screen 2: Pix Key ────────────────────────────────────────
-function KycPixKey({ onNext }: { onNext: () => void }) {
+function KycPixKey({ onNext, allowSkip = true }: { onNext: () => void; allowSkip?: boolean }) {
   const navigate = useNavigate()
   const { refreshUser } = useAuth()
   const [pixType, setPixType] = useState<'CPF/CNPJ' | 'Celular' | 'E-mail' | 'Aleatória'>('CPF/CNPJ')
@@ -302,9 +303,11 @@ function KycPixKey({ onNext }: { onNext: () => void }) {
             )}
 
             <div style={{ display: 'flex', gap: 12, marginTop: 32 }}>
-              <AuthBtn type="button" variant="ghost" onClick={() => navigate('/dashboard')} style={{ flex: 1 }}>
-                Pular por agora
-              </AuthBtn>
+              {allowSkip ? (
+                <AuthBtn type="button" variant="ghost" onClick={() => navigate('/dashboard')} style={{ flex: 1 }}>
+                  Pular por agora
+                </AuthBtn>
+              ) : null}
               <AuthBtn type="submit" variant="primary" style={{ flex: 1 }} iconRight={!loading && <Icon.ArrowRight style={{ width: 16, height: 16 }} />}>
                 {loading ? 'Salvando...' : 'Salvar e continuar'}
               </AuthBtn>
@@ -317,9 +320,11 @@ function KycPixKey({ onNext }: { onNext: () => void }) {
 }
 
 // ─── Screen 3: Success ────────────────────────────────────────
-function KycSuccess() {
+function KycSuccess({ redirectTarget }: { redirectTarget?: string }) {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const primaryLabel = redirectTarget ? 'Ir para pagamento' : 'Criar meu evento'
+  const primaryTarget = redirectTarget ?? '/criar'
 
   return (
     <div style={{ height: '100%', background: 'linear-gradient(180deg, #FAFAFF 0%, #F5F3FF 100%)', display: 'flex', flexDirection: 'column' }}>
@@ -356,8 +361,8 @@ function KycSuccess() {
             <AuthBtn variant="ghost" size="lg" onClick={() => navigate('/dashboard')}>
               Ir para o painel
             </AuthBtn>
-            <AuthBtn variant="primary" size="lg" iconRight={<Icon.ArrowRight style={{ width: 18, height: 18 }} />} style={{ minWidth: 240 }} onClick={() => navigate('/criar')}>
-              Criar meu evento
+            <AuthBtn variant="primary" size="lg" iconRight={<Icon.ArrowRight style={{ width: 18, height: 18 }} />} style={{ minWidth: 240 }} onClick={() => navigate(primaryTarget)}>
+              {primaryLabel}
             </AuthBtn>
           </div>
         </div>
@@ -369,6 +374,9 @@ function KycSuccess() {
 // ─── KycPage ─────────────────────────────────────────────────
 export function KycPage() {
   const { user } = useAuth()
+  const [searchParams] = useSearchParams()
+  const redirect = searchParams.get('redirect')
+  const publishFlow = isCheckoutPublishRedirect(redirect)
 
   const initialStep = user?.kycStatus === 'subaccount' ? 1 : 0
   const [step, setStep] = useState(initialStep)
@@ -376,8 +384,8 @@ export function KycPage() {
   return (
     <div className="auth-page ca-root">
       {step === 0 && <KycSubconta onNext={() => setStep(1)} />}
-      {step === 1 && <KycPixKey onNext={() => setStep(2)} />}
-      {step === 2 && <KycSuccess />}
+      {step === 1 && <KycPixKey onNext={() => setStep(2)} allowSkip={!publishFlow} />}
+      {step === 2 && <KycSuccess redirectTarget={redirect ?? undefined} />}
     </div>
   )
 }
