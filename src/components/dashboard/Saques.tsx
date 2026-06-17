@@ -10,7 +10,7 @@ type Summary = {
   pendingCount: number
   totalNetReceived: number
   confirmedCount: number
-  pixKey: string | null
+  bankConfigured: boolean
   lastConfirmedAt: string | null
 }
 
@@ -35,18 +35,6 @@ function fmtLastDate(iso: string | null) {
   if (!iso) return '—'
   const d = new Date(iso)
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-}
-
-function maskPixKey(key: string | null) {
-  if (!key) return '—'
-  if (key.includes('@')) {
-    const [local, domain] = key.split('@')
-    return local.slice(0, 2) + '···@' + domain
-  }
-  if (key.replace(/\D/g, '').length >= 11) {
-    return '···.' + key.slice(-4)
-  }
-  return key.slice(0, 3) + '···' + key.slice(-2)
 }
 
 function buildSparkData(transactions: Transaction[]): number[] {
@@ -117,8 +105,6 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
     : filter === 'in' ? txList.filter((t) => t.status === 'confirmed')
     : txList.filter((t) => t.status === 'pending')
 
-  const pixMasked = maskPixKey(summary?.pixKey ?? null)
-
   return (
     <>
       <PageHead
@@ -161,7 +147,7 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
               </div>
             )}
             <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginTop: 6 }}>
-              Chave PIX <strong style={{ color: '#fff' }}>{pixMasked}</strong>
+              {summary?.bankConfigured ? 'Conta bancária configurada' : 'Configure sua conta bancária para sacar'}
             </div>
             <div className="ca-row ca-row--gap" style={{ marginTop: 22 }}>
               <button
@@ -275,11 +261,11 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
           <div className="ca-card" style={{ padding: 0, overflow: 'hidden', minWidth: 640 }}>
             <div style={{ padding: '18px 22px 14px' }}>
               <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 16, fontWeight: 600 }}>Histórico de saques</div>
-              <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 2 }}>Solicitações de saque enviadas à sua conta PIX</div>
+              <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 2 }}>Solicitações de transferência para sua conta bancária</div>
             </div>
             <div style={{ borderTop: '1px solid var(--ca-line-soft)' }}>
               <div style={{ padding: '10px 22px', fontSize: 11, color: 'var(--ca-muted-2)', letterSpacing: '0.08em', textTransform: 'uppercase', background: 'var(--ca-bg-soft)', borderBottom: '1px solid var(--ca-line-soft)', display: 'grid', gridTemplateColumns: '160px 140px 1fr 150px' }}>
-                <span>Data</span><span style={{ textAlign: 'right' }}>Valor</span><span style={{ paddingLeft: 24 }}>Chave PIX</span><span>Status</span>
+                <span>Data</span><span style={{ textAlign: 'right' }}>Valor</span><span style={{ paddingLeft: 24 }}>Destino</span><span>Status</span>
               </div>
               {withdrawals.map((w: any) => (
                 <div key={w.id} style={{ padding: '14px 22px', display: 'grid', gridTemplateColumns: '160px 140px 1fr 150px', borderBottom: '1px solid var(--ca-line-soft)', alignItems: 'center', fontSize: 13 }}>
@@ -287,8 +273,8 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
                   <span style={{ textAlign: 'right', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: '#0F172A' }}>
                     R$ {Number(w.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
-                  <span style={{ paddingLeft: 24, color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>
-                    {w.pixKey} <span style={{ color: 'var(--ca-muted-2)', fontSize: 11 }}>{w.pixKeyType}</span>
+                  <span style={{ paddingLeft: 24, color: 'var(--ca-muted)', fontSize: 12 }}>
+                    Conta bancária cadastrada
                   </span>
                   <span>
                     {w.status === 'PENDING'  && <span className="ca-badge ca-badge--warn"><Icon.Loader style={{ width: 10, height: 10 }} />Aguardando</span>}
@@ -313,7 +299,7 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
           <div style={{ background: '#fff', borderRadius: 20, padding: 32, width: 400, maxWidth: '90vw' }} onClick={e => e.stopPropagation()}>
             <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Solicitar saque</div>
             <div style={{ fontSize: 13, color: 'var(--ca-muted)', marginBottom: 24 }}>
-              O valor será transferido para a chave PIX <strong style={{ color: 'var(--ca-ink)' }}>{pixMasked}</strong>
+              O valor será transferido para a conta bancária cadastrada no Pagar.me.
             </div>
 
             <label style={{ fontSize: 12.5, color: 'var(--ca-muted)', fontWeight: 500 }}>Valor (R$)</label>

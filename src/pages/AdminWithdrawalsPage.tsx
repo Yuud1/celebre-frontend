@@ -10,16 +10,16 @@ interface WithdrawalEvent {
 interface Withdrawal {
   id: string
   amount: string | number
-  pixKey: string
-  pixKeyType: string
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'FAILED'
   rejectionReason?: string
-  asaasError?: string
+  pagarmeError?: string
   createdAt: string
   user: {
     name: string
     email: string
     cpfCnpj: string
+    bankCode?: string
+    accountNumber?: string
     events: WithdrawalEvent[]
   }
 }
@@ -50,7 +50,7 @@ function StatusBadge({ w }: { w: Withdrawal }) {
   return (
     <div>
       <span className="ca-badge ca-badge--error">Falhou</span>
-      {w.asaasError && <div style={{ fontSize: 11, color: 'var(--ca-muted)', marginTop: 3 }}>{w.asaasError}</div>}
+      {w.pagarmeError && <div style={{ fontSize: 11, color: 'var(--ca-muted)', marginTop: 3 }}>{w.pagarmeError}</div>}
     </div>
   )
 }
@@ -175,7 +175,7 @@ export function AdminWithdrawalsPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 900 }}>
                 <thead>
                   <tr style={{ background: 'var(--ca-bg-soft)', borderBottom: '1px solid var(--ca-line)' }}>
-                    {['Data', 'Usuário', 'Evento(s)', 'Chave PIX', 'Valor', 'Status', 'Ações'].map(h => (
+                    {['Data', 'Usuário', 'Evento(s)', 'Conta Bancária', 'Valor', 'Status', 'Ações'].map(h => (
                       <th key={h} style={{ padding: '13px 18px', color: 'var(--ca-muted)', fontSize: 12, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{h}</th>
                     ))}
                   </tr>
@@ -197,8 +197,8 @@ export function AdminWithdrawalsPage() {
                           : '—'}
                       </td>
                       <td style={{ padding: '14px 18px', fontSize: 13, fontFamily: 'JetBrains Mono, monospace' }}>
-                        <div>{w.pixKey}</div>
-                        <div style={{ fontSize: 11, color: 'var(--ca-muted)' }}>{w.pixKeyType}</div>
+                        <div>{w.user.bankCode ?? '—'}</div>
+                        {w.user.accountNumber && <div style={{ fontSize: 11, color: 'var(--ca-muted)' }}>cc {w.user.accountNumber}</div>}
                       </td>
                       <td style={{ padding: '14px 18px', fontSize: 15, fontWeight: 700, fontFamily: 'Space Grotesk, sans-serif', whiteSpace: 'nowrap' }}>
                         R$ {Number(w.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -244,7 +244,7 @@ export function AdminWithdrawalsPage() {
             <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Confirmar aprovação</div>
             <div style={{ fontSize: 14, color: 'var(--ca-muted)', marginBottom: 24, lineHeight: 1.6 }}>
               Aprovar saque de <strong style={{ color: 'var(--ca-ink)' }}>R$ {Number(approveTarget.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> para <strong style={{ color: 'var(--ca-ink)' }}>{approveTarget.user.name}</strong>?
-              <br />A transferência PIX será realizada imediatamente via Asaas.
+              <br />A transferência será realizada imediatamente via Pagar.me.
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button className="ca-btn ca-btn--ghost" style={{ flex: 1, height: 42 }} onClick={() => setApproveTarget(null)}>Cancelar</button>

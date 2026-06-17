@@ -9,7 +9,8 @@ interface User {
   name: string
   role: string
   cpfCnpj: string | null
-  pixKey: string | null
+  bankCode: string | null
+  bankConfigured: boolean
   kycStatus: string
   createdAt: string
 }

@@ -49,25 +49,32 @@ export const api = {
       body: JSON.stringify(payload),
     });
   },
-  updatePixKey(pixKey: string, pixKeyType?: string) {
-    return request<any>("/auth/pix-key", {
+  setupRecipient(data: {
+    bankCode: string;
+    branchNumber: string;
+    accountNumber: string;
+    accountCheckDigit: string;
+    accountType: "checking" | "savings";
+  }) {
+    return request<{ kycStatus: string }>("/auth/recipient", {
       method: "PATCH",
-      body: JSON.stringify({ pixKey, pixKeyType }),
+      body: JSON.stringify(data),
     });
   },
-  setupSubconta(payload: {
-    birthDate: string;
-    mobilePhone: string;
-    postalCode: string;
-    address: string;
-    addressNumber: string;
-    province: string;
-    incomeValue: number;
+  setupBankAccount(data: {
+    bankCode: string;
+    branchNumber: string;
+    accountNumber: string;
+    accountCheckDigit: string;
+    accountType: "checking" | "savings";
   }) {
-    return request<any>("/auth/subconta", {
+    return request<{ kycStatus: string }>("/auth/bank-account", {
       method: "PATCH",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(data),
     });
+  },
+  getRecipientStatus() {
+    return request<{ kycStatus: string }>("/auth/recipient/status");
   },
 
   // ─── Drafts ─────────────────────────────────────────────────
@@ -177,7 +184,7 @@ export const api = {
       pendingCount: number
       totalNetReceived: number
       confirmedCount: number
-      pixKey: string | null
+      bankConfigured: boolean
       lastConfirmedAt: string | null
     }>('/wallet/summary')
   },
@@ -232,6 +239,7 @@ export const api = {
     guestName: string
     guestEmail: string
     guestCpf: string
+    guestPhone: string
     message?: string
     paymentMethod: 'PIX'
   }) {
