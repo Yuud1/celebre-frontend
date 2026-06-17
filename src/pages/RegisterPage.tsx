@@ -2,10 +2,9 @@ import React, { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { AuthLogo, AuthBtn, AuthField, AuthInput, AuthVisualPanel } from '../components/auth/AuthShared'
 import { Icon } from '../components/auth/AuthIcons'
-import { maskCEP, maskCPF, maskPhone } from '../lib/mask'
+import { maskCPF } from '../lib/mask'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
-import { isCheckoutPublishRedirect } from '../lib/builderDraft'
 
 function getPasswordStrength(password: string) {
   if (!password) return { score: 0, label: '', color: '#94A3B8' }
@@ -88,7 +87,6 @@ function StepAccount({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const redirect = searchParams.get('redirect')
-  const publishFlow = isCheckoutPublishRedirect(redirect)
   const loginHref = redirect
     ? `/login?redirect=${encodeURIComponent(redirect)}`
     : '/login'
@@ -127,12 +125,8 @@ function StepAccount({
       const res = await api.register({ name, email: email.trim().toLowerCase(), cpfCnpj: cpf, password })
       if (!res?.user) throw new Error('Resposta inválida ao criar conta')
       setUser(res.user)
-      if (publishFlow) {
-        const next = redirect ? `/verificacao?redirect=${encodeURIComponent(redirect)}` : '/verificacao'
-        navigate(next, { replace: true })
-        return
-      }
-      onNext()
+      const next = redirect ? `/verificacao?redirect=${encodeURIComponent(redirect)}` : '/verificacao'
+      navigate(next, { replace: true })
     } catch (err: any) {
       const message = err?.message || 'Erro ao criar conta'
       setError(message)
@@ -260,270 +254,17 @@ function StepAccount({
   )
 }
 
-function StepRecebimento({ onNext }: { onNext: () => void }) {
-  const [birthDate, setBirthDate] = useState('')
-  const [mobilePhone, setMobilePhone] = useState('')
-  const [postalCode, setPostalCode] = useState('')
-  const [address, setAddress] = useState('')
-  const [addressNumber, setAddressNumber] = useState('')
-  const [province, setProvince] = useState('')
-  const [incomeValue, setIncomeValue] = useState('')
-  const [cepLoading, setCepLoading] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-
-  async function fetchCep(cep: string) {
-    const digits = cep.replace(/\D/g, '')
-    if (digits.length !== 8) return
-    setCepLoading(true)
-    try {
-      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`)
-      const data = await res.json()
-      if (!data.erro) {
-        setAddress(data.logradouro || '')
-        setProvince(data.bairro || '')
-      }
-    } catch {
-      // preenchimento manual
-    } finally {
-      setCepLoading(false)
-    }
-  }
-
-  const handleSubmit = async () => {
-    if (!birthDate || !mobilePhone || !postalCode || !address || !addressNumber || !province || !incomeValue) {
-      return setError('Preencha todos os campos')
-    }
-
-    setLoading(true)
-    setError('')
-    try {
-      await api.setupSubconta({
-        birthDate,
-        mobilePhone: mobilePhone.replace(/\D/g, ''),
-        postalCode: postalCode.replace(/\D/g, ''),
-        address,
-        addressNumber,
-        province,
-        incomeValue: Number(incomeValue.replace(/\D/g, '')),
-      })
-      onNext()
-    } catch (err: any) {
-      setError(err.message || 'Erro ao configurar conta')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <RegisterStepLayout>
-      <div className="register-form-logo">
-        <AuthLogo size={17} />
-      </div>
-      <div className="ca-eyebrow" style={{ marginBottom: 10 }}>Passo 2 · Recebimento</div>
-      <h2 className="ca-display register-headline">Dados para recebimento</h2>
-      <p className="register-lead">
-        Necessários para configurar sua conta de pagamentos e receber os valores do seu evento.
-      </p>
-
-      <form className="register-form" onSubmit={e => { e.preventDefault(); handleSubmit() }}>
-        <div className="register-form__row">
-          <AuthField label="Data de nascimento">
-            <AuthInput type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} />
-          </AuthField>
-
-          <AuthField label="Celular (com DDD)">
-            <AuthInput
-              type="text"
-              placeholder="(11) 99999-9999"
-              value={mobilePhone}
-              onChange={e => setMobilePhone(maskPhone(e.target.value))}
-            />
-          </AuthField>
-        </div>
-
-        <div className="register-form__row register-form__row--full">
-          <AuthField label="CEP">
-            <AuthInput
-              type="text"
-              placeholder="00000-000"
-              value={postalCode}
-              onChange={e => {
-                const masked = maskCEP(e.target.value)
-                setPostalCode(masked)
-                fetchCep(masked)
-              }}
-              suffix={cepLoading ? <span style={{ fontSize: 11, color: 'var(--ca-muted-2)' }}>...</span> : undefined}
-            />
-          </AuthField>
-        </div>
-
-        <div className="register-form__row register-form__row--full">
-          <AuthField label="Endereço (rua/avenida)">
-            <AuthInput type="text" placeholder="Rua das Flores" value={address} onChange={e => setAddress(e.target.value)} />
-          </AuthField>
-        </div>
-
-        <div className="register-form__row register-form__row--address">
-          <AuthField label="Bairro">
-            <AuthInput type="text" placeholder="Centro" value={province} onChange={e => setProvince(e.target.value)} />
-          </AuthField>
-
-          <AuthField label="Número">
-            <AuthInput type="text" placeholder="123" value={addressNumber} onChange={e => setAddressNumber(e.target.value)} />
-          </AuthField>
-        </div>
-
-        <div className="register-form__row register-form__row--full">
-          <AuthField label="Faturamento mensal estimado (R$)">
-            <AuthInput
-              type="text"
-              placeholder="Ex: 5000"
-              value={incomeValue}
-              onChange={e => setIncomeValue(e.target.value.replace(/\D/g, ''))}
-            />
-          </AuthField>
-        </div>
-
-        {error ? <RegisterError message={error} /> : null}
-
-        <AuthBtn type="submit" variant="primary" block size="lg" style={{ marginTop: 4 }} iconRight={!loading && <Icon.ArrowRight style={{ width: 18, height: 18 }} />}>
-          {loading ? 'Configurando...' : 'Continuar'}
-        </AuthBtn>
-      </form>
-    </RegisterStepLayout>
-  )
-}
-
-type PixType = 'CPF/CNPJ' | 'Celular' | 'E-mail' | 'Aleatória'
-
-function maskPixKeyValue(val: string, pixType: PixType) {
-  if (pixType === 'CPF/CNPJ') {
-    const digits = val.replace(/\D/g, '').slice(0, 14)
-    if (digits.length <= 11) {
-      return digits.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2')
-    }
-    return digits.replace(/(\d{2})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1/$2').replace(/(\d{4})(\d{1,2})$/, '$1-$2')
-  }
-
-  if (pixType === 'Celular') return maskPhone(val)
-  return val
-}
-
-function StepPix({ onPrev }: { onPrev: () => void }) {
-  const navigate = useNavigate()
-  const { refreshUser } = useAuth()
-  const [pixType, setPixType] = useState<PixType>('CPF/CNPJ')
-  const [pixKey, setPixKey] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-
-  const handleSubmit = async () => {
-    if (!pixKey) return setError('Informe sua chave PIX')
-
-    setLoading(true)
-    setError('')
-    try {
-      const typeMap: Record<PixType, string> = {
-        'CPF/CNPJ': pixKey.replace(/\D/g, '').length > 11 ? 'CNPJ' : 'CPF',
-        'Celular': 'PHONE',
-        'E-mail': 'EMAIL',
-        'Aleatória': 'EVP',
-      }
-      await api.updatePixKey(pixKey, typeMap[pixType])
-      await refreshUser()
-      navigate('/criar', { replace: true })
-    } catch (err: any) {
-      setError(err.message || 'Erro ao salvar chave PIX')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <RegisterStepLayout>
-      <div className="register-form-logo">
-        <AuthLogo size={17} />
-      </div>
-      <div className="ca-eyebrow" style={{ marginBottom: 10 }}>Passo 3 · Chave PIX</div>
-      <h2 className="ca-display register-headline">Para onde enviamos seu dinheiro?</h2>
-      <p className="register-lead">
-        Informe sua chave PIX para receber os valores arrecadados no seu evento.
-      </p>
-
-      <form className="register-form" onSubmit={e => { e.preventDefault(); handleSubmit() }}>
-        <AuthField label="Tipo de chave">
-          <div className="register-select-wrap">
-            <select
-              className="register-select"
-              value={pixType}
-              onChange={e => {
-                setPixType(e.target.value as PixType)
-                setPixKey('')
-              }}
-            >
-              <option value="CPF/CNPJ">CPF / CNPJ</option>
-              <option value="Celular">Celular</option>
-              <option value="E-mail">E-mail</option>
-              <option value="Aleatória">Chave aleatória</option>
-            </select>
-            <span className="register-select-wrap__chevron" aria-hidden="true">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
-            </span>
-          </div>
-        </AuthField>
-
-        <AuthField
-          label="Sua chave PIX"
-          hint={pixType === 'CPF/CNPJ' ? 'Apenas números' : pixType === 'Celular' ? 'Com DDD' : undefined}
-        >
-          <AuthInput
-            icon={<Icon.Pix style={{ width: 18, height: 18 }} />}
-            type={pixType === 'E-mail' ? 'email' : 'text'}
-            placeholder={
-              pixType === 'CPF/CNPJ' ? '000.000.000-00'
-                : pixType === 'Celular' ? '(00) 00000-0000'
-                  : 'Insira sua chave PIX'
-            }
-            value={pixKey}
-            onChange={e => setPixKey(maskPixKeyValue(e.target.value, pixType))}
-          />
-        </AuthField>
-
-        {error ? <RegisterError message={error} /> : null}
-
-        <div className="register-actions">
-          <AuthBtn type="button" variant="ghost" onClick={onPrev} icon={<Icon.ArrowLeft style={{ width: 16, height: 16 }} />}>
-            Voltar
-          </AuthBtn>
-          <button type="button" className="register-actions__skip" onClick={() => navigate('/dashboard')}>
-            Pular por agora
-          </button>
-          <AuthBtn type="submit" variant="primary" className="register-actions__primary" iconRight={!loading && <Icon.ArrowRight style={{ width: 16, height: 16 }} />}>
-            {loading ? 'Salvando...' : 'Concluir'}
-          </AuthBtn>
-        </div>
-      </form>
-    </RegisterStepLayout>
-  )
-}
-
 export function RegisterPage() {
-  const [step, setStep] = useState(0)
   const [accountForm, setAccountForm] = useState<AccountFormState>(initialAccountForm)
 
   return (
     <div className="auth-page ca-root">
       <RegisterShell>
-        {step === 0 && (
-          <StepAccount
-            form={accountForm}
-            setForm={setAccountForm}
-            onNext={() => setStep(1)}
-          />
-        )}
-        {step === 1 && <StepRecebimento onNext={() => setStep(2)} />}
-        {step === 2 && <StepPix onPrev={() => setStep(1)} />}
+        <StepAccount
+          form={accountForm}
+          setForm={setAccountForm}
+          onNext={() => {}}
+        />
       </RegisterShell>
     </div>
   )

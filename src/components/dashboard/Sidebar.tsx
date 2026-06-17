@@ -13,7 +13,7 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
 
 function KycSidebarWidget() {
   const { user } = useAuth()
-  if (user?.kycStatus === 'pix_configured') {
+  if (user?.kycStatus === 'bank_configured') {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: 'rgba(16,185,129,0.06)', borderRadius: 10, border: '1px solid rgba(16,185,129,0.15)' }}>
         <Icon.ShieldCheck style={{ width: 15, height: 15, color: '#10B981' }} />

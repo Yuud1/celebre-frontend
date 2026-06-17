@@ -48,7 +48,7 @@ function buildSparkData(contributions: any[]): number[] {
 
 function KycStatusBig() {
   const { user } = useAuth()
-  if (user?.kycStatus === 'pix_configured') return null
+  if (user?.kycStatus === 'bank_configured') return null
   return (
     <div className="ca-card" style={{ padding: 22, background: 'linear-gradient(160deg, #FEFBF4, #FEF7E7)', borderColor: 'rgba(245,158,11,0.25)' }}>
       <div className="ca-row ca-row--between">

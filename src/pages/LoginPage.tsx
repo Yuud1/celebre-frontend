@@ -31,7 +31,7 @@ export function LoginPage() {
       const { user } = await api.login({ email, password })
       setUser(user)
       const redirect = searchParams.get('redirect')
-      if (user.kycStatus !== 'pix_configured') {
+      if (user.kycStatus !== 'bank_configured') {
         const next = redirect ? `/verificacao?redirect=${encodeURIComponent(redirect)}` : '/verificacao'
         navigate(next, { replace: true })
       } else {
