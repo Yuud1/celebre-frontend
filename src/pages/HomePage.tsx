@@ -6,19 +6,19 @@ const FEATURE_CARDS = [
   {
     title: 'Página do seu jeito',
     desc: 'Templates elegantes, paletas prontas e preview em tempo real para cada tipo de celebração.',
-    image: '/img-01.png',
+    image: '/img-01.webp',
     imageAlt: 'Exemplo de página personalizada no Celebre',
   },
   {
     title: 'Lista inteligente',
     desc: 'Presentes fixos, vaquinhas e destaques — tudo organizado para seus convidados presentearem com facilidade.',
-    image: '/img02.png',
+    image: '/img02.webp',
     imageAlt: 'Exemplo de lista de presentes no Celebre',
   },
   {
     title: 'Pagamentos seguros',
     desc: 'PIX e cartão com repasse automático. Você configura uma vez e recebe direto na sua conta.',
-    image: '/img03.png',
+    image: '/img03.webp',
     imageAlt: 'Exemplo de pagamentos no Celebre',
   },
 ]
@@ -54,11 +54,11 @@ const PLANS = [
 ]
 
 const TESTIMONIALS = [
-  { name: 'Julia M.', role: 'Casamento · SP', text: 'Montamos nossa lista em uma tarde. Os convidados elogiaram o visual e a facilidade do PIX.', stars: 5, photo: '/casais/casal-01.png' },
-  { name: 'Fernanda R.', role: 'Chá de bebê', text: 'A página ficou linda e recebemos presentes de parentes que moram longe. Super prático!', stars: 5, photo: '/casais/casal-02.png' },
-  { name: 'Marcos & Ana', role: 'Revelação', text: 'Compartilhamos o link no WhatsApp e em minutos já tinha contribuição entrando.', stars: 5, photo: '/casais/casal-03.png' },
-  { name: 'Camila T.', role: 'Panelas', text: 'O painel mostra tudo claramente: quem presenteou, quanto entrou e o saldo disponível.', stars: 5, photo: '/casais/casal-04.png' },
-  { name: 'Rafael S.', role: 'Aniversário', text: 'Interface limpa, fácil de usar. Até minha mãe conseguiu presentear sem ajuda.', stars: 5, photo: '/casais/casal-07.png' },
+  { name: 'Julia M.', role: 'Casamento · SP', text: 'Montamos nossa lista em uma tarde. Os convidados elogiaram o visual e a facilidade do PIX.', stars: 5, photo: '/casais/casal-01.webp' },
+  { name: 'Fernanda R.', role: 'Chá de bebê', text: 'A página ficou linda e recebemos presentes de parentes que moram longe. Super prático!', stars: 5, photo: '/casais/casal-02.webp' },
+  { name: 'Marcos & Ana', role: 'Revelação', text: 'Compartilhamos o link no WhatsApp e em minutos já tinha contribuição entrando.', stars: 5, photo: '/casais/casal-03.webp' },
+  { name: 'Camila T.', role: 'Panelas', text: 'O painel mostra tudo claramente: quem presenteou, quanto entrou e o saldo disponível.', stars: 5, photo: '/casais/casal-04.webp' },
+  { name: 'Rafael S.', role: 'Aniversário', text: 'Interface limpa, fácil de usar. Até minha mãe conseguiu presentear sem ajuda.', stars: 5, photo: '/casais/casal-07.webp' },
 ]
 
 const FAQ_ITEMS = [
@@ -221,7 +221,7 @@ export function HomePage() {
           </div>
           <div className="home-hero__center">
             <img
-              src="/img08.png"
+              src="/img08.webp"
               alt=""
               className="home-hero__center-img"
               loading="lazy"
@@ -231,7 +231,7 @@ export function HomePage() {
 
           <div className="home-hero__feature home-hero__feature--tl">
             <img
-              src="/img06.png"
+              src="/img06.webp"
               alt=""
               className="home-hero__feature-img"
               loading="lazy"
@@ -248,7 +248,7 @@ export function HomePage() {
 
           <div className="home-hero__feature home-hero__feature--tr">
             <img
-              src="/img05.png"
+              src="/img05.webp"
               alt=""
               className="home-hero__feature-img"
               loading="lazy"
@@ -265,7 +265,7 @@ export function HomePage() {
 
           <div className="home-hero__feature home-hero__feature--br">
             <img
-              src="/img07.png"
+              src="/img07.webp"
               alt=""
               className="home-hero__feature-img"
               loading="lazy"
@@ -282,7 +282,7 @@ export function HomePage() {
 
           <div className="home-hero__feature home-hero__feature--bl">
             <img
-              src="/img04.png"
+              src="/img04.webp"
               alt=""
               className="home-hero__feature-img"
               loading="lazy"
@@ -321,7 +321,7 @@ export function HomePage() {
 
       <section className="home-showcase" aria-label="Painel Celebre">
         <img
-          src="/img04.png"
+          src="/img04.webp"
           alt="Painel do Celebre para gerenciar convidados, presentes e recebimentos"
           loading="lazy"
           decoding="async"

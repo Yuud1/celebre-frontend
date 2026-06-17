@@ -4,7 +4,7 @@ import { Icon } from './AuthIcons'
 export function AuthVisualPanel() {
   return (
     <aside className="auth-visual" aria-hidden="true">
-      <img src="/login-bg.png" alt="" className="auth-visual__image" />
+      <img src="/login-bg.webp" alt="" className="auth-visual__image" />
     </aside>
   )
 }

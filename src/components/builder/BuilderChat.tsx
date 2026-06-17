@@ -106,7 +106,7 @@ function Avatar() {
   return (
     <div className={'ai-chat__avatar' + (imageError ? ' is-fallback' : '')} aria-hidden="true">
       {!imageError ? (
-        <img src="/chatbot.png" alt="" onError={() => setImageError(true)} />
+        <img src="/chatbot.webp" alt="" onError={() => setImageError(true)} />
       ) : (
         <>
           c<span>b</span>
