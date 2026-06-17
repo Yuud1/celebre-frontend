@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { GiftItem } from '../../types/event'
 import { api } from '../../lib/api'
 import { formatCurrency } from '../../lib/format'
+import { maskPhone } from '../../lib/mask'
 
 interface Props {
   gift: GiftItem | null
@@ -20,6 +21,7 @@ export function ContributionModal({ gift, onClose }: Props) {
   const [guestName, setGuestName] = useState('')
   const [guestEmail, setGuestEmail] = useState('')
   const [guestCpf, setGuestCpf] = useState('')
+  const [guestPhone, setGuestPhone] = useState('')
   const [amount, setAmount] = useState(0)
   const [message, setMessage] = useState('')
   const [chargeUrl, setChargeUrl] = useState('')
@@ -32,6 +34,7 @@ export function ContributionModal({ gift, onClose }: Props) {
       setGuestName('')
       setGuestEmail('')
       setGuestCpf('')
+      setGuestPhone('')
       setAmount(gift.type === 'contribution' ? (gift.meta ?? gift.value) : gift.value)
       setMessage('')
       setChargeUrl('')
@@ -51,6 +54,11 @@ export function ContributionModal({ gift, onClose }: Props) {
       setError('CPF inválido. Digite os 11 dígitos.')
       return
     }
+    const phone = guestPhone.replace(/\D/g, '')
+    if (phone.length < 10 || phone.length > 11) {
+      setError('Telefone inválido. Digite o DDD + número.')
+      return
+    }
     setStep('loading')
     setError(null)
     try {
@@ -60,6 +68,7 @@ export function ContributionModal({ gift, onClose }: Props) {
         guestName: guestName.trim(),
         guestEmail: guestEmail.trim(),
         guestCpf: cpf,
+        guestPhone: phone,
         message: message.trim() || undefined,
         paymentMethod: 'PIX',
       })
@@ -127,6 +136,18 @@ export function ContributionModal({ gift, onClose }: Props) {
               />
             </label>
 
+            <label>
+              Telefone
+              <input
+                value={guestPhone}
+                onChange={(e) => setGuestPhone(maskPhone(e.target.value))}
+                placeholder="(11) 98765-4321"
+                required
+                disabled={busy}
+                inputMode="tel"
+              />
+            </label>
+
             {isFixed ? (
               <div className="contribution-modal__fixed-value">
                 <span>Valor</span>
@@ -138,10 +159,10 @@ export function ContributionModal({ gift, onClose }: Props) {
                 <input
                   type="number"
                   min={1}
-                  max={goal}
+                  max={Math.floor(goal / 100)}
                   step={1}
-                  value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
+                  value={Math.round(amount / 100)}
+                  onChange={(e) => setAmount(Math.round(Number(e.target.value) * 100))}
                   required
                   disabled={busy}
                 />
@@ -168,7 +189,7 @@ export function ContributionModal({ gift, onClose }: Props) {
               type="submit"
               className="btn btn-primary"
               style={{ width: '100%' }}
-              disabled={busy || !guestName.trim() || !guestEmail.trim() || !guestCpf.trim()}
+              disabled={busy || !guestName.trim() || !guestEmail.trim() || !guestCpf.trim() || !guestPhone.trim()}
             >
               {busy
                 ? 'Gerando cobrança...'
