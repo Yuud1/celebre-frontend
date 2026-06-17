@@ -19,7 +19,7 @@ function giftToForm(gift: any): GiftFormData {
   return {
     type: gift.type ?? 'fixed',
     name: gift.name ?? '',
-    value: String(gift.value ?? ''),
+    value: String((gift.value ?? 0) / 100),
     description: gift.description ?? '',
   }
 }
@@ -79,7 +79,7 @@ function GiftFormModal({ eventId, gift, onClose, onSaved }: GiftFormModalProps) 
       const payload: Record<string, unknown> = {
         type: form.type,
         name: form.name.trim(),
-        value: parsedValue,
+        value: Math.round(parsedValue * 100),
       }
       if (form.description.trim()) payload.description = form.description.trim()
       if (imageUrl) payload.imageUrl = imageUrl
@@ -295,7 +295,7 @@ function GiftCardItem({ gift, onEdit, onDelete }: GiftCardItemProps) {
         )}
         <div className="ca-row ca-row--between" style={{ marginTop: 12, marginBottom: 8 }}>
           <Money value={isFixed ? (isPurchased ? goal : 0) : collected} size={17} />
-          {goal > 0 && <span style={{ fontSize: 12, color: 'var(--ca-muted)', fontVariantNumeric: 'tabular-nums' }}>de R$ {goal.toLocaleString('pt-BR')}</span>}
+          {goal > 0 && <span style={{ fontSize: 12, color: 'var(--ca-muted)', fontVariantNumeric: 'tabular-nums' }}>de R$ {(goal / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>}
         </div>
         <div className={'cd-progress' + (isPurchased ? ' cd-progress--success' : '')}>
           <div className="cd-progress__fill" style={{ width: `${pct}%` }} />

@@ -81,7 +81,7 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
   }, [])
 
   const handleWithdraw = async () => {
-    const amount = parseFloat(withdrawAmount.replace(',', '.'))
+    const amount = Math.round(parseFloat(withdrawAmount.replace(',', '.')) * 100)
     if (!amount || amount <= 0) return
     setWithdrawing(true)
     setWithdrawMsg(null)
@@ -119,7 +119,7 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
             <button
               className="ca-btn ca-btn--primary"
               style={{ height: 38, padding: '0 16px', fontSize: 13 }}
-              onClick={() => { setWithdrawAmount(String(summary?.availableBalance?.toFixed(2) ?? '')); setWithdrawModal(true) }}
+              onClick={() => { setWithdrawAmount(String((summary?.availableBalance ?? 0) / 100)); setWithdrawModal(true) }}
               disabled={hasPendingWithdrawal || !summary?.availableBalance || summary.availableBalance <= 0}
             >
               <Icon.Pix style={{ width: 16, height: 16 }} />Sacar via PIX
@@ -142,8 +142,8 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
             ) : (
               <div className="cd-money" style={{ fontSize: 44, color: '#fff', marginTop: 10 }}>
                 <span className="cd-money__currency">R$</span>
-                <span>{Math.floor(summary?.availableBalance ?? 0).toLocaleString('pt-BR')}</span>
-                <span className="cd-money__cents">,{String(Math.round(((summary?.availableBalance ?? 0) % 1) * 100)).padStart(2, '0')}</span>
+                <span>{Math.floor((summary?.availableBalance ?? 0) / 100).toLocaleString('pt-BR')}</span>
+                <span className="cd-money__cents">,{String((summary?.availableBalance ?? 0) % 100).padStart(2, '0')}</span>
               </div>
             )}
             <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginTop: 6 }}>
@@ -153,7 +153,7 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
               <button
                 className="ca-btn ca-btn--primary ca-btn--lg"
                 style={{ minWidth: 200 }}
-                onClick={() => { setWithdrawAmount(String(summary?.availableBalance?.toFixed(2) ?? '')); setWithdrawModal(true) }}
+                onClick={() => { setWithdrawAmount(String((summary?.availableBalance ?? 0) / 100)); setWithdrawModal(true) }}
                 disabled={hasPendingWithdrawal || !summary?.availableBalance || summary.availableBalance <= 0}
               >
                 Sacar para minha conta <Icon.ArrowRight style={{ width: 18, height: 18 }} />
@@ -244,7 +244,7 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
               <span style={{ fontWeight: 500 }}>{t.desc}</span>
               <span style={{ color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{t.method}</span>
               <span style={{ textAlign: 'right', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: '#047857' }}>
-                + R$ {t.netAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                + R$ {(t.netAmount / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
               <span>
                 {t.status === 'confirmed' && <span className="ca-badge ca-badge--success"><Icon.Check style={{ width: 10, height: 10 }} />Confirmado</span>}
@@ -271,7 +271,7 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
                 <div key={w.id} style={{ padding: '14px 22px', display: 'grid', gridTemplateColumns: '160px 140px 1fr 150px', borderBottom: '1px solid var(--ca-line-soft)', alignItems: 'center', fontSize: 13 }}>
                   <span style={{ color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{fmtDateShort(w.createdAt)}</span>
                   <span style={{ textAlign: 'right', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: '#0F172A' }}>
-                    R$ {Number(w.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {(Number(w.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                   <span style={{ paddingLeft: 24, color: 'var(--ca-muted)', fontSize: 12 }}>
                     Conta bancária cadastrada
@@ -307,7 +307,7 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
               type="number"
               min="0.01"
               step="0.01"
-              max={summary?.availableBalance ?? 0}
+              max={(summary?.availableBalance ?? 0) / 100}
               value={withdrawAmount}
               onChange={e => setWithdrawAmount(e.target.value)}
               style={{ display: 'block', width: '100%', marginTop: 6, marginBottom: 20, padding: '10px 14px', border: '1px solid var(--ca-line)', borderRadius: 10, fontSize: 18, fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, boxSizing: 'border-box' }}

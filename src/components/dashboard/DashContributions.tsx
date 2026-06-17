@@ -39,7 +39,7 @@ export function DashContributions({ contributions }: DashContributionsProps) {
               <span style={{ fontWeight: 500 }}>{c.guestName ?? 'Anônimo'}</span>
               <span style={{ color: 'var(--ca-muted)' }}>{c.gift?.name ?? '—'}</span>
               <span style={{ textAlign: 'right', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                R$ {Number(c.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                R$ {(Number(c.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
               <span style={{ fontSize: 12, color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
                 {c.paymentMethod === 'pix' ? 'PIX' : c.paymentMethod === 'credit_card' ? 'Cartão' : c.paymentMethod ?? '—'}

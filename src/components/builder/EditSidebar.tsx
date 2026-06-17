@@ -568,9 +568,9 @@ export function EditSidebar({
               Valor (R$)
               <input
                 type="number"
-                value={gift.value}
+                value={gift.value / 100}
                 placeholder="Valor (R$)"
-                onChange={(e) => onGift(gift.id, { value: Number(e.target.value) })}
+                onChange={(e) => onGift(gift.id, { value: Math.round(Number(e.target.value) * 100) })}
               />
             </label>
             {gift.type === 'contribution' ? (
@@ -578,9 +578,9 @@ export function EditSidebar({
                 Meta (R$)
                 <input
                   type="number"
-                  value={gift.meta ?? gift.value}
+                  value={(gift.meta ?? gift.value) / 100}
                   placeholder="Meta (R$)"
-                  onChange={(e) => onGift(gift.id, { meta: Number(e.target.value) })}
+                  onChange={(e) => onGift(gift.id, { meta: Math.round(Number(e.target.value) * 100) })}
                 />
               </label>
             ) : null}

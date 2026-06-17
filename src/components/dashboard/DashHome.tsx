@@ -143,7 +143,7 @@ export function DashHome({ event, contributions, onNavigate, availableBalance: a
 
       <div className="cd-grid-stats-4" style={{ gap: 16 }}>
         <StatCard icon={<Icon.Pix style={{ color: '#10B981' }} />} label="Total arrecadado" value={totalCollected} currency spark={sparkData} />
-        <StatCard icon={<Icon.Heart style={{ color: '#EC4899' }} />} label="Contribuições" value={confirmedCount} hint={avgTicket > 0 ? `Média R$ ${avgTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por contribuição` : undefined} />
+        <StatCard icon={<Icon.Heart style={{ color: '#EC4899' }} />} label="Contribuições" value={confirmedCount} hint={avgTicket > 0 ? `Média R$ ${(avgTicket / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por contribuição` : undefined} />
         <StatCard icon={<Icon.Sparkle style={{ color: '#8B5CF6' }} />} label="Conversão da página" value="—" hint="Dados de visitas indisponíveis" />
         <StatCard icon={<Icon.Bank style={{ color: '#6366F1' }} />} label="Saldo disponível" value={availableBalance} currency hint="Saldo líquido acumulado" />
       </div>
@@ -200,14 +200,14 @@ export function DashHome({ event, contributions, onNavigate, availableBalance: a
                   <Donut value={goalPct} size={100} stroke={10} />
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 22, letterSpacing: '-0.02em' }}>{Math.round(goalPct * 100)}%</div>
-                    <div style={{ fontSize: 10, color: 'var(--ca-muted)' }}>de {Number(goalGift.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}</div>
+                    <div style={{ fontSize: 10, color: 'var(--ca-muted)' }}>de {(Number(goalGift.value) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}</div>
                   </div>
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 11, color: 'var(--ca-muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Arrecadado</div>
                   <Money value={Number(goalGift.collected ?? 0)} size={22} />
                   <div style={{ fontSize: 12, color: 'var(--ca-muted)', marginTop: 2 }}>
-                    Faltam <strong style={{ color: 'var(--ca-ink)' }}>{Math.max(0, Number(goalGift.value) - Number(goalGift.collected ?? 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
+                    Faltam <strong style={{ color: 'var(--ca-ink)' }}>{(Math.max(0, Number(goalGift.value) - Number(goalGift.collected ?? 0)) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
                   </div>
                   <button onClick={() => onNavigate('gifts')} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12.5, color: 'var(--ca-indigo)', fontWeight: 600, marginTop: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                     Ver detalhes <Icon.ArrowRight style={{ width: 12, height: 12 }} />

@@ -201,7 +201,7 @@ export function AdminWithdrawalsPage() {
                         {w.user.accountNumber && <div style={{ fontSize: 11, color: 'var(--ca-muted)' }}>cc {w.user.accountNumber}</div>}
                       </td>
                       <td style={{ padding: '14px 18px', fontSize: 15, fontWeight: 700, fontFamily: 'Space Grotesk, sans-serif', whiteSpace: 'nowrap' }}>
-                        R$ {Number(w.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {(Number(w.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
                       <td style={{ padding: '14px 18px', fontSize: 13 }}>
                         <StatusBadge w={w} />
@@ -243,7 +243,7 @@ export function AdminWithdrawalsPage() {
           <div className="ca-card" style={{ padding: 32, width: 420, maxWidth: '90vw' }} onClick={e => e.stopPropagation()}>
             <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Confirmar aprovação</div>
             <div style={{ fontSize: 14, color: 'var(--ca-muted)', marginBottom: 24, lineHeight: 1.6 }}>
-              Aprovar saque de <strong style={{ color: 'var(--ca-ink)' }}>R$ {Number(approveTarget.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> para <strong style={{ color: 'var(--ca-ink)' }}>{approveTarget.user.name}</strong>?
+              Aprovar saque de <strong style={{ color: 'var(--ca-ink)' }}>R$ {(Number(approveTarget.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> para <strong style={{ color: 'var(--ca-ink)' }}>{approveTarget.user.name}</strong>?
               <br />A transferência será realizada imediatamente via Pagar.me.
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
@@ -260,7 +260,7 @@ export function AdminWithdrawalsPage() {
           <div className="ca-card" style={{ padding: 32, width: 420, maxWidth: '90vw' }} onClick={e => e.stopPropagation()}>
             <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Rejeitar saque</div>
             <div style={{ fontSize: 14, color: 'var(--ca-muted)', marginBottom: 16 }}>
-              Saque de <strong style={{ color: 'var(--ca-ink)' }}>R$ {Number(rejectTarget.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> — {rejectTarget.user.name}
+              Saque de <strong style={{ color: 'var(--ca-ink)' }}>R$ {(Number(rejectTarget.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> — {rejectTarget.user.name}
             </div>
             <label style={{ fontSize: 12.5, color: 'var(--ca-muted)', fontWeight: 500 }}>Motivo da rejeição <span style={{ color: '#EF4444' }}>*</span></label>
             <textarea

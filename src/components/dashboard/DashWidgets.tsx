@@ -19,7 +19,7 @@ export function nameInitials(name: string | null | undefined) {
 }
 
 export function fmtCurrencyInner(v: number) {
-  const r = Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const r = (Number(v) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   const [reais, cents] = r.split(',')
   return (
     <>

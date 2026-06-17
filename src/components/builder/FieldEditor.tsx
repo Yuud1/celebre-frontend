@@ -97,8 +97,8 @@ export function FieldEditor({
           Valor (R$)
           <input
             type="number"
-            value={gift.value}
-            onChange={(e) => onGift(giftId, { value: Number(e.target.value) })}
+            value={gift.value / 100}
+            onChange={(e) => onGift(giftId, { value: Math.round(Number(e.target.value) * 100) })}
           />
         </label>
         {gift.type === 'contribution' ? (
@@ -106,8 +106,8 @@ export function FieldEditor({
             Meta (R$)
             <input
               type="number"
-              value={gift.meta ?? gift.value}
-              onChange={(e) => onGift(giftId, { meta: Number(e.target.value) })}
+              value={(gift.meta ?? gift.value) / 100}
+              onChange={(e) => onGift(giftId, { meta: Math.round(Number(e.target.value) * 100) })}
             />
           </label>
         ) : null}
