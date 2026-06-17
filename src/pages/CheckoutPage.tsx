@@ -52,7 +52,7 @@ export function CheckoutPage() {
         const { status, eventSlug } = await api.getDraftStatus(draftId)
         if (status === 'published' && eventSlug) {
           clearInterval(interval)
-          navigate(`/p/${eventSlug}`)
+          navigate(`/verificacao?redirect=${encodeURIComponent(`/p/${eventSlug}`)}`, { replace: true })
         }
       } catch {
         // ignore transient poll errors
@@ -84,7 +84,7 @@ export function CheckoutPage() {
       <h1 style={{ margin: '0 0 0.5rem', fontSize: '1.5rem' }}>Publicar seu evento</h1>
       <p style={{ color: 'var(--cb-muted)', margin: '0 0 1.5rem', lineHeight: 1.5 }}>
         Taxa única de lançamento para colocar sua página no ar. Depois do pagamento,
-        você configura conta Asaas e PIX no painel.
+        você configura a conta bancária para receber os presentes.
       </p>
 
       <div

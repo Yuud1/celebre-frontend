@@ -1,3 +1,4 @@
+import type { ServerResponse } from 'node:http'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -18,9 +19,10 @@ export default defineConfig({
         configure: (proxy) => {
           proxy.on('error', (err, _req, res) => {
             console.warn('[proxy error]', err.message)
-            if (!res.headersSent) {
-              res.writeHead(502)
-              res.end('Bad Gateway')
+            const response = res as ServerResponse
+            if (!response.headersSent) {
+              response.writeHead(502)
+              response.end('Bad Gateway')
             }
           })
         },

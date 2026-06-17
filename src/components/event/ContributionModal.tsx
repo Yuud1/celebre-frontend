@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { GiftItem } from '../../types/event'
 import { api } from '../../lib/api'
 import { formatCurrency } from '../../lib/format'
-import { maskPhone } from '../../lib/mask'
+import { maskPhone, maskCPF } from '../../lib/mask'
 
 interface Props {
   gift: GiftItem | null
@@ -128,7 +128,7 @@ export function ContributionModal({ gift, onClose }: Props) {
               CPF
               <input
                 value={guestCpf}
-                onChange={(e) => setGuestCpf(e.target.value)}
+                onChange={(e) => setGuestCpf(maskCPF(e.target.value))}
                 placeholder="000.000.000-00"
                 required
                 disabled={busy}

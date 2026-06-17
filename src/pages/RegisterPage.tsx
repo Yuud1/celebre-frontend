@@ -5,6 +5,7 @@ import { Icon } from '../components/auth/AuthIcons'
 import { maskCPF } from '../lib/mask'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
+import { isCheckoutPublishRedirect } from '../lib/builderDraft'
 
 function getPasswordStrength(password: string) {
   if (!password) return { score: 0, label: '', color: '#94A3B8' }
@@ -75,11 +76,9 @@ const initialAccountForm: AccountFormState = {
 function StepAccount({
   form,
   setForm,
-  onNext,
 }: {
   form: AccountFormState
   setForm: React.Dispatch<React.SetStateAction<AccountFormState>>
-  onNext: () => void
 }) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -125,7 +124,12 @@ function StepAccount({
       const res = await api.register({ name, email: email.trim().toLowerCase(), cpfCnpj: cpf, password })
       if (!res?.user) throw new Error('Resposta inválida ao criar conta')
       setUser(res.user)
-      const next = redirect ? `/verificacao?redirect=${encodeURIComponent(redirect)}` : '/verificacao'
+      const publishFlow = isCheckoutPublishRedirect(redirect)
+      const next = publishFlow && redirect
+        ? redirect
+        : redirect
+          ? `/verificacao?redirect=${encodeURIComponent(redirect)}`
+          : '/dashboard'
       navigate(next, { replace: true })
     } catch (err: any) {
       const message = err?.message || 'Erro ao criar conta'
@@ -263,7 +267,6 @@ export function RegisterPage() {
         <StepAccount
           form={accountForm}
           setForm={setAccountForm}
-          onNext={() => {}}
         />
       </RegisterShell>
     </div>

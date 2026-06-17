@@ -26,7 +26,7 @@ const FEATURE_CARDS = [
 const PLANS = [
   {
     name: 'Essencial',
-    price: 'R$ 11,99',
+    price: 'R$ 21,90',
     period: '/por evento',
     features: ['1 evento publicado', 'Lista de presentes', 'Página personalizada', 'Suporte por e-mail'],
     cta: 'Escolher plano',
@@ -35,7 +35,7 @@ const PLANS = [
   },
   {
     name: 'Celebre Pro',
-    price: 'R$ 15,99',
+    price: 'R$ 29,90',
     period: '/por evento',
     features: ['Tudo do Essencial', 'Domínio personalizado', 'Templates premium', 'Relatórios avançados', 'Suporte prioritário'],
     cta: 'Publicar evento',
@@ -44,7 +44,7 @@ const PLANS = [
   },
   {
     name: 'Premium',
-    price: 'R$ 22,99',
+    price: 'R$ 34,90',
     period: '/por evento',
     features: ['Tudo do Pro', 'Múltiplos eventos', 'White-label', 'API de integração', 'Gerente dedicado'],
     cta: 'Escolher plano',
@@ -332,7 +332,7 @@ export function HomePage() {
         <div className="home-section__head">
           <span className="home-badge">Planos</span>
           <h2>Escolha como quer celebrar</h2>
-          <p>Planos a partir de R$ 11,99 por evento. Publique quando estiver pronto, sem taxa escondida.</p>
+          <p>Planos a partir de R$ 21,90 por evento. Publique quando estiver pronto, sem taxa escondida.</p>
         </div>
 
         <div className="home-pricing-track">
