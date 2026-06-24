@@ -1,0 +1,317 @@
+/* ─── Celebre · Convites (invitation templates) ──────────────────
+   Each invite is a fixed 1080×1920 Story canvas, themed from a single
+   --accent. Everything else (paper tint, deep ink, soft fills, hairlines)
+   is derived via color-mix(oklab) so ANY accent color stays harmonious. */
+
+.cv-invite,
+.cv-invite *,
+.cv-invite *::before,
+.cv-invite *::after { box-sizing: border-box; margin: 0; }
+
+.cv-invite {
+  position: relative;
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* derived theme — set --accent inline on the root */
+  --accent: #8b79c2;
+  --ink:         #34302e;
+  --ink-soft:    #6a625c;
+  --accent-deep: color-mix(in oklab, var(--accent) 64%, #261b30);
+  --accent-rich: color-mix(in oklab, var(--accent) 86%, #261b30);
+  --accent-mid:  color-mix(in oklab, var(--accent) 64%, white);
+  --accent-soft: color-mix(in oklab, var(--accent) 26%, white);
+  --accent-wash: color-mix(in oklab, var(--accent) 13%, white);
+  --paper:   color-mix(in oklab, var(--accent) 6%,  #fcf9f4);
+  --paper-2: color-mix(in oklab, var(--accent) 12%, #f7f1e9);
+  --gold:    color-mix(in oklab, var(--accent) 30%, #b79356);
+  --line:    color-mix(in oklab, var(--accent) 34%, transparent);
+  --line-soft: color-mix(in oklab, var(--accent) 18%, transparent);
+
+  color: var(--ink);
+  background: var(--paper);
+}
+
+/* ─── type ───────────────────────────────────────────────────── */
+.cv-script   { font-family: 'Pinyon Script', cursive; font-weight: 400; line-height: 1.05; }
+.cv-script-a { font-family: 'Allura', cursive; font-weight: 400; line-height: 1.0; }
+.cv-script-y { font-family: 'Yellowtail', cursive; font-weight: 400; line-height: 1.05; }
+.cv-serif    { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+.cv-eyebrow {
+  font-family: 'Geist', sans-serif;
+  font-weight: 500;
+  font-size: 23px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+.cv-mono {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 18px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.cv-body {
+  font-size: 33px;
+  line-height: 1.62;
+  letter-spacing: -0.005em;
+  color: var(--ink-soft);
+  text-wrap: pretty;
+}
+
+/* ─── photo placeholder ──────────────────────────────────────── */
+.cv-ph {
+  position: relative;
+  background:
+    repeating-linear-gradient(135deg,
+      color-mix(in oklab, var(--accent) 22%, transparent) 0 1.5px,
+      transparent 1.5px 22px),
+    linear-gradient(160deg,
+      color-mix(in oklab, var(--accent) 24%, #efe7da) 0%,
+      color-mix(in oklab, var(--accent) 40%, #d9ccba) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.cv-ph__tag {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 17px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--accent-deep) 70%, white);
+  background: rgba(255,255,255,0.5);
+  padding: 7px 14px;
+  border-radius: 999px;
+  backdrop-filter: blur(2px);
+}
+.cv-ph__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ─── detail rows (date / time / place) ──────────────────────── */
+.cv-details { display: flex; flex-direction: column; gap: 18px; }
+.cv-detail {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 30px;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+}
+.cv-detail__ic {
+  flex: 0 0 56px;
+  width: 56px; height: 56px;
+  border-radius: 999px;
+  background: var(--accent-wash);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent-deep);
+}
+.cv-detail b { font-weight: 600; }
+.cv-detail span { color: var(--ink-soft); }
+
+/* ─── QR block ───────────────────────────────────────────────── */
+.cv-qr {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 26px;
+  background: rgba(255,255,255,0.66);
+  border: 1.5px solid var(--line-soft);
+  border-radius: 30px;
+  box-shadow: 0 2px 4px rgba(40,30,40,0.03), 0 20px 50px color-mix(in oklab, var(--accent) 18%, transparent);
+}
+.cv-qr__code {
+  flex: 0 0 auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+.cv-qr__code img { display: block; width: 188px; height: 188px; }
+.cv-qr__title {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 30px; font-weight: 600; color: var(--ink);
+  margin-bottom: 12px;
+}
+.cv-qr__desc { font-size: 25px; line-height: 1.5; color: var(--ink-soft); }
+.cv-link {
+  display: inline-flex; align-items: center; gap: 12px;
+  margin-top: 22px;
+  padding: 16px 26px;
+  border-radius: 999px;
+  background: var(--accent-deep);
+  color: #fff;
+  font-size: 25px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* ─── divider rule with center mark ──────────────────────────── */
+.cv-rule {
+  display: flex; align-items: center; justify-content: center;
+  gap: 22px;
+}
+.cv-rule::before, .cv-rule::after {
+  content: ''; height: 1.5px; flex: 1;
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
+}
+.cv-rule__mark { color: var(--gold); display: flex; }
+
+/* ─── thanks pill ────────────────────────────────────────────── */
+.cv-thanks { display: flex; align-items: center; gap: 24px; }
+.cv-thanks__ic {
+  flex: 0 0 70px; width: 70px; height: 70px;
+  border-radius: 999px;
+  background: var(--accent-wash);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent-deep);
+}
+.cv-thanks__t { font-size: 31px; font-weight: 600; color: var(--ink); }
+.cv-thanks__s { font-size: 27px; color: var(--ink-soft); margin-top: 4px; }
+
+/* ─── WhatsApp / message preview ─────────────────────────────── */
+.cv-wa, .cv-wa * { box-sizing: border-box; }
+.cv-wa {
+  width: 460px;
+  height: 940px;
+  border-radius: 56px;
+  background: #ffffff;
+  border: 10px solid #1f1c1a;
+  box-shadow: 0 30px 80px rgba(30,24,30,0.22);
+  overflow: hidden;
+  position: relative;
+  font-family: 'Geist', sans-serif;
+  flex-shrink: 0;
+}
+.cv-wa__screen {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(0deg, rgba(0,0,0,0.015), rgba(0,0,0,0.015)),
+    #e7ddd3;
+  display: flex; flex-direction: column;
+}
+.cv-wa__bar {
+  flex: 0 0 auto;
+  background: #f6f1ea;
+  padding: 18px 22px 14px;
+  display: flex; align-items: center; gap: 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.cv-wa__avatar {
+  width: 46px; height: 46px; border-radius: 999px;
+  background: var(--accent-soft, #e8e3f8);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent-deep, #4a3d7c);
+  font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 24px;
+}
+.cv-wa__name { font-size: 20px; font-weight: 600; color: #1f1c1a; }
+.cv-wa__status { font-size: 14px; color: #8a8278; margin-top: 1px; }
+.cv-wa__chat {
+  flex: 1; padding: 22px 18px; display: flex; flex-direction: column;
+  gap: 12px; overflow: hidden;
+}
+.cv-wa__bubble {
+  align-self: flex-end;
+  max-width: 86%;
+  background: #e4f6cf;
+  border-radius: 16px 16px 4px 16px;
+  padding: 8px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.07);
+}
+.cv-wa__img {
+  width: 100%; border-radius: 11px; overflow: hidden;
+  position: relative; background: #fff;
+}
+.cv-wa__msg {
+  align-self: flex-end;
+  max-width: 86%;
+  background: #e4f6cf;
+  border-radius: 16px 16px 4px 16px;
+  padding: 12px 14px 9px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.07);
+}
+.cv-wa__msg-title { font-size: 16px; font-weight: 600; color: #1f1c1a; line-height: 1.3; }
+.cv-wa__msg-body { font-size: 15px; color: #4a463f; line-height: 1.4; margin-top: 3px; }
+.cv-wa__msg-link { font-size: 14px; color: #2a72c9; margin-top: 7px; word-break: break-all; }
+.cv-wa__meta {
+  display: flex; align-items: center; justify-content: flex-end; gap: 5px;
+  font-size: 12px; color: #8a8a7a; margin-top: 5px;
+}
+.cv-wa__preview-card {
+  background: rgba(255,255,255,0.55);
+  border-left: 3px solid var(--accent, #8b79c2);
+  border-radius: 8px; padding: 8px 10px; margin-bottom: 6px;
+}
+
+/* ─── Dashboard Convites page layout ─────────────────────────── */
+.cd-convites {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.cd-convites__panels {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+.cd-convites__preview-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cd-convites__preview-box {
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--ca-bg-soft);
+  border: 1px solid var(--ca-line);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px;
+}
+.cd-convites__preview-scaled {
+  transform-origin: top center;
+}
+.cd-convites__actions {
+  flex: 0 0 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cd-convites__wa-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.cd-convites__wa-scale {
+  transform-origin: top center;
+}
+.cd-convites__btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cd-convites__hint {
+  font-size: 13px;
+  color: var(--ca-muted);
+  line-height: 1.5;
+  padding: 12px 16px;
+  background: var(--ca-bg-soft);
+  border-radius: 10px;
+  border: 1px solid var(--ca-line);
+}

@@ -6,6 +6,7 @@ interface DashContributionsProps { contributions: any[] }
 
 export function DashContributions({ contributions }: DashContributionsProps) {
   const confirmed = contributions.filter((c: any) => c.status === 'confirmed')
+  const pending = contributions.filter((c: any) => c.status === 'pending')
   const total = confirmed.reduce((s: number, c: any) => s + Number(c.amount), 0)
 
   return (
@@ -19,7 +20,7 @@ export function DashContributions({ contributions }: DashContributionsProps) {
       <div className="cd-grid-stats-3" style={{ gap: 16, marginBottom: 20 }}>
         <StatCard icon={<Icon.Pix style={{ color: '#10B981' }} />} label="Total arrecadado" value={total} currency />
         <StatCard icon={<Icon.Check style={{ color: '#10B981' }} />} label="Confirmadas" value={confirmed.length} />
-        <StatCard icon={<Icon.Loader style={{ color: '#F59E0B' }} />} label="Pendentes" value={contributions.length - confirmed.length} />
+        <StatCard icon={<Icon.Loader style={{ color: '#F59E0B' }} />} label="Pendentes" value={pending.length} />
       </div>
 
       <div className="cd-table-scroll">
@@ -33,7 +34,6 @@ export function DashContributions({ contributions }: DashContributionsProps) {
           </div>
         )}
         {contributions.map((c: any, i: number) => {
-          const isPaid = c.status === 'confirmed'
           return (
             <div key={c.id} style={{ padding: '14px 22px', display: 'grid', gridTemplateColumns: '1fr 1fr 140px 120px 120px', borderBottom: i < contributions.length - 1 ? '1px solid var(--ca-line-soft)' : 'none', alignItems: 'center', fontSize: 13 }}>
               <span style={{ fontWeight: 500 }}>{c.guestName ?? 'Anônimo'}</span>
@@ -45,9 +45,11 @@ export function DashContributions({ contributions }: DashContributionsProps) {
                 {c.paymentMethod === 'pix' ? 'PIX' : c.paymentMethod === 'credit_card' ? 'Cartão' : c.paymentMethod ?? '—'}
               </span>
               <span>
-                {isPaid
+                {c.status === 'confirmed'
                   ? <span className="ca-badge ca-badge--success"><Icon.Check style={{ width: 10, height: 10 }} />Confirmado</span>
-                  : <span className="ca-badge ca-badge--warn"><Icon.Loader style={{ width: 10, height: 10 }} />Pendente</span>}
+                  : c.status === 'failed'
+                    ? <span className="ca-badge ca-badge--error"><Icon.X style={{ width: 10, height: 10 }} />Falhou</span>
+                    : <span className="ca-badge ca-badge--warn"><Icon.Loader style={{ width: 10, height: 10 }} />Pendente</span>}
               </span>
             </div>
           )

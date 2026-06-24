@@ -55,6 +55,7 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, onC
   const main: Array<{ id: NavId; label: string; icon: React.ReactNode; count?: number }> = [
     { id: 'dashboard', label: 'Dashboard',     icon: <Icon.Globe   style={{ width: 17, height: 17 }} /> },
     { id: 'customize', label: 'Meu Evento', icon: <Icon.Heart style={{ width: 17, height: 17 }} /> },
+    { id: 'convites',  label: 'Convite',    icon: <Icon.Mail  style={{ width: 17, height: 17 }} /> },
     { id: 'gifts',     label: 'Presentes',     icon: <Icon.Sparkle style={{ width: 17, height: 17 }} />, count: giftCount || undefined },
     { id: 'contrib',   label: 'Contribuições', icon: <Icon.Pix     style={{ width: 17, height: 17 }} />, count: contribCount || undefined },
     { id: 'payouts',   label: 'Saques',        icon: <Icon.Bank    style={{ width: 17, height: 17 }} /> },
@@ -65,7 +66,7 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, onC
   ]
   const navCls = (id: NavId) => 'cd-nav__item' + (id === activePage ? ' cd-nav__item--on' : '')
   const go = (id: NavId) => {
-    if (id === 'dashboard' || id === 'gifts' || id === 'contrib' || id === 'payouts' || id === 'customize' || id === 'settings') {
+    if (id === 'dashboard' || id === 'gifts' || id === 'contrib' || id === 'payouts' || id === 'customize' || id === 'settings' || id === 'convites') {
       onClose?.()
       onNav(id)
     }

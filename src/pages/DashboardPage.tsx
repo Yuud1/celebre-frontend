@@ -11,8 +11,9 @@ import { Personalize } from '../components/dashboard/Personalize'
 import { Settings } from '../components/dashboard/Settings'
 import { Sidebar } from '../components/dashboard/Sidebar'
 import { Topbar } from '../components/dashboard/Topbar'
+import { DashConvites } from '../components/dashboard/DashConvites'
 
-export type ActivePage = 'dashboard' | 'gifts' | 'contrib' | 'payouts' | 'customize' | 'settings'
+export type ActivePage = 'dashboard' | 'gifts' | 'contrib' | 'payouts' | 'customize' | 'settings' | 'convites'
 
 interface PageHeadProps {
   eyebrow?: string
@@ -136,7 +137,8 @@ export function DashboardPage() {
                 {activePage === 'contrib'   && <DashContributions contributions={contributions} />}
                 {activePage === 'payouts'   && <Saques eventId={event?.id} />}
                 {activePage === 'customize' && <Personalize event={event} onReload={loadData} onNavigate={setActivePage} />}
-                {activePage === 'settings' && <Settings />}
+                {activePage === 'settings'  && <Settings />}
+                {activePage === 'convites'  && <DashConvites event={event} />}
               </>
             )}
           </div>
