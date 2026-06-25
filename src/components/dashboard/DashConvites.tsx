@@ -76,10 +76,14 @@ export function DashConvites({ event }: DashConvitesProps) {
   const [fontEmbedCSS, setFontEmbedCSS] = useState('')
   const [coverDataUrl, setCoverDataUrl] = useState<string | undefined>()
   const [capturing, setCapturing] = useState(false)
+  const [pregenFile, setPregenFile] = useState<File | null>(null)
 
   const eventType = event?.data?.eventType ?? 'casamento'
   const accent = event?.data?.theme?.accent ?? ACCENTS[eventType] ?? '#74865f'
   const slug = event?.slug ?? ''
+
+  const hasCover = !!event?.data?.coverUrl
+  const ready = !!event && !!qrDataUrl && !!fontEmbedCSS && (!hasCover || !!coverDataUrl)
 
   // QR code (real, scannable)
   useEffect(() => {
@@ -104,19 +108,50 @@ export function DashConvites({ event }: DashConvitesProps) {
     fetchAsDataUrl(proxyUrl).then(setCoverDataUrl)
   }, [event?.data?.coverUrl])
 
-  // Capture the hidden full-res element as PNG
+  // Pre-generate the PNG as soon as all resources are ready.
+  // On iOS, navigator.share() must be called within the user-gesture budget (~5 s),
+  // which is not enough time to run html-to-image on a 1080×1920 canvas on demand.
+  useEffect(() => {
+    if (!ready) { setPregenFile(null); return }
+    let cancelled = false
+    let raf1: number, raf2: number
+    // Double rAF: wait for two paint frames so the hidden element is fully rasterized
+    // before html-to-image reads it (critical on mobile where first paint is slower).
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(async () => {
+        if (cancelled) return
+        try {
+          await document.fonts.ready
+          const dataUrl = await capture()
+          const res = await fetch(dataUrl)
+          const blob = await res.blob()
+          if (!cancelled) setPregenFile(new File([blob], `convite-${slug || 'evento'}.png`, { type: 'image/png' }))
+        } catch (e) {
+          console.error('[DashConvites] pregen failed:', e)
+        }
+      })
+    })
+    return () => { cancelled = true; cancelAnimationFrame(raf1); cancelAnimationFrame(raf2) }
+  }, [ready, slug]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Capture the hidden full-res element as PNG.
+  // Mobile browsers (iOS Safari, Chrome Android) often return a blank canvas on
+  // the first toPng call because the SVG foreignObject img hasn't been decoded yet.
+  // A second call hits the browser's cached image and returns the real result.
   const capture = async (): Promise<string> => {
     if (!hiddenRef.current) throw new Error('no ref')
     await document.fonts.ready
-    return toPng(hiddenRef.current, {
+    const opts = {
       width: 1080,
       height: 1920,
       pixelRatio: 1,
-      // Bypass cross-origin stylesheet rule access — we supply embedded fonts directly
       fontEmbedCSS: fontEmbedCSS || undefined,
-      // Skip re-fetching images; they're already embedded as data URLs in the hidden render
-      skipAutoScale: false,
-    })
+    }
+    await toPng(hiddenRef.current, opts).catch(() => {}) // warm-up: loads SVG img into browser cache
+    const dataUrl = await toPng(hiddenRef.current, opts)
+    console.log('[capture] dataUrl length:', dataUrl.length, dataUrl.length < 5000 ? '⚠️ blank?' : '✓')
+    if (dataUrl.length < 5000) throw new Error(`blank image (${dataUrl.length} bytes)`)
+    return dataUrl
   }
 
   const download = async () => {
@@ -139,6 +174,21 @@ export function DashConvites({ event }: DashConvitesProps) {
   const share = async () => {
     if (capturing) return
     if (!navigator.share) { await download(); return }
+
+    // Fast path: use the pre-generated file so navigator.share() is called
+    // immediately within the user-gesture window (required on iOS Safari).
+    if (pregenFile) {
+      try {
+        if (navigator.canShare?.({ files: [pregenFile] })) {
+          await navigator.share({ files: [pregenFile], title: `Convite — ${event?.data?.name ?? 'Evento'}` })
+        } else {
+          await download()
+        }
+      } catch { /* user cancelled */ }
+      return
+    }
+
+    // Fallback: generate on demand (may hit iOS gesture timeout on slower devices)
     setCapturing(true)
     try {
       const dataUrl = await capture()
@@ -150,7 +200,9 @@ export function DashConvites({ event }: DashConvitesProps) {
       } else {
         await download()
       }
-    } catch {
+    } catch(error: unknown) {
+      console.error(error)
+      alert('Não foi possível compartilhar. Tente baixar o PNG.')
     } finally {
       setCapturing(false)
     }
@@ -171,9 +223,6 @@ export function DashConvites({ event }: DashConvitesProps) {
   // hasn't completed — never passes the raw R2 URL, which would cause CORS errors
   // because html-to-image scans all <img> elements in the document.
   const captureEvent = { ...event, data: { ...event.data, coverUrl: coverDataUrl ?? '' } }
-
-  const hasCover = !!event?.data?.coverUrl
-  const ready = !!qrDataUrl && !!fontEmbedCSS && (!hasCover || !!coverDataUrl)
 
   return (
     <div className="cd-convites">
@@ -245,8 +294,11 @@ export function DashConvites({ event }: DashConvitesProps) {
         </div>
       </div>
 
-      {/* hidden 1080×1920 render used only for PNG capture */}
-      <div aria-hidden="true" style={{ position: 'fixed', left: -9999, top: -9999, pointerEvents: 'none', zIndex: -1 }}>
+      {/* hidden 1080×1920 render used only for PNG capture.
+          Must stay within the viewport (top/left 0) so the browser's paint engine
+          actually rasterizes it — mobile browsers skip off-screen fixed elements.
+          opacity:0 + pointer-events:none keeps it invisible and non-interactive. */}
+      <div aria-hidden="true" style={{ position: 'fixed', top: 0, left: 0, opacity: 0, pointerEvents: 'none', zIndex: -1, overflow: 'hidden', width: 1080, height: 1920 }}>
         <div ref={hiddenRef} style={{ width: 1080, height: 1920 }}>
           <ConviteRenderer event={captureEvent} qrDataUrl={qrDataUrl} />
         </div>
