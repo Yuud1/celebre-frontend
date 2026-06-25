@@ -4,6 +4,8 @@ import QRCode from 'qrcode'
 import { PageHead } from '../../pages/DashboardPage'
 import { ConviteRenderer, ConviteWaPreview, CvMiniInvite } from '../convites/ConviteRenderer'
 
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? ''
+
 interface DashConvitesProps {
   event: any
 }
@@ -93,11 +95,13 @@ export function DashConvites({ event }: DashConvitesProps) {
     buildFontEmbedCSS().then(setFontEmbedCSS).catch(() => {})
   }, [])
 
-  // Pre-fetch cover image as data URL for the hidden capture render
+  // Pre-fetch cover image through the backend proxy so the browser can get
+  // it with CORS (R2 public URLs don't send CORS headers by default).
   useEffect(() => {
     const url = event?.data?.coverUrl
     if (!url) return
-    fetchAsDataUrl(url).then(setCoverDataUrl)
+    const proxyUrl = `${API_BASE}/upload/proxy-image?url=${encodeURIComponent(url)}`
+    fetchAsDataUrl(proxyUrl).then(setCoverDataUrl)
   }, [event?.data?.coverUrl])
 
   // Capture the hidden full-res element as PNG
@@ -162,12 +166,14 @@ export function DashConvites({ event }: DashConvitesProps) {
   const waW = Math.round(460 * WA_SCALE)
   const waH = Math.round(940 * WA_SCALE)
 
-  // Hidden render always uses coverDataUrl (data: URI or undefined).
-  // undefined → CvPlaceholder renders the pattern, no <img> → html-to-image
-  // never sees a cross-origin src that it would set to "" on CORS failure.
-  const captureEvent = { ...event, data: { ...event.data, coverUrl: coverDataUrl } }
+  // captureEvent uses the proxied data URL so html-to-image can embed the image
+  // without any CORS fetch. Falls back to '' (no image) if the proxy prefetch
+  // hasn't completed — never passes the raw R2 URL, which would cause CORS errors
+  // because html-to-image scans all <img> elements in the document.
+  const captureEvent = { ...event, data: { ...event.data, coverUrl: coverDataUrl ?? '' } }
 
-  const ready = !!qrDataUrl && !!fontEmbedCSS
+  const hasCover = !!event?.data?.coverUrl
+  const ready = !!qrDataUrl && !!fontEmbedCSS && (!hasCover || !!coverDataUrl)
 
   return (
     <div className="cd-convites">

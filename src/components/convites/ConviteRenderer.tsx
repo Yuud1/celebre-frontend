@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import '../../styles/convites.css'
+import { computeThemeVars } from '../../lib/themeColors'
 
 // ── event type config ────────────────────────────────────────────
 type EventTypeId = 'casamento' | 'cha-bebe' | 'cha-revelacao' | 'cha-panela'
@@ -195,7 +196,7 @@ function CvBadge({ icon, size = 122 }: { icon: IconName; size?: number }) {
       background: 'linear-gradient(150deg, var(--accent-mid), var(--accent-deep))',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       color: '#fff', margin: '0 auto',
-      boxShadow: '0 14px 34px color-mix(in oklab, var(--accent) 40%, transparent), inset 0 1px 0 rgba(255,255,255,0.35)',
+      boxShadow: '0 14px 34px var(--cv-badge-shadow), inset 0 1px 0 rgba(255,255,255,0.35)',
     }}>
       <CvIcon name={icon} size={size * 0.46} sw={1.7} />
     </div>
@@ -252,7 +253,7 @@ function CvHeaderOverlay({ icon, headline, headCls, headSize, mark, label, cover
   return (
     <div style={{ position: 'relative', height: 700, flex: '0 0 auto' }}>
       <CvPlaceholder style={{ position: 'absolute', inset: 0 }} coverUrl={coverUrl} />
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(178deg, color-mix(in oklab, var(--accent) 30%, transparent) 0%, transparent 26%, transparent 48%, color-mix(in oklab, var(--accent-deep) 78%, transparent) 100%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(178deg, var(--cv-overlay-top) 0%, transparent 26%, transparent 48%, var(--cv-overlay-bottom) 100%)' }} />
       <div style={{ position: 'absolute', top: 50, left: 0, right: 0 }}>
         <CvBadge icon={icon} />
       </div>
@@ -284,7 +285,7 @@ function CvHeaderArch({ icon, headline, headCls, headSize, label, coverUrl }: {
       <CvScatter items={dots} />
       <div className="cv-eyebrow" style={{ marginBottom: 24 }}>{label}</div>
       <CvBadge icon={icon} size={100} />
-      <div style={{ marginTop: 28, height: 344, borderRadius: '180px 180px 38px 38px', overflow: 'hidden', position: 'relative', boxShadow: '0 24px 60px color-mix(in oklab, var(--accent) 24%, transparent)' }}>
+      <div style={{ marginTop: 28, height: 344, borderRadius: '180px 180px 38px 38px', overflow: 'hidden', position: 'relative', boxShadow: '0 24px 60px var(--cv-arch-shadow)' }}>
         <CvPlaceholder style={{ position: 'absolute', inset: 0, height: '100%' }} coverUrl={coverUrl} />
       </div>
       <h1 className={headCls} style={{ marginTop: 26, fontSize: headSize, color: 'var(--accent-deep)', lineHeight: 1.0, whiteSpace: 'pre-line' }}>
@@ -321,6 +322,8 @@ export function ConviteRenderer({ event, qrDataUrl }: ConviteRendererProps) {
   const location = event.data.location || 'A confirmar'
   const link = `celebre.com.br/p/${event.slug}`
 
+  const themeVars = useMemo(() => computeThemeVars(accent), [accent])
+
   const date = useMemo(() => {
     if (!event.eventDate) return 'Em breve'
     try {
@@ -341,7 +344,7 @@ export function ConviteRenderer({ event, qrDataUrl }: ConviteRendererProps) {
   const coverUrl = event.data.coverUrl
 
   return (
-    <div className="cv-invite" style={{ '--accent': accent } as React.CSSProperties & { '--accent': string }}>
+    <div className="cv-invite" style={themeVars as React.CSSProperties}>
       {useOverlay
         ? <CvHeaderOverlay icon={tpl.icon} headline={tpl.headline} headCls={tpl.headCls} headSize={tpl.headSize} mark={tpl.mark} label={tpl.label} coverUrl={coverUrl} />
         : <CvHeaderArch icon={tpl.icon} headline={tpl.headline} headCls={tpl.headCls} headSize={tpl.headSize} label={tpl.label} coverUrl={coverUrl} />
@@ -383,9 +386,10 @@ export function ConviteWaPreview({ event, accent, children }: {
   const initials = names.split('&').map((p: string) => p.trim()[0] ?? '').join('').slice(0, 2)
   const link = `celebre.com.br/p/${event.slug}`
   const tpl = TEMPLATES[(event.data.eventType as EventTypeId) ?? 'casamento']
+  const themeVars = useMemo(() => computeThemeVars(accent), [accent])
 
   return (
-    <div className="cv-wa" style={{ '--accent': accent } as React.CSSProperties & { '--accent': string }}>
+    <div className="cv-wa" style={themeVars as React.CSSProperties}>
       <div className="cv-wa__screen">
         <div className="cv-wa__bar">
           <div className="cv-wa__avatar">{initials || 'C'}</div>

@@ -17,20 +17,21 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* derived theme — set --accent inline on the root */
-  --accent: #8b79c2;
+  /* All derived vars are injected as inline styles by computeThemeVars() in
+     themeColors.ts — these fallbacks apply only before JS hydrates. */
+  --accent:      #8b79c2;
   --ink:         #34302e;
   --ink-soft:    #6a625c;
-  --accent-deep: color-mix(in oklab, var(--accent) 64%, #261b30);
-  --accent-rich: color-mix(in oklab, var(--accent) 86%, #261b30);
-  --accent-mid:  color-mix(in oklab, var(--accent) 64%, white);
-  --accent-soft: color-mix(in oklab, var(--accent) 26%, white);
-  --accent-wash: color-mix(in oklab, var(--accent) 13%, white);
-  --paper:   color-mix(in oklab, var(--accent) 6%,  #fcf9f4);
-  --paper-2: color-mix(in oklab, var(--accent) 12%, #f7f1e9);
-  --gold:    color-mix(in oklab, var(--accent) 30%, #b79356);
-  --line:    color-mix(in oklab, var(--accent) 34%, transparent);
-  --line-soft: color-mix(in oklab, var(--accent) 18%, transparent);
+  --accent-deep: #4a3d7c;
+  --accent-rich: #6b5ea0;
+  --accent-mid:  #b0a5d9;
+  --accent-soft: #d5d0ed;
+  --accent-wash: #eceaf6;
+  --paper:       #f7f5fb;
+  --paper-2:     #ede9f5;
+  --gold:        #9d8ba0;
+  --line:        rgba(139,121,194,0.34);
+  --line-soft:   rgba(139,121,194,0.18);
 
   color: var(--ink);
   background: var(--paper);
@@ -69,11 +70,11 @@
   position: relative;
   background:
     repeating-linear-gradient(135deg,
-      color-mix(in oklab, var(--accent) 22%, transparent) 0 1.5px,
+      var(--cv-ph-stripe) 0 1.5px,
       transparent 1.5px 22px),
     linear-gradient(160deg,
-      color-mix(in oklab, var(--accent) 24%, #efe7da) 0%,
-      color-mix(in oklab, var(--accent) 40%, #d9ccba) 100%);
+      var(--cv-ph-bg-start) 0%,
+      var(--cv-ph-bg-end) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,7 +88,7 @@
   font-size: 17px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--accent-deep) 70%, white);
+  color: var(--cv-ph-tag-color);
   background: rgba(255,255,255,0.5);
   padding: 7px 14px;
   border-radius: 999px;
@@ -131,7 +132,7 @@
   background: rgba(255,255,255,0.66);
   border: 1.5px solid var(--line-soft);
   border-radius: 30px;
-  box-shadow: 0 2px 4px rgba(40,30,40,0.03), 0 20px 50px color-mix(in oklab, var(--accent) 18%, transparent);
+  box-shadow: 0 2px 4px rgba(40,30,40,0.03), 0 20px 50px var(--cv-qr-glow);
 }
 .cv-qr__code {
   flex: 0 0 auto;
