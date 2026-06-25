@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    { "source": "/auth/:path*", "destination": "https://api.celebre.fun/auth/:path*" },
+    { "source": "/drafts/:path*", "destination": "https://api.celebre.fun/drafts/:path*" },
+    { "source": "/events/:path*", "destination": "https://api.celebre.fun/events/:path*" },
+    { "source": "/upload/:path*", "destination": "https://api.celebre.fun/upload/:path*" },
+    { "source": "/p/:path*", "destination": "https://api.celebre.fun/p/:path*" },
+    { "source": "/contributions/:path*", "destination": "https://api.celebre.fun/contributions/:path*" },
+    { "source": "/admin/:path*", "destination": "https://api.celebre.fun/admin/:path*" },
+    { "source": "/wallet/:path*", "destination": "https://api.celebre.fun/wallet/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
