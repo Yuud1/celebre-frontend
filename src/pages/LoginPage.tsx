@@ -5,6 +5,7 @@ import { Icon } from '../components/auth/AuthIcons'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { isCheckoutPublishRedirect } from '../lib/builderDraft'
+import { cn } from '@/lib/utils'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -47,37 +48,45 @@ export function LoginPage() {
   }
 
   return (
-    <div className="auth-page ca-root login-page auth-theme--celebre">
-      <div className="login-page__form">
-        <div className="login-page__form-inner">
+    <div className="fixed inset-0 overflow-auto grid nav:grid-cols-[1fr_1.05fr] min-h-dvh bg-white font-display">
+      {/* Form column */}
+      <div className="flex flex-col items-center justify-center px-[clamp(18px,4vw,52px)] py-[clamp(24px,5vw,48px)] overflow-y-auto bg-[#fffefe]">
+        <div className="w-full max-w-[400px]">
           {/* Header */}
-          <div style={{ marginBottom: 36 }}>
+          <div className="mb-9">
             <AuthLogo size={18} />
-            <div style={{ marginTop: 28 }}>
-              <h1 className="ca-display login-headline">
+            <div className="mt-7">
+              <h1 className="font-display text-[28px] font-semibold tracking-tight text-slate-950 mb-2">
                 {publishFlow ? 'Entre para publicar' : 'Bem-vindo de volta'}
               </h1>
-              <p className="register-auth-switch">
+              <p className="text-sm text-slate-500">
                 Não tem conta?{' '}
-                <Link to={registerHref}>Criar gratuitamente</Link>
+                <Link to={registerHref} className="font-semibold text-indigo-600 hover:underline">
+                  Criar gratuitamente
+                </Link>
               </p>
             </div>
           </div>
 
           {/* Social login */}
-          <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
-            <AuthBtn variant="ghost" style={{ flex: 1 }} icon={<Icon.Google style={{ width: 18, height: 18 }} />}>
+          <div className="flex gap-2.5 mb-6">
+            <AuthBtn variant="ghost" className="flex-1 border border-slate-200" icon={<Icon.Google style={{ width: 18, height: 18 }} />}>
               Google
             </AuthBtn>
-            <AuthBtn variant="ghost" style={{ flex: 1 }} icon={<Icon.Apple style={{ width: 18, height: 18 }} />}>
+            <AuthBtn variant="ghost" className="flex-1 border border-slate-200" icon={<Icon.Apple style={{ width: 18, height: 18 }} />}>
               Apple
             </AuthBtn>
           </div>
 
-          <div className="ca-or" style={{ marginBottom: 24 }}>ou</div>
+          {/* Divider */}
+          <div className="flex items-center gap-3.5 mb-6 text-xs font-medium uppercase tracking-widest text-slate-400">
+            <span className="flex-1 h-px bg-slate-200" />
+            ou
+            <span className="flex-1 h-px bg-slate-200" />
+          </div>
 
           {/* Form */}
-          <form style={{ display: 'flex', flexDirection: 'column', gap: 18 }} onSubmit={handleSubmit}>
+          <form className="flex flex-col gap-[18px]" onSubmit={handleSubmit}>
             <AuthField label="E-mail">
               <AuthInput
                 icon={<Icon.Mail style={{ width: 18, height: 18 }} />}
@@ -95,7 +104,7 @@ export function LoginPage() {
                 suffix={
                   <button
                     type="button"
-                    className="register-input-toggle"
+                    className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
                     onClick={() => setShowPassword(v => !v)}
                   >
                     <Icon.Eye style={{ width: 16, height: 16 }} />
@@ -110,35 +119,51 @@ export function LoginPage() {
             </AuthField>
 
             {/* Remember + Forgot */}
-            <div className="ca-row ca-row--between" style={{ marginTop: -4 }}>
+            <div className="flex items-center justify-between -mt-1">
               <button
                 type="button"
-                className={'ca-check' + (remember ? ' ca-check--on' : '')}
+                className="inline-flex items-center gap-2.5 text-[13.5px] text-slate-700 cursor-pointer select-none"
                 onClick={() => setRemember(v => !v)}
               >
-                <span className="ca-check__box">
+                <span className={cn(
+                  'w-[18px] h-[18px] rounded-[5px] border-[1.5px] bg-white inline-flex items-center justify-center transition-all flex-shrink-0',
+                  remember ? 'bg-slate-950 border-slate-950 text-white' : 'border-slate-200 text-transparent',
+                )}>
                   {remember && <Icon.Check style={{ width: 10, height: 10 }} />}
                 </span>
-                <span>Lembrar de mim</span>
+                Lembrar de mim
               </button>
-              <Link to="/esqueci-senha" className="login-forgot-link">Esqueci a senha</Link>
+              <Link to="/esqueci-senha" className="text-[13.5px] font-medium text-indigo-600 hover:underline">
+                Esqueci a senha
+              </Link>
             </div>
 
-            {error && <div style={{ color: '#EF4444', fontSize: 13, padding: '8px 12px', background: '#FEF2F2', borderRadius: 8, border: '1px solid #FECACA' }}>{error}</div>}
+            {error && (
+              <div className="text-[13px] text-red-500 px-3 py-2 bg-red-50 rounded-lg border border-red-200">
+                {error}
+              </div>
+            )}
 
-            <AuthBtn type="submit" variant="primary" block size="lg" style={{ marginTop: 8 }} iconRight={!loading && <Icon.ArrowRight style={{ width: 18, height: 18 }} />}>
+            <AuthBtn
+              type="submit"
+              variant="primary"
+              block
+              size="lg"
+              className="mt-2"
+              iconRight={!loading && <Icon.ArrowRight style={{ width: 18, height: 18 }} />}
+            >
               {loading ? 'Entrando...' : 'Entrar'}
             </AuthBtn>
           </form>
 
           {/* Trust footer */}
-          <div className="login-trust">
+          <div className="mt-8 flex items-center justify-center gap-4 flex-wrap">
             {[
               { icon: <Icon.Shield style={{ width: 13, height: 13 }} />, text: 'SSL seguro' },
               { icon: <Icon.ShieldCheck style={{ width: 13, height: 13 }} />, text: 'LGPD' },
               { icon: <Icon.Check style={{ width: 13, height: 13 }} />, text: 'Dados protegidos' },
             ].map((item, i) => (
-              <div key={i} className="login-trust__item">
+              <div key={i} className="flex items-center gap-[5px] text-xs text-slate-400">
                 {item.icon}
                 {item.text}
               </div>

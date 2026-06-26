@@ -55,7 +55,7 @@
   body {
     margin: 0;
     min-width: 320px;
-    font-family: theme('fontFamily.display');
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
     background: theme('colors.surface');
     color: theme('colors.ink');
   }
