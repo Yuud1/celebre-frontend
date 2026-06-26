@@ -46,7 +46,7 @@ export function Settings() {
     return (
       <div>
         <PageHead eyebrow="Conta" title="Configurações" />
-        <div style={{ maxWidth: 520 }}>
+        <div style={{ maxWidth: 520, width: '100%' }}>
           <div className="ca-card" style={{ padding: '28px 28px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
               <span style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(99,102,241,0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -73,7 +73,7 @@ export function Settings() {
     return (
       <div>
         <PageHead eyebrow="Conta" title="Configurações" />
-        <div style={{ maxWidth: 520 }}>
+        <div style={{ maxWidth: 520, width: '100%' }}>
           <PayoutCard gradient="linear-gradient(140deg,#312E81 0%,#4338CA 45%,#7C3AED 100%)">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
               <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.7, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Conta Celebre</div>
@@ -99,7 +99,7 @@ export function Settings() {
     return (
       <div>
         <PageHead eyebrow="Conta" title="Configurações" />
-        <div style={{ maxWidth: 520 }}>
+        <div style={{ maxWidth: 520, width: '100%' }}>
           <PayoutCard gradient="linear-gradient(140deg,#312E81 0%,#4338CA 45%,#6D28D9 100%)">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
               <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.7, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Conta Celebre</div>
@@ -128,7 +128,7 @@ export function Settings() {
     return (
       <div>
         <PageHead eyebrow="Conta" title="Configurações" />
-        <div style={{ maxWidth: 520 }}>
+        <div style={{ maxWidth: 520, width: '100%' }}>
           <PayoutCard gradient="linear-gradient(140deg,#0F172A 0%,#1E293B 55%,#334155 100%)">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
               <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.7, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Conta Celebre</div>

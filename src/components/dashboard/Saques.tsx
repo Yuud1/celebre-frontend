@@ -24,11 +24,14 @@ type Transaction = {
   status: 'confirmed' | 'pending'
 }
 
-function fmtDateShort(iso: string | null) {
+type HistoryEntry =
+  | { kind: 'tx'; item: Transaction }
+  | { kind: 'wd'; item: any }
+
+function fmtDayMonth(iso: string | null) {
   if (!iso) return '—'
   const d = new Date(iso)
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
-    + ' · ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }).replace('.', '')
 }
 
 function fmtLastDate(iso: string | null) {
@@ -59,7 +62,6 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [withdrawals, setWithdrawals] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'in' | 'pending'>('all')
   const [withdrawModal, setWithdrawModal] = useState(false)
   const [withdrawAmount, setWithdrawAmount] = useState('')
   const [withdrawing, setWithdrawing] = useState(false)
@@ -99,37 +101,44 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
 
   const hasPendingWithdrawal = withdrawals.some((w: any) => w.status === 'PENDING')
   const sparkData = useMemo(() => buildSparkData(transactions), [transactions])
-
   const txList = Array.isArray(transactions) ? transactions : []
-  const filtered = filter === 'all' ? txList
-    : filter === 'in' ? txList.filter((t) => t.status === 'confirmed')
-    : txList.filter((t) => t.status === 'pending')
+
+  const historyEntries: HistoryEntry[] = useMemo(() => [
+    ...txList.map(t => ({ kind: 'tx' as const, item: t })),
+    ...withdrawals.map(w => ({ kind: 'wd' as const, item: w })),
+  ].sort((a, b) => {
+    const da = new Date(a.kind === 'tx' ? a.item.date : a.item.createdAt).getTime()
+    const db = new Date(b.kind === 'tx' ? b.item.date : b.item.createdAt).getTime()
+    return db - da
+  }), [txList, withdrawals])
 
   return (
     <>
-      <PageHead
-        eyebrow="Conta de pagamento"
-        title="Saques e saldo"
-        sub="Acompanhe seu dinheiro em tempo real. Transferências processadas com segurança pela infraestrutura Celebre."
-        actions={
-          <>
-            <button className="ca-btn ca-btn--ghost" style={{ height: 38, padding: '0 16px', fontSize: 13 }}>
-              <Icon.Doc style={{ width: 15, height: 15 }} />Extrato completo
-            </button>
-            <button
-              className="ca-btn ca-btn--primary"
-              style={{ height: 38, padding: '0 16px', fontSize: 13 }}
-              onClick={() => { setWithdrawAmount(String((summary?.availableBalance ?? 0) / 100)); setWithdrawModal(true) }}
-              disabled={hasPendingWithdrawal || !summary?.availableBalance || summary.availableBalance <= 0}
-            >
-              <Icon.Pix style={{ width: 16, height: 16 }} />Sacar via PIX
-            </button>
-          </>
-        }
-      />
+      <div className="cd-saques-page-head">
+        <PageHead
+          eyebrow="Conta de pagamento"
+          title="Saques e saldo"
+          sub="Acompanhe seu dinheiro em tempo real. Transferências processadas com segurança pela infraestrutura Celebre."
+          actions={
+            <>
+              <button className="ca-btn ca-btn--ghost" style={{ height: 38, padding: '0 16px', fontSize: 13 }}>
+                <Icon.Doc style={{ width: 15, height: 15 }} />Extrato completo
+              </button>
+              <button
+                className="ca-btn ca-btn--primary"
+                style={{ height: 38, padding: '0 16px', fontSize: 13 }}
+                onClick={() => { setWithdrawAmount(String((summary?.availableBalance ?? 0) / 100)); setWithdrawModal(true) }}
+                disabled={hasPendingWithdrawal || !summary?.availableBalance || summary.availableBalance <= 0}
+              >
+                <Icon.Pix style={{ width: 16, height: 16 }} />Sacar via PIX
+              </button>
+            </>
+          }
+        />
+      </div>
 
       <div className="cd-grid-saques" style={{ gap: 16 }}>
-        <div className="ca-card" style={{ padding: 28, position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 60%, #312E81 100%)', borderColor: '#1E1B4B', color: '#fff' }}>
+        <div className="ca-card cd-saques-hero" style={{ padding: 28, position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 60%, #312E81 100%)', borderColor: '#1E1B4B', color: '#fff' }}>
           <div style={{ position: 'absolute', width: 280, height: 280, borderRadius: '50%', top: -100, right: -80, background: 'radial-gradient(circle, rgba(139,92,246,0.45), transparent 70%)', filter: 'blur(20px)' }} />
           <div style={{ position: 'absolute', width: 220, height: 220, borderRadius: '50%', bottom: -80, left: -40, background: 'radial-gradient(circle, rgba(99,102,241,0.35), transparent 70%)', filter: 'blur(20px)' }} />
           <div style={{ position: 'relative' }}>
@@ -140,7 +149,7 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
             {loading ? (
               <div style={{ height: 60, marginTop: 10, opacity: 0.4, background: 'rgba(255,255,255,0.2)', borderRadius: 8 }} />
             ) : (
-              <div className="cd-money" style={{ fontSize: 44, color: '#fff', marginTop: 10 }}>
+              <div className="cd-money" style={{ fontSize: 'clamp(28px, 6vw, 44px)', color: '#fff', marginTop: 10 }}>
                 <span className="cd-money__currency">R$</span>
                 <span>{Math.floor((summary?.availableBalance ?? 0) / 100).toLocaleString('pt-BR')}</span>
                 <span className="cd-money__cents">,{String((summary?.availableBalance ?? 0) % 100).padStart(2, '0')}</span>
@@ -149,17 +158,17 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
             <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginTop: 6 }}>
               {summary?.bankConfigured ? 'Conta bancária configurada' : 'Configure sua conta bancária para sacar'}
             </div>
-            <div className="ca-row ca-row--gap" style={{ marginTop: 22 }}>
+            <div className="ca-row ca-row--gap cd-saques-cta" style={{ marginTop: 22 }}>
               <button
                 className="ca-btn ca-btn--primary ca-btn--lg"
-                style={{ minWidth: 200 }}
+                style={{ width: '100%', maxWidth: 200 }}
                 onClick={() => { setWithdrawAmount(String((summary?.availableBalance ?? 0) / 100)); setWithdrawModal(true) }}
                 disabled={hasPendingWithdrawal || !summary?.availableBalance || summary.availableBalance <= 0}
               >
-                Sacar para minha conta <Icon.ArrowRight style={{ width: 18, height: 18 }} />
+                Sacar via PIX <Icon.ArrowRight style={{ width: 18, height: 18 }} />
               </button>
             </div>
-            <div className="ca-row" style={{ gap: 18, marginTop: 24, fontSize: 11.5, color: 'rgba(255,255,255,0.6)' }}>
+            <div className="ca-row cd-saques-trust" style={{ gap: 18, marginTop: 24, fontSize: 11.5, color: 'rgba(255,255,255,0.6)' }}>
               <span className="ca-row ca-row--gap-sm"><Icon.ShieldCheck style={{ width: 13, height: 13, color: '#A5B4FC' }} />Custódia em conta segregada</span>
               <span className="ca-row ca-row--gap-sm"><Icon.Pix style={{ width: 13, height: 13, color: '#A5B4FC' }} />PIX em até 30s</span>
               <span className="ca-row ca-row--gap-sm"><Icon.Lock style={{ width: 13, height: 13, color: '#A5B4FC' }} />Auditado · BACEN</span>
@@ -211,88 +220,66 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
         </div>
       </div>
 
-      <div className="cd-table-scroll" style={{ marginTop: 16 }}>
-      <div className="ca-card" style={{ padding: 0, overflow: 'hidden', minWidth: 640 }}>
-        <div className="ca-row ca-row--between" style={{ padding: '18px 22px 14px' }}>
-          <div>
-            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 16, fontWeight: 600 }}>Histórico de recebimentos</div>
-            <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 2 }}>Todas as contribuições recebidas na sua conta</div>
-          </div>
-          <div className="cd-tabs">
-            <span className={`cd-tab${filter === 'all' ? ' cd-tab--on' : ''}`} style={{ cursor: 'pointer' }} onClick={() => setFilter('all')}>Todos</span>
-            <span className={`cd-tab${filter === 'in' ? ' cd-tab--on' : ''}`} style={{ cursor: 'pointer' }} onClick={() => setFilter('in')}>Confirmados</span>
-            <span className={`cd-tab${filter === 'pending' ? ' cd-tab--on' : ''}`} style={{ cursor: 'pointer' }} onClick={() => setFilter('pending')}>Em análise</span>
-          </div>
+      <div className="ca-card" style={{ padding: 0, overflow: 'hidden', marginTop: 16 }}>
+        <div style={{ padding: '18px 20px 12px' }}>
+          <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 15, fontWeight: 600 }}>Histórico</div>
         </div>
-        <div style={{ borderTop: '1px solid var(--ca-line-soft)' }}>
-          <div style={{ padding: '10px 22px', fontSize: 11, color: 'var(--ca-muted-2)', letterSpacing: '0.08em', textTransform: 'uppercase', background: 'var(--ca-bg-soft)', borderBottom: '1px solid var(--ca-line-soft)', display: 'grid', gridTemplateColumns: '160px 1fr 1fr 140px 120px' }}>
-            <span>Data</span><span>Descrição</span><span>Método</span><span style={{ textAlign: 'right' }}>Valor</span><span>Status</span>
-          </div>
-          {loading && (
-            <div style={{ padding: '24px 22px', textAlign: 'center', color: 'var(--ca-muted)', fontSize: 13 }}>
-              Carregando…
-            </div>
-          )}
-          {!loading && filtered.length === 0 && (
-            <div style={{ padding: '24px 22px', textAlign: 'center', color: 'var(--ca-muted)', fontSize: 13 }}>
-              Nenhuma movimentação encontrada.
-            </div>
-          )}
-          {!loading && filtered.map((t) => (
-            <div key={t.id} style={{ padding: '14px 22px', display: 'grid', gridTemplateColumns: '160px 1fr 1fr 140px 120px', borderBottom: '1px solid var(--ca-line-soft)', alignItems: 'center', fontSize: 13 }}>
-              <span style={{ color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{fmtDateShort(t.date)}</span>
-              <span style={{ fontWeight: 500 }}>{t.desc}</span>
-              <span style={{ color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{t.method}</span>
-              <span style={{ textAlign: 'right', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: '#047857' }}>
-                + R$ {(t.netAmount / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </span>
-              <span>
-                {t.status === 'confirmed' && <span className="ca-badge ca-badge--success"><Icon.Check style={{ width: 10, height: 10 }} />Confirmado</span>}
-                {t.status === 'pending'   && <span className="ca-badge ca-badge--warn"><Icon.Loader style={{ width: 10, height: 10 }} />Em análise</span>}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-      </div>
-
-      {withdrawals.length > 0 && (
-        <div className="cd-table-scroll" style={{ marginTop: 16 }}>
-          <div className="ca-card" style={{ padding: 0, overflow: 'hidden', minWidth: 640 }}>
-            <div style={{ padding: '18px 22px 14px' }}>
-              <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 16, fontWeight: 600 }}>Histórico de saques</div>
-              <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 2 }}>Solicitações de transferência para sua conta bancária</div>
-            </div>
-            <div style={{ borderTop: '1px solid var(--ca-line-soft)' }}>
-              <div style={{ padding: '10px 22px', fontSize: 11, color: 'var(--ca-muted-2)', letterSpacing: '0.08em', textTransform: 'uppercase', background: 'var(--ca-bg-soft)', borderBottom: '1px solid var(--ca-line-soft)', display: 'grid', gridTemplateColumns: '160px 140px 1fr 150px' }}>
-                <span>Data</span><span style={{ textAlign: 'right' }}>Valor</span><span style={{ paddingLeft: 24 }}>Destino</span><span>Status</span>
-              </div>
-              {withdrawals.map((w: any) => (
-                <div key={w.id} style={{ padding: '14px 22px', display: 'grid', gridTemplateColumns: '160px 140px 1fr 150px', borderBottom: '1px solid var(--ca-line-soft)', alignItems: 'center', fontSize: 13 }}>
-                  <span style={{ color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{fmtDateShort(w.createdAt)}</span>
-                  <span style={{ textAlign: 'right', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: '#0F172A' }}>
-                    R$ {(Number(w.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                  <span style={{ paddingLeft: 24, color: 'var(--ca-muted)', fontSize: 12 }}>
-                    Conta bancária cadastrada
-                  </span>
-                  <span>
-                    {w.status === 'PENDING'  && <span className="ca-badge ca-badge--warn"><Icon.Loader style={{ width: 10, height: 10 }} />Aguardando</span>}
-                    {w.status === 'APPROVED' && <span className="ca-badge ca-badge--success"><Icon.Check style={{ width: 10, height: 10 }} />Aprovado</span>}
-                    {w.status === 'REJECTED' && (
-                      <div>
-                        <span className="ca-badge ca-badge--error">Rejeitado</span>
-                        {w.rejectionReason && <div style={{ fontSize: 11, color: 'var(--ca-muted)', marginTop: 3 }}>{w.rejectionReason}</div>}
-                      </div>
-                    )}
-                    {w.status === 'FAILED'   && <span className="ca-badge ca-badge--error">Falhou</span>}
-                  </span>
+        {loading && (
+          <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ca-muted)', fontSize: 13 }}>Carregando…</div>
+        )}
+        {!loading && historyEntries.length === 0 && (
+          <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ca-muted)', fontSize: 13 }}>Nenhuma movimentação ainda.</div>
+        )}
+        {!loading && historyEntries.map(entry => {
+          if (entry.kind === 'tx') {
+            const t = entry.item
+            const isConfirmed = t.status === 'confirmed'
+            return (
+              <div key={`tx-${t.id}`} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 20px', borderTop: '1px solid var(--ca-line-soft)' }}>
+                <span style={{ width: 38, height: 38, borderRadius: 999, background: isConfirmed ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon.Pix style={{ width: 16, height: 16, color: isConfirmed ? '#10B981' : '#F59E0B' }} />
+                </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 500, fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.desc}</div>
+                  <div style={{ fontSize: 12, color: 'var(--ca-muted)', marginTop: 1 }}>{fmtDayMonth(t.date)}</div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: isConfirmed ? '#047857' : 'var(--ca-muted)' }}>
+                    {isConfirmed ? '+ ' : ''}R$ {(t.netAmount / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                  <div style={{ fontSize: 11, marginTop: 1 }}>
+                    {isConfirmed
+                      ? <span style={{ color: '#10B981', fontWeight: 500 }}>Confirmado</span>
+                      : <span style={{ color: '#F59E0B', fontWeight: 500 }}>Em análise</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            )
+          } else {
+            const w = entry.item
+            const statusColor = w.status === 'APPROVED' ? '#047857' : w.status === 'PENDING' ? '#B45309' : '#BE123C'
+            const statusLabel = w.status === 'APPROVED' ? 'Aprovado' : w.status === 'PENDING' ? 'Aguardando' : w.status === 'REJECTED' ? 'Rejeitado' : 'Falhou'
+            return (
+              <div key={`wd-${w.id}`} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 20px', borderTop: '1px solid var(--ca-line-soft)' }}>
+                <span style={{ width: 38, height: 38, borderRadius: 999, background: 'rgba(99,102,241,0.10)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon.Bank style={{ width: 16, height: 16, color: 'var(--ca-indigo)' }} />
+                </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 500, fontSize: 13.5 }}>Saque PIX</div>
+                  <div style={{ fontSize: 12, color: 'var(--ca-muted)', marginTop: 1 }}>{fmtDayMonth(w.createdAt)}</div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: 'var(--ca-ink)' }}>
+                    − R$ {(Number(w.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                  <div style={{ fontSize: 11, color: statusColor, fontWeight: 500, marginTop: 1 }}>{statusLabel}</div>
+                </div>
+              </div>
+            )
+          }
+        })}
+      </div>
 
       {withdrawModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setWithdrawModal(false)}>
@@ -301,7 +288,6 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
             <div style={{ fontSize: 13, color: 'var(--ca-muted)', marginBottom: 24 }}>
               O valor será transferido para a conta bancária cadastrada no Pagar.me.
             </div>
-
             <label style={{ fontSize: 12.5, color: 'var(--ca-muted)', fontWeight: 500 }}>Valor (R$)</label>
             <input
               type="number"
@@ -313,13 +299,11 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
               style={{ display: 'block', width: '100%', marginTop: 6, marginBottom: 20, padding: '10px 14px', border: '1px solid var(--ca-line)', borderRadius: 10, fontSize: 18, fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, boxSizing: 'border-box' }}
               autoFocus
             />
-
             {withdrawMsg && (
               <div style={{ padding: '10px 14px', borderRadius: 10, marginBottom: 16, fontSize: 13, background: withdrawMsg.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: withdrawMsg.type === 'success' ? '#065F46' : '#991B1B' }}>
                 {withdrawMsg.text}
               </div>
             )}
-
             <div style={{ display: 'flex', gap: 10 }}>
               <button className="ca-btn ca-btn--ghost" style={{ flex: 1, height: 44 }} onClick={() => setWithdrawModal(false)} disabled={withdrawing}>
                 Cancelar
@@ -336,19 +320,6 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
           </div>
         </div>
       )}
-
-      <div style={{ marginTop: 16, padding: '14px 18px', background: '#fff', border: '1px solid var(--ca-line)', borderRadius: 14, display: 'flex', alignItems: 'center', gap: 14 }}>
-        <span style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--ca-violet-50)', color: 'var(--ca-indigo)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon.ShieldCheck style={{ width: 18, height: 18 }} />
-        </span>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 600, fontSize: 13.5 }}>Transferências processadas com segurança</div>
-          <div style={{ fontSize: 12.5, color: 'var(--ca-muted)' }}>
-            Seu dinheiro fica em conta segregada auditada pelo BACEN. Todas as transferências passam por análise antifraude antes do envio.
-          </div>
-        </div>
-        <a style={{ fontSize: 12.5, color: 'var(--ca-indigo)', fontWeight: 600 }}>Saiba mais →</a>
-      </div>
     </>
   )
 }

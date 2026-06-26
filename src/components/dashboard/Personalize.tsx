@@ -196,7 +196,7 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
           </div>
         </div>
 
-        <div className="ca-card" style={{ padding: 0, overflow: 'hidden', background: 'linear-gradient(180deg, #F1F5F9, #F8FAFC)', minHeight: 600 }}>
+        <div className="ca-card" style={{ padding: 0, overflow: 'hidden', background: 'linear-gradient(180deg, #F1F5F9, #F8FAFC)', minHeight: 'clamp(280px, 50vh, 600px)' }}>
           <div className="ca-row ca-row--between" style={{ padding: '14px 18px', background: '#fff', borderBottom: '1px solid var(--ca-line-soft)' }}>
             <div className="cd-tabs">
               <span className="cd-tab cd-tab--on"><Icon.Globe style={{ width: 12, height: 12, marginRight: 4 }} />Preview</span>
@@ -211,14 +211,14 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
 
           <div style={{ padding: 28, display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', maxWidth: 540, background: '#fff', borderRadius: 14, overflow: 'hidden', boxShadow: '0 20px 50px rgba(15,23,42,0.10)', border: '1px solid var(--ca-line)' }}>
-              <div style={{ height: 240, position: 'relative', background: `linear-gradient(135deg, ${PALETTES[colorIdx][0]} 0%, ${PALETTES[colorIdx][1]} 100%)`, overflow: 'hidden' }}>
+              <div style={{ height: 'clamp(140px, 20vh, 240px)', position: 'relative', background: `linear-gradient(135deg, ${PALETTES[colorIdx][0]} 0%, ${PALETTES[colorIdx][1]} 100%)`, overflow: 'hidden' }}>
                 {coverPreview && (
                   <img src={coverPreview} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                 )}
                 <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 80% at 30% 20%, rgba(255,255,255,0.18), transparent 60%)' }} />
                 <div style={{ position: 'absolute', bottom: 20, left: 24, right: 24, color: '#fff' }}>
                   {form.subtitle && <div style={{ fontSize: 11, opacity: 0.7, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{form.subtitle}</div>}
-                  <div style={{ fontFamily: selectedFont.family, fontSize: 36, marginTop: 4, fontWeight: selectedFont.weight, letterSpacing: '-0.02em', lineHeight: 1 }}>
+                  <div style={{ fontFamily: selectedFont.family, fontSize: 'clamp(22px, 4vw, 36px)', marginTop: 4, fontWeight: selectedFont.weight, letterSpacing: '-0.02em', lineHeight: 1 }}>
                     {form.hosts || form.name || '—'}
                   </div>
                 </div>

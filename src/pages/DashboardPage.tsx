@@ -49,6 +49,23 @@ export function PageHead({ eyebrow, title, status, sub, actions }: PageHeadProps
   )
 }
 
+// ─── Bottom nav icon ──────────────────────────────────────────
+function HomeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ width: 22, height: 22 }}>
+      <path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+const BOTTOM_NAV: Array<{ id: ActivePage; label: string; icon: React.ReactNode }> = [
+  { id: 'dashboard', label: 'Início',    icon: <HomeIcon /> },
+  { id: 'gifts',     label: 'Presentes', icon: <Icon.Sparkle style={{ width: 22, height: 22 }} /> },
+  { id: 'contrib',   label: 'Feed',      icon: <Icon.Pix    style={{ width: 22, height: 22 }} /> },
+  { id: 'payouts',   label: 'Saldo',     icon: <Icon.Bank   style={{ width: 22, height: 22 }} /> },
+  { id: 'settings',  label: 'Perfil',    icon: <Icon.User   style={{ width: 22, height: 22 }} /> },
+]
+
 // ─── Empty State ──────────────────────────────────────────────
 function NoEventState() {
   return (
@@ -110,7 +127,7 @@ export function DashboardPage() {
 
   return (
     <div style={{ position: 'fixed', inset: 0 }} className="ca-root">
-      <div className={`cd-shell${menuOpen ? ' cd-shell--menu-open' : ''}`}>
+      <div className={`cd-shell${menuOpen ? ' cd-shell--menu-open' : ''}${activePage === 'payouts' ? ' cd-shell--saques' : ''}`}>
         {menuOpen && <div className="cd-side__overlay" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
         <Sidebar
           activePage={activePage}
@@ -142,6 +159,18 @@ export function DashboardPage() {
               </>
             )}
           </div>
+          <nav className="cd-bottom-nav">
+            {BOTTOM_NAV.map(item => (
+              <button
+                key={item.id}
+                className={`cd-bottom-nav__btn${activePage === item.id ? ' cd-bottom-nav__btn--on' : ''}`}
+                onClick={() => setActivePage(item.id)}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
         </div>
       </div>
     </div>

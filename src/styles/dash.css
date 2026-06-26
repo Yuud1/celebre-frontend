@@ -374,10 +374,13 @@
 .cd-grid-stats-3    { display: grid; grid-template-columns: repeat(3, 1fr); }
 .cd-grid-content    { display: grid; grid-template-columns: 1.4fr 1fr; }
 .cd-grid-saques     { display: grid; grid-template-columns: 1.4fr 1fr 1fr; }
-.cd-grid-personalize{ display: grid; grid-template-columns: 340px 1fr; }
+.cd-grid-personalize{ display: grid; grid-template-columns: minmax(280px, 340px) 1fr; }
 .cd-grid-gifts      { display: grid; grid-template-columns: repeat(3, 1fr); }
 
-.cd-table-scroll { width: 100%; }
+.cd-table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ─── Bottom navigation bar (mobile only) ───────────────── */
+.cd-bottom-nav { display: none; }
 
 .cd-top__menu-btn {
   display: none;
@@ -434,16 +437,65 @@
   .cd-grid-content, .cd-grid-saques, .cd-grid-personalize { grid-template-columns: 1fr; }
   .cd-grid-gifts { grid-template-columns: repeat(2, 1fr); }
 
-  .cd-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* overflow-x already set on base rule */
 }
 
 /* ─── Mobile (< 640px) ───────────────────────────────────── */
 @media (max-width: 639px) {
-  .cd-page  { padding: 16px 16px 28px; }
+  .cd-page  { padding: 16px 16px calc(64px + 16px); }
   .cd-top   { padding: 12px 16px; gap: 10px; }
+  .cd-top__menu-btn { display: none !important; }
 
   .cd-grid-stats-4, .cd-grid-stats-3 { grid-template-columns: 1fr; }
   .cd-grid-gifts { grid-template-columns: 1fr; }
 
   .cd-page__head { flex-direction: column; align-items: flex-start; }
+
+  /* ─── Bottom navigation ──────────────────────────────── */
+  .cd-bottom-nav {
+    display: flex;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 64px;
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--ca-line);
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .cd-bottom-nav__btn {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px;
+    cursor: pointer; color: var(--ca-muted);
+    font-size: 10px; font-weight: 500;
+    border: none; background: none;
+    transition: color .15s ease; padding: 6px 0;
+  }
+  .cd-bottom-nav__btn svg { width: 22px; height: 22px; }
+  .cd-bottom-nav__btn--on { color: var(--ca-indigo); }
+  .cd-bottom-nav__btn--on svg { color: var(--ca-indigo); }
+
+  /* ─── Saques hero mobile ─────────────────────────────── */
+  .cd-shell--saques .cd-top { display: none; }
+  .cd-shell--saques .cd-page { padding-top: 0; }
+  .cd-saques-page-head { display: none; }
+
+  .cd-grid-saques { grid-template-columns: 1fr; }
+  .cd-saques-hero {
+    margin: 0 -16px !important;
+    border-radius: 0 0 28px 28px !important;
+    padding: 44px 24px 28px !important;
+  }
+  .cd-saques-cta {
+    flex-direction: column !important;
+    align-items: center !important;
+    margin-top: 28px !important;
+  }
+  .cd-saques-cta .ca-btn {
+    width: 100% !important; max-width: 260px !important;
+    justify-content: center;
+  }
+  .cd-saques-trust {
+    justify-content: center !important; flex-wrap: wrap;
+    gap: 6px 16px !important; font-size: 10.5px !important;
+  }
 }

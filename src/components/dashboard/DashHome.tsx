@@ -250,7 +250,7 @@ export function DashHome({ event, contributions, onNavigate, availableBalance: a
                     <span style={{ fontSize: 12.5, color: 'var(--ca-muted)' }}>{c.gift?.name ?? '—'}</span>
                   </div>
                   {c.message && (
-                    <div style={{ fontSize: 12.5, color: 'var(--ca-ink-3)', marginTop: 2, fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 460 }}>
+                    <div style={{ fontSize: 12.5, color: 'var(--ca-ink-3)', marginTop: 2, fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
                       "{c.message}"
                     </div>
                   )}
