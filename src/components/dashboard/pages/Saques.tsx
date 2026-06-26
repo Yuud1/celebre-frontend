@@ -124,8 +124,9 @@ export function Saques({ eventId: _eventId, onBack }: SaquesProps) {
       <div className="hidden nav:block mb-5">
         <PageHead eyebrow="Financeiro" title="Saques" />
       </div>
-      <div
-        className="relative overflow-hidden shrink-0 rounded-b-[32px] nav:rounded-[24px]"
+      <div className="sm:flex sm:justify-between sm:gap-10">
+        <div
+        className="nav:flex-1 relative nav:block overflow-hidden shrink-0 rounded-b-[32px] nav:rounded-[24px]"
         style={{ background: 'linear-gradient(145deg, #0F172A 0%, #1E1B4B 50%, #312E81 100%)' }}
       >
         <div className="absolute w-[340px] h-[340px] rounded-full pointer-events-none"
@@ -205,6 +206,53 @@ export function Saques({ eventId: _eventId, onBack }: SaquesProps) {
         </div>
       </div>
 
+      {/* Stat cards — after history */}
+        <div className="sm:grid grid-cols-2 hidden gap-4">
+          {/* Pending */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-[22px]">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1.5 text-[12.5px] text-slate-500">
+                <Icon.Loader style={{ width: 14, height: 14, color: '#F59E0B' }} />Saldo em análise
+              </div>
+              {!loading && (summary?.pendingCount ?? 0) > 0 && (
+                <DashBadge tone="warn">{summary!.pendingCount} {summary!.pendingCount === 1 ? 'contrib.' : 'contribs.'}</DashBadge>
+              )}
+            </div>
+            {loading ? (
+              <div className="h-8 mt-2 bg-slate-50 rounded-md animate-pulse" />
+            ) : (
+              <Money value={summary?.pendingBalance ?? 0} size={26} />
+            )}
+            <div className="text-[12.5px] text-slate-500 mt-1.5 leading-relaxed">
+              Análise antifraude · disponível em até <strong className="text-slate-900">48h</strong>.
+            </div>
+            <hr className="border-0 border-t border-slate-100 my-3.5" />
+            <div className="flex items-center gap-1.5 text-[12px] text-slate-500">
+              <Icon.Info style={{ width: 13, height: 13 }} />
+              Contribuições acima de R$ 500 passam por revisão automática.
+            </div>
+          </div>
+
+          {/* Total received */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-[22px]">
+            <div className="flex items-center gap-1.5 text-[12.5px] text-slate-500 mb-1">
+              <Icon.Check style={{ width: 14, height: 14, color: '#10B981' }} />Total recebido
+            </div>
+            {loading ? (
+              <div className="h-8 mt-2 bg-slate-50 rounded-md animate-pulse" />
+            ) : (
+              <Money value={summary?.totalNetReceived ?? 0} size={26} />
+            )}
+            <div className="text-[12.5px] text-slate-500 mt-1.5">
+              {summary?.confirmedCount ?? 0} {(summary?.confirmedCount ?? 0) === 1 ? 'contribuição' : 'contribuições'} confirmadas
+              {summary?.lastConfirmedAt ? ` · último em ${fmtLastDate(summary.lastConfirmedAt)}` : ''}
+            </div>
+            <hr className="border-0 border-t border-slate-100 my-3.5" />
+            <div className="h-9"><Sparkline data={sparkData} /></div>
+          </div>
+        </div>
+      </div>
+
       {/* ── Content below hero ── */}
       <div className="flex flex-col gap-4 px-5 nav:px-0 pt-5 pb-8 max-sm:pb-[calc(64px+20px)]">
 
@@ -267,52 +315,6 @@ export function Saques({ eventId: _eventId, onBack }: SaquesProps) {
               )
             }
           })}
-        </div>
-
-        {/* Stat cards — after history */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Pending */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-[22px]">
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-1.5 text-[12.5px] text-slate-500">
-                <Icon.Loader style={{ width: 14, height: 14, color: '#F59E0B' }} />Saldo em análise
-              </div>
-              {!loading && (summary?.pendingCount ?? 0) > 0 && (
-                <DashBadge tone="warn">{summary!.pendingCount} {summary!.pendingCount === 1 ? 'contrib.' : 'contribs.'}</DashBadge>
-              )}
-            </div>
-            {loading ? (
-              <div className="h-8 mt-2 bg-slate-50 rounded-md animate-pulse" />
-            ) : (
-              <Money value={summary?.pendingBalance ?? 0} size={26} />
-            )}
-            <div className="text-[12.5px] text-slate-500 mt-1.5 leading-relaxed">
-              Análise antifraude · disponível em até <strong className="text-slate-900">48h</strong>.
-            </div>
-            <hr className="border-0 border-t border-slate-100 my-3.5" />
-            <div className="flex items-center gap-1.5 text-[12px] text-slate-500">
-              <Icon.Info style={{ width: 13, height: 13 }} />
-              Contribuições acima de R$ 500 passam por revisão automática.
-            </div>
-          </div>
-
-          {/* Total received */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-[22px]">
-            <div className="flex items-center gap-1.5 text-[12.5px] text-slate-500 mb-1">
-              <Icon.Check style={{ width: 14, height: 14, color: '#10B981' }} />Total recebido
-            </div>
-            {loading ? (
-              <div className="h-8 mt-2 bg-slate-50 rounded-md animate-pulse" />
-            ) : (
-              <Money value={summary?.totalNetReceived ?? 0} size={26} />
-            )}
-            <div className="text-[12.5px] text-slate-500 mt-1.5">
-              {summary?.confirmedCount ?? 0} {(summary?.confirmedCount ?? 0) === 1 ? 'contribuição' : 'contribuições'} confirmadas
-              {summary?.lastConfirmedAt ? ` · último em ${fmtLastDate(summary.lastConfirmedAt)}` : ''}
-            </div>
-            <hr className="border-0 border-t border-slate-100 my-3.5" />
-            <div className="h-9"><Sparkline data={sparkData} /></div>
-          </div>
         </div>
       </div>
 
