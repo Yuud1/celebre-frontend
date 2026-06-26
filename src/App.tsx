@@ -17,7 +17,6 @@ import { AdminWithdrawalsPage } from './pages/AdminWithdrawalsPage'
 import { InfoPage } from './pages/InfoPage'
 import { AuthLogo } from './components/auth/AuthShared'
 import './styles/app.css'
-import './styles/auth.css'
 
 function HeaderNavLinks({ user, onNavigate }: { user: ReturnType<typeof useAuth>['user']; onNavigate?: () => void }) {
   const close = onNavigate ?? (() => {})

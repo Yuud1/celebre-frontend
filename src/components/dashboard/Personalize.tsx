@@ -3,8 +3,9 @@ import { PageHead, type ActivePage } from "../../pages/DashboardPage";
 import { api } from "../../lib/api";
 import { ImagePicker } from "../builder/ImagePicker";
 import { Icon } from "../auth/AuthIcons";
+import { DashBtn } from "./DashShared";
+import { cn } from "@/lib/utils";
 
-// ─── Personalize Page ─────────────────────────────────────────
 const PALETTES = [
   ['#0F172A', '#6366F1'], ['#3F2A1D', '#B8543A'],
   ['#1F3D2C', '#5B8C5E'], ['#1E1B4B', '#A855F7'],
@@ -15,6 +16,9 @@ const FONTS = [
   { id: 'serif'   as const, label: 'Editorial', sub: 'Instrument Serif', family: 'Instrument Serif, Georgia, serif', weight: 400 },
   { id: 'sans'    as const, label: 'Modern',    sub: 'Inter',            family: 'Inter, sans-serif',               weight: 600 },
 ]
+
+const inputCls = 'w-full px-2.5 py-2 rounded-lg border border-slate-200 text-[13px] text-slate-900 bg-white focus:outline-none focus:border-indigo-400 box-border'
+const labelTextCls = 'text-[11px] font-semibold tracking-[0.06em] uppercase text-slate-500'
 
 interface PersonalizeProps { event: any | null; onReload: () => void; onNavigate: (p: ActivePage) => void }
 
@@ -85,15 +89,10 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
   }
 
   const tabDefs = [
-    { id: 'geral'    as const, label: 'Geral',     icon: <Icon.Doc     style={{ width: 14, height: 14 }} /> },
-    { id: 'media'    as const, label: 'Mídia',     icon: <Icon.Camera  style={{ width: 14, height: 14 }} /> },
-    { id: 'aparencia'as const, label: 'Aparência', icon: <Icon.Sparkle style={{ width: 14, height: 14 }} /> },
+    { id: 'geral'     as const, label: 'Geral',     icon: <Icon.Doc     style={{ width: 14, height: 14 }} /> },
+    { id: 'media'     as const, label: 'Mídia',     icon: <Icon.Camera  style={{ width: 14, height: 14 }} /> },
+    { id: 'aparencia' as const, label: 'Aparência', icon: <Icon.Sparkle style={{ width: 14, height: 14 }} /> },
   ]
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--ca-line)',
-    fontSize: 13, color: 'var(--ca-ink)', background: '#fff', boxSizing: 'border-box',
-  }
 
   return (
     <>
@@ -103,48 +102,59 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
         sub="Edite informações, foto de capa e aparência. As mudanças ficam visíveis ao salvar."
         actions={
           <>
-            <button className="ca-btn ca-btn--ghost" style={{ height: 38, padding: '0 16px', fontSize: 13 }} onClick={() => resetFromEvent(event)} disabled={saving}>
+            <DashBtn variant="ghost" onClick={() => resetFromEvent(event)} disabled={saving}>
               Descartar alterações
-            </button>
-            <button className="ca-btn ca-btn--primary" style={{ height: 38, padding: '0 16px', fontSize: 13 }} onClick={handleSave} disabled={saving}>
+            </DashBtn>
+            <DashBtn variant="primary" onClick={handleSave} disabled={saving}>
               <Icon.Check style={{ width: 15, height: 15 }} />{saving ? 'Salvando…' : 'Publicar mudanças'}
-            </button>
+            </DashBtn>
           </>
         }
       />
 
-      <div className="cd-grid-personalize" style={{ gap: 20 }}>
-        <div className="ca-card" style={{ padding: 0, overflow: 'hidden', height: 'fit-content' }}>
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--ca-line-soft)' }}>
+      <div className="grid grid-cols-1 nav:grid-cols-[minmax(280px,340px)_1fr] gap-5">
+        {/* Form panel */}
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden h-fit">
+          {/* Tab bar */}
+          <div className="flex border-b border-slate-100">
             {tabDefs.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: '14px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13, fontWeight: 500, color: tab === t.id ? 'var(--ca-ink)' : 'var(--ca-muted)', background: tab === t.id ? '#fff' : 'transparent', borderBottom: tab === t.id ? '2px solid var(--ca-indigo)' : '2px solid transparent', border: 'none', cursor: 'pointer' }}>
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={cn(
+                  'flex-1 flex items-center justify-center gap-2 px-2 py-3.5 text-[13px] font-medium cursor-pointer bg-transparent border-0 border-b-2 transition-colors',
+                  tab === t.id
+                    ? 'text-slate-900 border-indigo-500 bg-white'
+                    : 'text-slate-500 border-transparent hover:text-slate-900',
+                )}
+              >
                 {t.icon}{t.label}
               </button>
             ))}
           </div>
 
-          <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div className="flex flex-col gap-[18px] p-[22px]">
             {tab === 'geral' && (
               <>
-                <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ca-muted)' }}>Nome do evento</span>
-                  <input style={inputStyle} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Casamento Júlia & Marcos" />
+                <label className="flex flex-col gap-1.5">
+                  <span className={labelTextCls}>Nome do evento</span>
+                  <input className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Casamento Júlia & Marcos" />
                 </label>
-                <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ca-muted)' }}>Anfitriões</span>
-                  <input style={inputStyle} value={form.hosts} onChange={e => setForm(f => ({ ...f, hosts: e.target.value }))} placeholder="Ex: Júlia & Marcos" />
+                <label className="flex flex-col gap-1.5">
+                  <span className={labelTextCls}>Anfitriões</span>
+                  <input className={inputCls} value={form.hosts} onChange={e => setForm(f => ({ ...f, hosts: e.target.value }))} placeholder="Ex: Júlia & Marcos" />
                 </label>
-                <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ca-muted)' }}>Subtítulo</span>
-                  <input style={inputStyle} value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))} placeholder="Ex: Florianópolis · 18 Out 2026" />
+                <label className="flex flex-col gap-1.5">
+                  <span className={labelTextCls}>Subtítulo</span>
+                  <input className={inputCls} value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))} placeholder="Ex: Florianópolis · 18 Out 2026" />
                 </label>
-                <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ca-muted)' }}>Data do evento</span>
-                  <input style={inputStyle} type="date" value={form.eventDate} onChange={e => setForm(f => ({ ...f, eventDate: e.target.value }))} />
+                <label className="flex flex-col gap-1.5">
+                  <span className={labelTextCls}>Data do evento</span>
+                  <input className={inputCls} type="date" value={form.eventDate} onChange={e => setForm(f => ({ ...f, eventDate: e.target.value }))} />
                 </label>
-                <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ca-muted)' }}>Mensagem</span>
-                  <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 90, lineHeight: 1.55 }} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder="Uma mensagem para os convidados…" />
+                <label className="flex flex-col gap-1.5">
+                  <span className={labelTextCls}>Mensagem</span>
+                  <textarea className={cn(inputCls, 'resize-y min-h-[90px] leading-[1.55]')} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder="Uma mensagem para os convidados…" />
                 </label>
               </>
             )}
@@ -161,31 +171,50 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
             {tab === 'aparencia' && (
               <>
                 <div>
-                  <div className="ca-row ca-row--between" style={{ marginBottom: 10 }}>
-                    <span className="ca-eyebrow">Paleta</span>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-slate-400">Paleta</span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8 }}>
+                  <div className="grid grid-cols-6 gap-2">
                     {PALETTES.map((p, i) => (
-                      <button key={i} onClick={() => setColorIdx(i)} className={'cd-swatch' + (colorIdx === i ? ' cd-swatch--on' : '')} style={{ background: `linear-gradient(135deg, ${p[0]} 50%, ${p[1]} 50%)` }} />
+                      <button
+                        key={i}
+                        onClick={() => setColorIdx(i)}
+                        className={cn(
+                          'w-9 h-9 rounded-[10px] border-2 cursor-pointer transition-transform hover:scale-105',
+                          colorIdx === i ? 'border-slate-900 shadow-[0_0_0_2px_#fff_inset]' : 'border-transparent',
+                        )}
+                        style={{ background: `linear-gradient(135deg, ${p[0]} 50%, ${p[1]} 50%)` }}
+                      />
                     ))}
                   </div>
-                  <div className="ca-row" style={{ gap: 10, marginTop: 12, padding: '10px 12px', background: 'var(--ca-bg-soft)', borderRadius: 10 }}>
-                    <span style={{ width: 22, height: 22, borderRadius: 6, background: PALETTES[colorIdx][0] }} />
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--ca-ink-3)' }}>{PALETTES[colorIdx][0]}</span>
-                    <span style={{ width: 22, height: 22, borderRadius: 6, background: PALETTES[colorIdx][1], marginLeft: 'auto' }} />
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--ca-ink-3)' }}>{PALETTES[colorIdx][1]}</span>
+                  <div className="flex items-center gap-2.5 mt-3 px-3 py-2.5 bg-slate-50 rounded-[10px]">
+                    <span className="w-[22px] h-[22px] rounded-md shrink-0" style={{ background: PALETTES[colorIdx][0] }} />
+                    <span className="font-mono text-[11px] text-slate-500">{PALETTES[colorIdx][0]}</span>
+                    <span className="w-[22px] h-[22px] rounded-md ml-auto shrink-0" style={{ background: PALETTES[colorIdx][1] }} />
+                    <span className="font-mono text-[11px] text-slate-500">{PALETTES[colorIdx][1]}</span>
                   </div>
                 </div>
 
                 <div>
-                  <div className="ca-eyebrow" style={{ marginBottom: 10 }}>Tipografia</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-slate-400 mb-2.5">Tipografia</div>
+                  <div className="flex flex-col gap-1.5">
                     {FONTS.map(f => (
-                      <button key={f.id} onClick={() => setFont(f.id)} className={'ca-pick' + (font === f.id ? ' ca-pick--on' : '')} style={{ padding: 12, borderRadius: 10 }}>
-                        {font === f.id && <span className="ca-pick__check" style={{ top: 10, right: 10, width: 18, height: 18 }}><Icon.Check style={{ width: 10, height: 10 }} /></span>}
-                        <div style={{ textAlign: 'left' }}>
+                      <button
+                        key={f.id}
+                        onClick={() => setFont(f.id)}
+                        className={cn(
+                          'relative w-full p-3 rounded-[10px] border-[1.5px] cursor-pointer text-left transition-all bg-white',
+                          font === f.id ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-200 hover:border-slate-300',
+                        )}
+                      >
+                        {font === f.id && (
+                          <span className="absolute top-2.5 right-2.5 w-[18px] h-[18px] rounded-full bg-indigo-500 text-white inline-flex items-center justify-center">
+                            <Icon.Check style={{ width: 10, height: 10 }} />
+                          </span>
+                        )}
+                        <div className="text-left">
                           <div style={{ fontFamily: f.family, fontSize: 18, letterSpacing: '-0.02em', fontWeight: f.weight }}>{form.hosts || 'Anfitriões'}</div>
-                          <div style={{ fontSize: 11, color: 'var(--ca-muted)', marginTop: 2 }}>{f.label} · {f.sub}</div>
+                          <div className="text-[11px] text-slate-500 mt-0.5">{f.label} · {f.sub}</div>
                         </div>
                       </button>
                     ))}
@@ -196,41 +225,44 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
           </div>
         </div>
 
-        <div className="ca-card" style={{ padding: 0, overflow: 'hidden', background: 'linear-gradient(180deg, #F1F5F9, #F8FAFC)', minHeight: 'clamp(280px, 50vh, 600px)' }}>
-          <div className="ca-row ca-row--between" style={{ padding: '14px 18px', background: '#fff', borderBottom: '1px solid var(--ca-line-soft)' }}>
-            <div className="cd-tabs">
-              <span className="cd-tab cd-tab--on"><Icon.Globe style={{ width: 12, height: 12, marginRight: 4 }} />Preview</span>
+        {/* Preview panel */}
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden" style={{ background: 'linear-gradient(180deg, #F1F5F9, #F8FAFC)', minHeight: 'clamp(280px, 50vh, 600px)' }}>
+          <div className="flex items-center justify-between px-[18px] py-3.5 bg-white border-b border-slate-100">
+            <div className="inline-flex gap-0.5 p-1 bg-slate-50 border border-slate-200 rounded-xl">
+              <span className="flex items-center gap-1 px-3.5 py-[7px] rounded-lg text-[13px] font-semibold text-slate-900 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
+                <Icon.Globe style={{ width: 12, height: 12, marginRight: 4 }} />Preview
+              </span>
             </div>
             {event?.slug && (
-              <div className="ca-row ca-row--gap-sm" style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11.5, color: 'var(--ca-muted)' }}>
-                <span style={{ width: 7, height: 7, borderRadius: 999, background: '#10B981' }} />
+              <div className="flex items-center gap-1.5 font-mono text-[11.5px] text-slate-500">
+                <span className="w-[7px] h-[7px] rounded-full bg-emerald-500" />
                 celebre.app/{event.slug}
               </div>
             )}
           </div>
 
-          <div style={{ padding: 28, display: 'flex', justifyContent: 'center' }}>
-            <div style={{ width: '100%', maxWidth: 540, background: '#fff', borderRadius: 14, overflow: 'hidden', boxShadow: '0 20px 50px rgba(15,23,42,0.10)', border: '1px solid var(--ca-line)' }}>
-              <div style={{ height: 'clamp(140px, 20vh, 240px)', position: 'relative', background: `linear-gradient(135deg, ${PALETTES[colorIdx][0]} 0%, ${PALETTES[colorIdx][1]} 100%)`, overflow: 'hidden' }}>
+          <div className="flex justify-center p-7">
+            <div className="w-full max-w-[540px] bg-white rounded-[14px] overflow-hidden shadow-[0_20px_50px_rgba(15,23,42,0.10)] border border-slate-200">
+              <div className="relative overflow-hidden" style={{ height: 'clamp(140px, 20vh, 240px)', background: `linear-gradient(135deg, ${PALETTES[colorIdx][0]} 0%, ${PALETTES[colorIdx][1]} 100%)` }}>
                 {coverPreview && (
-                  <img src={coverPreview} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={coverPreview} alt="" className="absolute inset-0 w-full h-full object-cover" />
                 )}
-                <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 80% at 30% 20%, rgba(255,255,255,0.18), transparent 60%)' }} />
-                <div style={{ position: 'absolute', bottom: 20, left: 24, right: 24, color: '#fff' }}>
-                  {form.subtitle && <div style={{ fontSize: 11, opacity: 0.7, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{form.subtitle}</div>}
-                  <div style={{ fontFamily: selectedFont.family, fontSize: 'clamp(22px, 4vw, 36px)', marginTop: 4, fontWeight: selectedFont.weight, letterSpacing: '-0.02em', lineHeight: 1 }}>
+                <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(120% 80% at 30% 20%, rgba(255,255,255,0.18), transparent 60%)' }} />
+                <div className="absolute bottom-5 left-6 right-6 text-white">
+                  {form.subtitle && <div className="text-[11px] opacity-70 tracking-[0.16em] uppercase">{form.subtitle}</div>}
+                  <div className="mt-1 leading-none tracking-[-0.02em]" style={{ fontFamily: selectedFont.family, fontSize: 'clamp(22px, 4vw, 36px)', fontWeight: selectedFont.weight }}>
                     {form.hosts || form.name || '—'}
                   </div>
                 </div>
               </div>
-              <div style={{ padding: 24 }}>
+              <div className="p-6">
                 {form.message && (
                   <>
-                    <div style={{ fontSize: 11, color: 'var(--ca-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Mensagem</div>
-                    <p style={{ fontSize: 14, color: 'var(--ca-ink-3)', lineHeight: 1.65, marginTop: 8 }}>{form.message}</p>
+                    <div className="text-[11px] text-slate-500 tracking-[0.12em] uppercase">Mensagem</div>
+                    <p className="text-[14px] text-slate-600 leading-[1.65] mt-2">{form.message}</p>
                   </>
                 )}
-                <button style={{ marginTop: 16, width: '100%', height: 44, borderRadius: 12, background: PALETTES[colorIdx][1], color: '#fff', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer' }}>
+                <button className="mt-4 w-full h-11 rounded-xl text-white font-semibold text-[14px] border-0 cursor-pointer" style={{ background: PALETTES[colorIdx][1] }}>
                   Contribuir com um presente
                 </button>
               </div>

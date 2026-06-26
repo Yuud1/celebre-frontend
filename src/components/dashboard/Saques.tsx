@@ -2,7 +2,9 @@ import { useEffect, useState, useMemo } from 'react'
 import { Icon } from '../auth/AuthIcons'
 import { PageHead } from '../../pages/DashboardPage'
 import { Money, Sparkline } from './DashWidgets'
+import { DashBtn, DashBadge } from './DashShared'
 import { api } from '../../lib/api'
+import { cn } from '@/lib/utils'
 
 type Summary = {
   availableBalance: number
@@ -53,9 +55,7 @@ function buildSparkData(transactions: Transaction[]): number[] {
   return buckets
 }
 
-interface SaquesProps {
-  eventId?: string | null
-}
+interface SaquesProps { eventId?: string | null }
 
 export function Saques({ eventId: _eventId }: SaquesProps) {
   const [summary, setSummary] = useState<Summary | null>(null)
@@ -114,143 +114,144 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
 
   return (
     <>
-      <div className="cd-saques-page-head">
-        <PageHead
-          eyebrow="Conta de pagamento"
-          title="Saques e saldo"
-          sub="Acompanhe seu dinheiro em tempo real. Transferências processadas com segurança pela infraestrutura Celebre."
-          actions={
-            <>
-              <button className="ca-btn ca-btn--ghost" style={{ height: 38, padding: '0 16px', fontSize: 13 }}>
-                <Icon.Doc style={{ width: 15, height: 15 }} />Extrato completo
-              </button>
-              <button
-                className="ca-btn ca-btn--primary"
-                style={{ height: 38, padding: '0 16px', fontSize: 13 }}
-                onClick={() => { setWithdrawAmount(String((summary?.availableBalance ?? 0) / 100)); setWithdrawModal(true) }}
-                disabled={hasPendingWithdrawal || !summary?.availableBalance || summary.availableBalance <= 0}
-              >
-                <Icon.Pix style={{ width: 16, height: 16 }} />Sacar via PIX
-              </button>
-            </>
-          }
-        />
-      </div>
+      <PageHead
+        eyebrow="Conta de pagamento"
+        title="Saques e saldo"
+        sub="Acompanhe seu dinheiro em tempo real. Transferências processadas com segurança pela infraestrutura Celebre."
+        actions={
+          <>
+            <DashBtn variant="ghost">
+              <Icon.Doc style={{ width: 15, height: 15 }} />Extrato completo
+            </DashBtn>
+            <DashBtn
+              variant="primary"
+              onClick={() => { setWithdrawAmount(String((summary?.availableBalance ?? 0) / 100)); setWithdrawModal(true) }}
+              disabled={hasPendingWithdrawal || !summary?.availableBalance || summary.availableBalance <= 0}
+            >
+              <Icon.Pix style={{ width: 16, height: 16 }} />Sacar via PIX
+            </DashBtn>
+          </>
+        }
+      />
 
-      <div className="cd-grid-saques" style={{ gap: 16 }}>
-        <div className="ca-card cd-saques-hero" style={{ padding: 28, position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 60%, #312E81 100%)', borderColor: '#1E1B4B', color: '#fff' }}>
-          <div style={{ position: 'absolute', width: 280, height: 280, borderRadius: '50%', top: -100, right: -80, background: 'radial-gradient(circle, rgba(139,92,246,0.45), transparent 70%)', filter: 'blur(20px)' }} />
-          <div style={{ position: 'absolute', width: 220, height: 220, borderRadius: '50%', bottom: -80, left: -40, background: 'radial-gradient(circle, rgba(99,102,241,0.35), transparent 70%)', filter: 'blur(20px)' }} />
-          <div style={{ position: 'relative' }}>
-            <div className="ca-row ca-row--gap-sm" style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12.5 }}>
+      {/* 3-col grid */}
+      <div className="grid grid-cols-1 nav:grid-cols-[1.4fr_1fr_1fr] gap-4">
+        {/* Hero balance card */}
+        <div className="rounded-2xl p-7 relative overflow-hidden text-white" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 60%, #312E81 100%)' }}>
+          <div className="absolute w-[280px] h-[280px] rounded-full -top-[100px] -right-[80px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.45), transparent 70%)', filter: 'blur(20px)' }} />
+          <div className="absolute w-[220px] h-[220px] rounded-full -bottom-[80px] -left-[40px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.35), transparent 70%)', filter: 'blur(20px)' }} />
+          <div className="relative">
+            <div className="flex items-center gap-1.5 text-white/70 text-[12.5px]">
               <Icon.Pix style={{ width: 14, height: 14, color: '#A5B4FC' }} />
               Saldo disponível para saque
             </div>
             {loading ? (
-              <div style={{ height: 60, marginTop: 10, opacity: 0.4, background: 'rgba(255,255,255,0.2)', borderRadius: 8 }} />
+              <div className="h-[60px] mt-2.5 bg-white/20 rounded-lg opacity-40" />
             ) : (
-              <div className="cd-money" style={{ fontSize: 'clamp(28px, 6vw, 44px)', color: '#fff', marginTop: 10 }}>
-                <span className="cd-money__currency">R$</span>
+              <div className="mt-2.5 font-display font-semibold tabular-nums text-white inline-flex items-baseline gap-1" style={{ fontSize: 'clamp(28px, 6vw, 44px)' }}>
+                <span className="text-[0.58em] text-white/70 font-medium">R$</span>
                 <span>{Math.floor((summary?.availableBalance ?? 0) / 100).toLocaleString('pt-BR')}</span>
-                <span className="cd-money__cents">,{String((summary?.availableBalance ?? 0) % 100).padStart(2, '0')}</span>
+                <span className="text-[0.55em] text-white/70 ml-0.5">,{String((summary?.availableBalance ?? 0) % 100).padStart(2, '0')}</span>
               </div>
             )}
-            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginTop: 6 }}>
+            <div className="text-[12.5px] text-white/55 mt-1.5">
               {summary?.bankConfigured ? 'Conta bancária configurada' : 'Configure sua conta bancária para sacar'}
             </div>
-            <div className="ca-row ca-row--gap cd-saques-cta" style={{ marginTop: 22 }}>
-              <button
-                className="ca-btn ca-btn--primary ca-btn--lg"
-                style={{ width: '100%', maxWidth: 200 }}
+            <div className="mt-[22px]">
+              <DashBtn
+                variant="primary"
+                size="lg"
+                className="w-full max-w-[200px] justify-center"
                 onClick={() => { setWithdrawAmount(String((summary?.availableBalance ?? 0) / 100)); setWithdrawModal(true) }}
                 disabled={hasPendingWithdrawal || !summary?.availableBalance || summary.availableBalance <= 0}
               >
                 Sacar via PIX <Icon.ArrowRight style={{ width: 18, height: 18 }} />
-              </button>
+              </DashBtn>
             </div>
-            <div className="ca-row cd-saques-trust" style={{ gap: 18, marginTop: 24, fontSize: 11.5, color: 'rgba(255,255,255,0.6)' }}>
-              <span className="ca-row ca-row--gap-sm"><Icon.ShieldCheck style={{ width: 13, height: 13, color: '#A5B4FC' }} />Custódia em conta segregada</span>
-              <span className="ca-row ca-row--gap-sm"><Icon.Pix style={{ width: 13, height: 13, color: '#A5B4FC' }} />PIX em até 30s</span>
-              <span className="ca-row ca-row--gap-sm"><Icon.Lock style={{ width: 13, height: 13, color: '#A5B4FC' }} />Auditado · BACEN</span>
+            <div className="flex items-center gap-[18px] mt-6 text-[11.5px] text-white/60 flex-wrap">
+              <span className="flex items-center gap-1.5"><Icon.ShieldCheck style={{ width: 13, height: 13, color: '#A5B4FC' }} />Custódia em conta segregada</span>
+              <span className="flex items-center gap-1.5"><Icon.Pix style={{ width: 13, height: 13, color: '#A5B4FC' }} />PIX em até 30s</span>
+              <span className="flex items-center gap-1.5"><Icon.Lock style={{ width: 13, height: 13, color: '#A5B4FC' }} />Auditado · BACEN</span>
             </div>
           </div>
         </div>
 
-        <div className="ca-card" style={{ padding: 22 }}>
-          <div className="ca-row ca-row--between">
-            <div className="ca-row ca-row--gap-sm" style={{ fontSize: 12.5, color: 'var(--ca-muted)' }}>
+        {/* Pending */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-[22px]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-[12.5px] text-slate-500">
               <Icon.Loader style={{ width: 14, height: 14, color: '#F59E0B' }} />Saldo em análise
             </div>
             {!loading && (summary?.pendingCount ?? 0) > 0 && (
-              <span className="ca-badge ca-badge--warn">{summary!.pendingCount} {summary!.pendingCount === 1 ? 'contribuição' : 'contribuições'}</span>
+              <DashBadge tone="warn">{summary!.pendingCount} {summary!.pendingCount === 1 ? 'contribuição' : 'contribuições'}</DashBadge>
             )}
           </div>
           {loading ? (
-            <div style={{ height: 36, marginTop: 8, background: 'var(--ca-bg-soft)', borderRadius: 6 }} />
+            <div className="h-9 mt-2 bg-slate-50 rounded-md" />
           ) : (
             <Money value={summary?.pendingBalance ?? 0} size={28} />
           )}
-          <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 6, lineHeight: 1.5 }}>
-            Análise antifraude · disponível em até <strong style={{ color: 'var(--ca-ink)' }}>48h</strong>.
+          <div className="text-[12.5px] text-slate-500 mt-1.5 leading-relaxed">
+            Análise antifraude · disponível em até <strong className="text-slate-900">48h</strong>.
           </div>
-          <hr style={{ border: 0, borderTop: '1px solid var(--ca-line-soft)', margin: '14px 0' }} />
-          <div className="ca-row ca-row--gap-sm" style={{ fontSize: 12, color: 'var(--ca-muted)' }}>
+          <hr className="border-0 border-t border-slate-100 my-3.5" />
+          <div className="flex items-center gap-1.5 text-[12px] text-slate-500">
             <Icon.Info style={{ width: 13, height: 13 }} />
             Contribuições acima de R$ 500 passam por revisão automática.
           </div>
         </div>
 
-        <div className="ca-card" style={{ padding: 22 }}>
-          <div className="ca-row ca-row--between">
-            <div className="ca-row ca-row--gap-sm" style={{ fontSize: 12.5, color: 'var(--ca-muted)' }}>
-              <Icon.Check style={{ width: 14, height: 14, color: '#10B981' }} />Total recebido
-            </div>
+        {/* Total received */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-[22px]">
+          <div className="flex items-center gap-1.5 text-[12.5px] text-slate-500">
+            <Icon.Check style={{ width: 14, height: 14, color: '#10B981' }} />Total recebido
           </div>
           {loading ? (
-            <div style={{ height: 36, marginTop: 8, background: 'var(--ca-bg-soft)', borderRadius: 6 }} />
+            <div className="h-9 mt-2 bg-slate-50 rounded-md" />
           ) : (
             <Money value={summary?.totalNetReceived ?? 0} size={28} />
           )}
-          <div style={{ fontSize: 12.5, color: 'var(--ca-muted)', marginTop: 6 }}>
+          <div className="text-[12.5px] text-slate-500 mt-1.5">
             {summary?.confirmedCount ?? 0} {(summary?.confirmedCount ?? 0) === 1 ? 'contribuição' : 'contribuições'} confirmadas
             {summary?.lastConfirmedAt ? ` · último em ${fmtLastDate(summary.lastConfirmedAt)}` : ''}
           </div>
-          <hr style={{ border: 0, borderTop: '1px solid var(--ca-line-soft)', margin: '14px 0' }} />
-          <div style={{ height: 36 }}><Sparkline data={sparkData} /></div>
+          <hr className="border-0 border-t border-slate-100 my-3.5" />
+          <div className="h-9"><Sparkline data={sparkData} /></div>
         </div>
       </div>
 
-      <div className="ca-card" style={{ padding: 0, overflow: 'hidden', marginTop: 16 }}>
-        <div style={{ padding: '18px 20px 12px' }}>
-          <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 15, fontWeight: 600 }}>Histórico</div>
+      {/* History */}
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden mt-4">
+        <div className="px-5 pt-[18px] pb-3">
+          <div className="font-display text-[15px] font-semibold text-slate-900">Histórico</div>
         </div>
         {loading && (
-          <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ca-muted)', fontSize: 13 }}>Carregando…</div>
+          <div className="py-5 text-center text-slate-500 text-[13px]">Carregando…</div>
         )}
         {!loading && historyEntries.length === 0 && (
-          <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ca-muted)', fontSize: 13 }}>Nenhuma movimentação ainda.</div>
+          <div className="py-5 text-center text-slate-500 text-[13px]">Nenhuma movimentação ainda.</div>
         )}
         {!loading && historyEntries.map(entry => {
           if (entry.kind === 'tx') {
             const t = entry.item
             const isConfirmed = t.status === 'confirmed'
             return (
-              <div key={`tx-${t.id}`} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 20px', borderTop: '1px solid var(--ca-line-soft)' }}>
-                <span style={{ width: 38, height: 38, borderRadius: 999, background: isConfirmed ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div key={`tx-${t.id}`} className="flex items-center gap-3.5 px-5 py-[13px] border-t border-slate-100">
+                <span className={cn('w-[38px] h-[38px] rounded-full inline-flex items-center justify-center shrink-0', isConfirmed ? 'bg-emerald-500/10' : 'bg-amber-500/10')}>
                   <Icon.Pix style={{ width: 16, height: 16, color: isConfirmed ? '#10B981' : '#F59E0B' }} />
                 </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 500, fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.desc}</div>
-                  <div style={{ fontSize: 12, color: 'var(--ca-muted)', marginTop: 1 }}>{fmtDayMonth(t.date)}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-[13.5px] overflow-hidden text-ellipsis whitespace-nowrap">{t.desc}</div>
+                  <div className="text-[12px] text-slate-500 mt-px">{fmtDayMonth(t.date)}</div>
                 </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: isConfirmed ? '#047857' : 'var(--ca-muted)' }}>
+                <div className="text-right shrink-0">
+                  <div className={`font-semibold text-[14px] tabular-nums ${isConfirmed ? 'text-emerald-700' : 'text-slate-400'}`}>
                     {isConfirmed ? '+ ' : ''}R$ {(t.netAmount / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </div>
-                  <div style={{ fontSize: 11, marginTop: 1 }}>
+                  <div className="text-[11px] mt-px">
                     {isConfirmed
-                      ? <span style={{ color: '#10B981', fontWeight: 500 }}>Confirmado</span>
-                      : <span style={{ color: '#F59E0B', fontWeight: 500 }}>Em análise</span>
+                      ? <span className="text-emerald-500 font-medium">Confirmado</span>
+                      : <span className="text-amber-500 font-medium">Em análise</span>
                     }
                   </div>
                 </div>
@@ -261,19 +262,19 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
             const statusColor = w.status === 'APPROVED' ? '#047857' : w.status === 'PENDING' ? '#B45309' : '#BE123C'
             const statusLabel = w.status === 'APPROVED' ? 'Aprovado' : w.status === 'PENDING' ? 'Aguardando' : w.status === 'REJECTED' ? 'Rejeitado' : 'Falhou'
             return (
-              <div key={`wd-${w.id}`} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 20px', borderTop: '1px solid var(--ca-line-soft)' }}>
-                <span style={{ width: 38, height: 38, borderRadius: 999, background: 'rgba(99,102,241,0.10)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Icon.Bank style={{ width: 16, height: 16, color: 'var(--ca-indigo)' }} />
+              <div key={`wd-${w.id}`} className="flex items-center gap-3.5 px-5 py-[13px] border-t border-slate-100">
+                <span className="w-[38px] h-[38px] rounded-full bg-indigo-500/10 inline-flex items-center justify-center shrink-0">
+                  <Icon.Bank style={{ width: 16, height: 16, color: '#6366F1' }} />
                 </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 500, fontSize: 13.5 }}>Saque PIX</div>
-                  <div style={{ fontSize: 12, color: 'var(--ca-muted)', marginTop: 1 }}>{fmtDayMonth(w.createdAt)}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-[13.5px]">Saque PIX</div>
+                  <div className="text-[12px] text-slate-500 mt-px">{fmtDayMonth(w.createdAt)}</div>
                 </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: 'var(--ca-ink)' }}>
+                <div className="text-right shrink-0">
+                  <div className="font-semibold text-[14px] tabular-nums text-slate-900">
                     − R$ {(Number(w.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </div>
-                  <div style={{ fontSize: 11, color: statusColor, fontWeight: 500, marginTop: 1 }}>{statusLabel}</div>
+                  <div className="text-[11px] font-medium mt-px" style={{ color: statusColor }}>{statusLabel}</div>
                 </div>
               </div>
             )
@@ -281,14 +282,15 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
         })}
       </div>
 
+      {/* Withdraw modal */}
       {withdrawModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setWithdrawModal(false)}>
-          <div style={{ background: '#fff', borderRadius: 20, padding: 32, width: 400, maxWidth: '90vw' }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Solicitar saque</div>
-            <div style={{ fontSize: 13, color: 'var(--ca-muted)', marginBottom: 24 }}>
+        <div className="fixed inset-0 bg-black/45 flex items-center justify-center z-[1000]" onClick={() => setWithdrawModal(false)}>
+          <div className="bg-white rounded-[20px] p-8 w-[400px] max-w-[90vw]" onClick={e => e.stopPropagation()}>
+            <div className="font-display text-xl font-bold mb-1.5">Solicitar saque</div>
+            <div className="text-[13px] text-slate-500 mb-6">
               O valor será transferido para a conta bancária cadastrada no Pagar.me.
             </div>
-            <label style={{ fontSize: 12.5, color: 'var(--ca-muted)', fontWeight: 500 }}>Valor (R$)</label>
+            <label className="text-[12.5px] text-slate-500 font-medium">Valor (R$)</label>
             <input
               type="number"
               min="0.01"
@@ -296,26 +298,26 @@ export function Saques({ eventId: _eventId }: SaquesProps) {
               max={(summary?.availableBalance ?? 0) / 100}
               value={withdrawAmount}
               onChange={e => setWithdrawAmount(e.target.value)}
-              style={{ display: 'block', width: '100%', marginTop: 6, marginBottom: 20, padding: '10px 14px', border: '1px solid var(--ca-line)', borderRadius: 10, fontSize: 18, fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, boxSizing: 'border-box' }}
+              className="block w-full mt-1.5 mb-5 px-3.5 py-2.5 border border-slate-200 rounded-[10px] text-[18px] font-display font-semibold focus:outline-none focus:border-indigo-400"
               autoFocus
             />
             {withdrawMsg && (
-              <div style={{ padding: '10px 14px', borderRadius: 10, marginBottom: 16, fontSize: 13, background: withdrawMsg.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: withdrawMsg.type === 'success' ? '#065F46' : '#991B1B' }}>
+              <div className={cn('px-3.5 py-2.5 rounded-[10px] mb-4 text-[13px]', withdrawMsg.type === 'success' ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800')}>
                 {withdrawMsg.text}
               </div>
             )}
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button className="ca-btn ca-btn--ghost" style={{ flex: 1, height: 44 }} onClick={() => setWithdrawModal(false)} disabled={withdrawing}>
+            <div className="flex gap-2.5">
+              <DashBtn variant="ghost" className="flex-1 h-11 justify-center" onClick={() => setWithdrawModal(false)} disabled={withdrawing}>
                 Cancelar
-              </button>
-              <button
-                className="ca-btn ca-btn--primary"
-                style={{ flex: 2, height: 44 }}
+              </DashBtn>
+              <DashBtn
+                variant="primary"
+                className="flex-[2] h-11 justify-center"
                 onClick={handleWithdraw}
                 disabled={withdrawing || !withdrawAmount || parseFloat(withdrawAmount) <= 0}
               >
                 {withdrawing ? 'Solicitando…' : 'Confirmar saque'}
-              </button>
+              </DashBtn>
             </div>
           </div>
         </div>

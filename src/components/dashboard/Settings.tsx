@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { Icon } from '../auth/AuthIcons'
 import { PageHead } from '../../pages/DashboardPage'
+import { DashBtn } from './DashShared'
 
 const BANKS: Record<string, { name: string; color: string; ink: string }> = {
   '260': { name: 'Nubank',          color: '#820AD1', ink: '#fff' },
@@ -21,17 +22,9 @@ function bankName(code: string | null) {
 
 function PayoutCard({ gradient, children }: { gradient: string; children: React.ReactNode }) {
   return (
-    <div style={{
-      borderRadius: 16,
-      background: gradient,
-      padding: '24px 24px',
-      color: '#fff',
-      position: 'relative',
-      overflow: 'hidden',
-      marginBottom: 16,
-    }}>
-      <div style={{ position: 'absolute', width: 180, height: 180, borderRadius: '50%', top: -50, right: -30, background: 'radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%)' }} />
-      <div style={{ position: 'relative' }}>{children}</div>
+    <div className="rounded-2xl p-6 text-white relative overflow-hidden mb-4" style={{ background: gradient }}>
+      <div className="absolute w-[180px] h-[180px] rounded-full -top-[50px] -right-[30px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%)' }} />
+      <div className="relative">{children}</div>
     </div>
   )
 }
@@ -46,23 +39,23 @@ export function Settings() {
     return (
       <div>
         <PageHead eyebrow="Conta" title="Configurações" />
-        <div style={{ maxWidth: 520, width: '100%' }}>
-          <div className="ca-card" style={{ padding: '28px 28px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <span style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(99,102,241,0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Icon.Bank style={{ width: 18, height: 18, color: 'var(--ca-indigo)' }} />
+        <div className="max-w-[520px] w-full">
+          <div className="bg-white rounded-2xl border border-slate-200 p-7">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="w-9 h-9 rounded-[10px] bg-indigo-500/10 inline-flex items-center justify-center">
+                <Icon.Bank style={{ width: 18, height: 18, color: '#6366F1' }} />
               </span>
               <div>
-                <div style={{ fontWeight: 600, fontSize: 14 }}>Conta bancária</div>
-                <div style={{ fontSize: 12.5, color: 'var(--ca-muted)' }}>Nenhuma conta configurada</div>
+                <div className="font-semibold text-[14px]">Conta bancária</div>
+                <div className="text-[12.5px] text-slate-500">Nenhuma conta configurada</div>
               </div>
             </div>
-            <p style={{ fontSize: 13.5, color: '#64748B', lineHeight: 1.5, marginBottom: 20 }}>
+            <p className="text-[13.5px] text-slate-500 leading-relaxed mb-5">
               Configure sua conta bancária para receber os valores arrecadados nos seus eventos.
             </p>
-            <button className="ca-btn ca-btn--primary" style={{ height: 40, padding: '0 20px', fontSize: 13.5 }} onClick={() => navigate('/verificacao')}>
+            <DashBtn variant="primary" onClick={() => navigate('/verificacao')}>
               Configurar conta bancária
-            </button>
+            </DashBtn>
           </div>
         </div>
       </div>
@@ -73,20 +66,20 @@ export function Settings() {
     return (
       <div>
         <PageHead eyebrow="Conta" title="Configurações" />
-        <div style={{ maxWidth: 520, width: '100%' }}>
+        <div className="max-w-[520px] w-full">
           <PayoutCard gradient="linear-gradient(140deg,#312E81 0%,#4338CA 45%,#7C3AED 100%)">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.7, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Conta Celebre</div>
-              <span style={{ background: 'rgba(251,191,36,0.2)', color: '#FDE68A', border: '1px solid rgba(251,191,36,0.3)', borderRadius: 20, padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>
+            <div className="flex justify-between items-start mb-5">
+              <div className="text-[12px] font-semibold opacity-70 tracking-[0.08em] uppercase">Conta Celebre</div>
+              <span className="text-[12px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: 'rgba(251,191,36,0.2)', color: '#FDE68A', border: '1px solid rgba(251,191,36,0.3)' }}>
                 Em verificação
               </span>
             </div>
-            <div style={{ fontSize: 20, fontWeight: 700, fontFamily: 'Space Grotesk, sans-serif' }}>{user?.name}</div>
-            <div style={{ fontSize: 13, opacity: 0.65, marginTop: 4 }}>Verificação em andamento pelo Pagar.me</div>
+            <div className="font-display text-xl font-bold">{user?.name}</div>
+            <div className="text-[13px] opacity-65 mt-1">Verificação em andamento pelo Pagar.me</div>
           </PayoutCard>
-          <div className="ca-card" style={{ padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="bg-white rounded-2xl border border-slate-200 p-[16px_18px] flex items-center gap-3">
             <Icon.RefreshCw style={{ width: 18, height: 18, color: '#6366F1', flexShrink: 0 }} />
-            <div style={{ fontSize: 13, color: '#64748B', lineHeight: 1.4 }}>
+            <div className="text-[13px] text-slate-500 leading-snug">
               Seus dados estão sendo verificados automaticamente. Você receberá uma atualização em breve.
             </div>
           </div>
@@ -99,24 +92,24 @@ export function Settings() {
     return (
       <div>
         <PageHead eyebrow="Conta" title="Configurações" />
-        <div style={{ maxWidth: 520, width: '100%' }}>
+        <div className="max-w-[520px] w-full">
           <PayoutCard gradient="linear-gradient(140deg,#312E81 0%,#4338CA 45%,#6D28D9 100%)">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.7, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Conta Celebre</div>
-              <span style={{ background: 'rgba(52,211,153,0.2)', color: '#6EE7B7', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 20, padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>
+            <div className="flex justify-between items-start mb-5">
+              <div className="text-[12px] font-semibold opacity-70 tracking-[0.08em] uppercase">Conta Celebre</div>
+              <span className="text-[12px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: 'rgba(52,211,153,0.2)', color: '#6EE7B7', border: '1px solid rgba(52,211,153,0.3)' }}>
                 KYC aprovado
               </span>
             </div>
-            <div style={{ fontSize: 20, fontWeight: 700, fontFamily: 'Space Grotesk, sans-serif' }}>{user?.name}</div>
-            <div style={{ fontSize: 13, opacity: 0.65, marginTop: 4 }}>Finalize adicionando sua conta bancária</div>
+            <div className="font-display text-xl font-bold">{user?.name}</div>
+            <div className="text-[13px] opacity-65 mt-1">Finalize adicionando sua conta bancária</div>
           </PayoutCard>
-          <div className="ca-card" style={{ padding: '16px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-            <div style={{ fontSize: 13, color: '#64748B' }}>
+          <div className="bg-white rounded-2xl border border-slate-200 p-[16px_18px] flex items-center justify-between gap-3">
+            <div className="text-[13px] text-slate-500">
               Identidade verificada. Adicione uma conta bancária para receber saques.
             </div>
-            <button className="ca-btn ca-btn--primary" style={{ height: 36, padding: '0 16px', fontSize: 13, flexShrink: 0 }} onClick={() => navigate('/verificacao')}>
+            <DashBtn variant="primary" onClick={() => navigate('/verificacao')} className="h-9 !px-4 !text-[13px] shrink-0">
               Adicionar conta
-            </button>
+            </DashBtn>
           </div>
         </div>
       </div>
@@ -128,26 +121,23 @@ export function Settings() {
     return (
       <div>
         <PageHead eyebrow="Conta" title="Configurações" />
-        <div style={{ maxWidth: 520, width: '100%' }}>
+        <div className="max-w-[520px] w-full">
           <PayoutCard gradient="linear-gradient(140deg,#0F172A 0%,#1E293B 55%,#334155 100%)">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.7, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Conta Celebre</div>
-              <span style={{ background: 'rgba(52,211,153,0.2)', color: '#6EE7B7', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 20, padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>
-                <Icon.Check style={{ width: 10, height: 10, display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
-                Verificado
+            <div className="flex justify-between items-start mb-5">
+              <div className="text-[12px] font-semibold opacity-70 tracking-[0.08em] uppercase">Conta Celebre</div>
+              <span className="text-[12px] font-semibold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1" style={{ background: 'rgba(52,211,153,0.2)', color: '#6EE7B7', border: '1px solid rgba(52,211,153,0.3)' }}>
+                <Icon.Check style={{ width: 10, height: 10 }} />Verificado
               </span>
             </div>
-            <div style={{ fontSize: 20, fontWeight: 700, fontFamily: 'Space Grotesk, sans-serif' }}>{user?.name}</div>
-            <div style={{ fontSize: 13, opacity: 0.65, marginTop: 4, fontFamily: 'JetBrains Mono, monospace' }}>
-              {bname ?? user?.bankCode}
-            </div>
+            <div className="font-display text-xl font-bold">{user?.name}</div>
+            <div className="text-[13px] opacity-65 mt-1 font-mono">{bname ?? user?.bankCode}</div>
           </PayoutCard>
-          <div className="ca-card" style={{ padding: '16px 18px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="bg-white rounded-2xl border border-slate-200 p-[16px_18px]">
+            <div className="flex items-center gap-2.5">
               <Icon.ShieldCheck style={{ width: 18, height: 18, color: '#10B981', flexShrink: 0 }} />
-              <div style={{ fontSize: 13, color: '#064E3B', fontWeight: 500 }}>Conta bancária verificada e ativa</div>
+              <div className="text-[13px] text-emerald-900 font-medium">Conta bancária verificada e ativa</div>
             </div>
-            <div style={{ fontSize: 12.5, color: '#64748B', marginTop: 6 }}>
+            <div className="text-[12.5px] text-slate-500 mt-1.5">
               Seus saques serão transferidos diretamente para a conta bancária cadastrada no Pagar.me.
             </div>
           </div>
@@ -156,27 +146,26 @@ export function Settings() {
     )
   }
 
-  // rejected
   return (
     <div>
       <PageHead eyebrow="Conta" title="Configurações" />
-      <div style={{ maxWidth: 520 }}>
+      <div className="max-w-[520px]">
         <PayoutCard gradient="linear-gradient(140deg,#1E293B 0%,#27272A 55%,#3F3F46 100%)">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.7, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Conta Celebre</div>
-            <span style={{ background: 'rgba(239,68,68,0.2)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 20, padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>
+          <div className="flex justify-between items-start mb-5">
+            <div className="text-[12px] font-semibold opacity-70 tracking-[0.08em] uppercase">Conta Celebre</div>
+            <span className="text-[12px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: 'rgba(239,68,68,0.2)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.3)' }}>
               Rejeitada
             </span>
           </div>
-          <div style={{ fontSize: 20, fontWeight: 700, fontFamily: 'Space Grotesk, sans-serif' }}>{user?.name}</div>
-          <div style={{ fontSize: 13, opacity: 0.65, marginTop: 4 }}>Verificação não aprovada</div>
+          <div className="font-display text-xl font-bold">{user?.name}</div>
+          <div className="text-[13px] opacity-65 mt-1">Verificação não aprovada</div>
         </PayoutCard>
-        <div className="ca-card" style={{ padding: '16px 18px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+        <div className="bg-white rounded-2xl border border-slate-200 p-[16px_18px]">
+          <div className="flex items-center gap-2.5 mb-2">
             <Icon.AlertCircle style={{ width: 18, height: 18, color: '#EF4444', flexShrink: 0 }} />
-            <div style={{ fontSize: 13, color: '#991B1B', fontWeight: 600 }}>Verificação rejeitada pelo Pagar.me</div>
+            <div className="text-[13px] text-red-900 font-semibold">Verificação rejeitada pelo Pagar.me</div>
           </div>
-          <div style={{ fontSize: 12.5, color: '#64748B', lineHeight: 1.5 }}>
+          <div className="text-[12.5px] text-slate-500 leading-relaxed">
             Entre em contato com o suporte da Celebre para mais informações sobre o processo de verificação.
           </div>
         </div>
