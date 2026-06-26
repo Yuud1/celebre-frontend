@@ -13,18 +13,50 @@ export default {
       xl:  '1200px',
     },
     extend: {
-      // ─── Celebre app tokens (--cb-* / --cl-*) ──────────────
+      // ─── shadcn CSS-variable colors ────────────────────────
       colors: {
-        surface:  '#fffefe',
-        ink:      '#42445d',
-        muted:    '#805a7c',
-        primary:  '#9e68ba',
-        rose:     '#c88bbe',
-        lilac:    '#b0aeff',
-        border:   'rgba(66, 68, 93, 0.1)',
+        border:     'hsl(var(--border))',
+        input:      'hsl(var(--input))',
+        ring:       'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT:    'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT:    'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT:    'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        muted: {
+          DEFAULT:    'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT:    'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        card: {
+          DEFAULT:    'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        popover: {
+          DEFAULT:    'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+
+        // ─── Celebre brand tokens (static) ───────────────────
+        surface: '#fffefe',
+        ink:     '#42445d',
+        rose:    '#c88bbe',
+        lilac:   '#b0aeff',
 
         // ─── Auth / Dashboard tokens (--ca-*) ────────────────
-        'slate': {
+        slate: {
           950: '#0F172A',
           900: '#1E293B',
           800: '#334155',
@@ -38,6 +70,9 @@ export default {
 
       // ─── Border radius ────────────────────────────────────
       borderRadius: {
+        lg:  'var(--radius)',
+        md:  'calc(var(--radius) - 2px)',
+        sm:  'calc(var(--radius) - 4px)',
         cb:  '14px',
         '2xl': '16px',
         '3xl': '24px',

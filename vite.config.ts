@@ -1,3 +1,4 @@
+import path from 'node:path'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -56,6 +57,9 @@ function mobileLogPlugin() {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), mobileLogPlugin()],
+  resolve: {
+    alias: { '@': path.resolve(__dirname, './src') },
+  },
   server: {
     allowedHosts: ['frontend.celebre.fun'],
     port: 5173,
