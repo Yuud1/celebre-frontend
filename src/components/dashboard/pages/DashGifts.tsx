@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react'
-import { Icon } from '../auth/AuthIcons'
-import { PageHead } from '../../pages/DashboardPage'
-import { Money } from './DashWidgets'
-import { DashBtn } from './DashShared'
-import { api } from '../../lib/api'
+import { Icon } from '../../auth/AuthIcons'
+import { PageHead } from '../../../pages/DashboardPage'
+import { Money } from '../DashWidgets'
+import { DashBtn } from '../DashBtn'
+import { api } from '../../../lib/api'
 import { cn } from '@/lib/utils'
 
 // ─── Gift Form Modal ──────────────────────────────────────────

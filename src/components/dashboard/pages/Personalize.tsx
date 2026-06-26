@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { PageHead, type ActivePage } from "../../pages/DashboardPage";
-import { api } from "../../lib/api";
-import { ImagePicker } from "../builder/ImagePicker";
-import { Icon } from "../auth/AuthIcons";
-import { DashBtn } from "./DashShared";
+import { PageHead, type ActivePage } from "../../../pages/DashboardPage";
+import { api } from "../../../lib/api";
+import { ImagePicker } from "../../builder/ImagePicker";
+import { Icon } from "../../auth/AuthIcons";
+import { DashBtn } from '../DashBtn'
 import { cn } from "@/lib/utils";
 
 const PALETTES = [

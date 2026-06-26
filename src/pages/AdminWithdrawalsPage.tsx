@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { api } from '../lib/api'
-import { DashBtn, DashBadge } from '../components/dashboard/DashShared'
+import { DashBtn } from '../components/dashboard/DashBtn'
+import { DashBadge } from '../components/dashboard/DashBadge'
 import { cn } from '@/lib/utils'
 
 interface WithdrawalEvent {

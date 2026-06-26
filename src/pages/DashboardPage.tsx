@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Icon } from '../components/auth/AuthIcons'
 import { api } from '../lib/api'
-import { DashHome } from '../components/dashboard/DashHome'
-import { DashGifts } from '../components/dashboard/DashGifts'
-import { DashContributions } from '../components/dashboard/DashContributions'
-import { Saques } from '../components/dashboard/Saques'
-import { Personalize } from '../components/dashboard/Personalize'
-import { Settings } from '../components/dashboard/Settings'
+import { DashHome } from '../components/dashboard/pages/DashHome'
+import { DashGifts } from '../components/dashboard/pages/DashGifts'
+import { DashContributions } from '../components/dashboard/pages/DashContributions'
+import { Saques } from '../components/dashboard/pages/Saques'
+import { Personalize } from '../components/dashboard/pages/Personalize'
+import { Settings } from '../components/dashboard/pages/Settings'
 import { Sidebar } from '../components/dashboard/Sidebar'
 import { Topbar } from '../components/dashboard/Topbar'
-import { DashConvites } from '../components/dashboard/DashConvites'
+import { DashConvites } from '../components/dashboard/pages/DashConvites'
 import { cn } from '@/lib/utils'
 
 export type ActivePage = 'dashboard' | 'gifts' | 'contrib' | 'payouts' | 'customize' | 'settings' | 'convites'
@@ -156,12 +156,14 @@ export function DashboardPage() {
           onClose={() => setMenuOpen(false)}
         />
         <div className="flex flex-col overflow-hidden min-w-0">
-          <Topbar eventSlug={event?.slug} onMenuToggle={() => setMenuOpen(v => !v)} />
+          {activePage !== 'payouts'
+            ? <Topbar eventSlug={event?.slug} onMenuToggle={() => setMenuOpen(v => !v)} />
+            : <div className="hidden nav:block"><Topbar eventSlug={event?.slug} onMenuToggle={() => setMenuOpen(v => !v)} /></div>}
           <div className={cn(
-            'flex-1 overflow-auto px-8 py-7 pb-10',
-            'max-[899px]:px-5 max-[899px]:py-5 max-[899px]:pb-8',
-            'max-sm:px-4 max-sm:py-4 max-sm:pb-[calc(64px+16px)]',
-            activePage === 'payouts' && 'max-sm:px-0 max-sm:py-0',
+            'flex-1 overflow-auto',
+            activePage !== 'payouts'
+              ? 'px-8 py-7 pb-10 max-[899px]:px-5 max-[899px]:py-5 max-[899px]:pb-8 max-sm:px-4 max-sm:py-4 max-sm:pb-[calc(64px+16px)]'
+              : 'px-8 py-7 pb-10 max-[899px]:px-0 max-[899px]:py-0 max-sm:pb-[calc(64px+16px)]',
           )}>
             {loading && (
               <div className="flex items-center justify-center flex-1 text-slate-500 text-[14px] h-40">
@@ -174,7 +176,7 @@ export function DashboardPage() {
                 {activePage === 'dashboard' && <DashHome event={event} contributions={contributions} onNavigate={setActivePage} availableBalance={walletAvailable} />}
                 {activePage === 'gifts'     && <DashGifts event={event} onReload={loadData} />}
                 {activePage === 'contrib'   && <DashContributions contributions={contributions} />}
-                {activePage === 'payouts'   && <Saques eventId={event?.id} />}
+                {activePage === 'payouts'   && <Saques eventId={event?.id} onBack={() => setActivePage('dashboard')} />}
                 {activePage === 'customize' && <Personalize event={event} onReload={loadData} onNavigate={setActivePage} />}
                 {activePage === 'settings'  && <Settings />}
                 {activePage === 'convites'  && <DashConvites event={event} />}

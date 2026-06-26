@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
-import { Icon } from '../auth/AuthIcons'
-import { PageHead } from '../../pages/DashboardPage'
-import { DashBtn } from './DashShared'
+import { useAuth } from '../../../contexts/AuthContext'
+import { Icon } from '../../auth/AuthIcons'
+import { PageHead } from '../../../pages/DashboardPage'
+import { DashBtn } from '../DashBtn'
 
 const BANKS: Record<string, { name: string; color: string; ink: string }> = {
   '260': { name: 'Nubank',          color: '#820AD1', ink: '#fff' },

@@ -1,9 +1,9 @@
 import { useRef, useState, useEffect } from 'react'
 import { toPng } from 'html-to-image'
 import QRCode from 'qrcode'
-import { PageHead } from '../../pages/DashboardPage'
-import { ConviteRenderer, ConviteWaPreview, CvMiniInvite } from '../convites/ConviteRenderer'
-import { DashBtn } from './DashShared'
+import { PageHead } from '../../../pages/DashboardPage'
+import { ConviteRenderer, ConviteWaPreview, CvMiniInvite } from '../../convites/ConviteRenderer'
+import { DashBtn } from '../DashBtn'
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? ''
 
