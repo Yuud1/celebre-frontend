@@ -1,5 +1,5 @@
 import type { IconName, MarkName } from './inviteTemplates'
-import { InviteIcon, InviteDot, InviteRule, InviteScatter, InviteWave, InvitePlaceholder } from './InvitePrimitives'
+import { InviteIcon, InviteRule, InviteScatter, InviteWave, InvitePlaceholder } from './InvitePrimitives'
 
 export function InviteDetails({ date, location }: { date: string; location: string }) {
   return (

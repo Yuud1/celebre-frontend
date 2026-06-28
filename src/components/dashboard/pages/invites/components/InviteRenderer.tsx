@@ -37,7 +37,7 @@ export function InviteRenderer({ event, qrDataUrl }: InviteRendererProps) {
 
   const names = event.data.hosts || event.data.name || 'Evento'
   const location = event.data.location || 'A confirmar'
-  const link = `celebre.com.br/p/${event.slug}`
+  const link = `celebre.fun/p/${event.slug}`
 
   const themeVars = useMemo(() => computeThemeVars(accent), [accent])
 

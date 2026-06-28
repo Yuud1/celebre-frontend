@@ -12,7 +12,7 @@ const BOTTOM_NAV: Array<{ id: ActivePage; label: string; icon: React.ReactNode }
 ]
 
 
-export function Bottombar({ activePage, onNav, setActivePage }: { activePage: ActivePage; onNav: (p: ActivePage) => void; setActivePage: (p: ActivePage) => void }) {
+export function Bottombar({ activePage, setActivePage }: { activePage: ActivePage; setActivePage: (p: ActivePage) => void }) {
     return (
         <nav className="hidden max-sm:flex fixed bottom-0 inset-x-0 h-16 bg-white/95 backdrop-blur-xl border-t border-slate-200 z-50 pb-[env(safe-area-inset-bottom)]">
             {BOTTOM_NAV.map(item => (

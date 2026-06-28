@@ -172,7 +172,7 @@ export function DashboardPage() {
             )}
           </div>
           {/* Bottom nav — mobile only */}
-          <Bottombar activePage={activePage} onNav={setActivePage} setActivePage={setActivePage} />
+          <Bottombar activePage={activePage} setActivePage={setActivePage} />
         </div>
       </div>
     </div>
