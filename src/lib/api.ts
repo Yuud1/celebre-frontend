@@ -229,7 +229,7 @@ export const api = {
 
   // ─── Public Event ───────────────────────────────────────────
   getPublicEvent(slug: string) {
-    return request<any>(`/p/${slug}`);
+    return request<any>(`/pub/${slug}`);
   },
 
   // ─── Contributions ──────────────────────────────────────────
