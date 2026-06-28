@@ -1,6 +1,6 @@
-import { Icon } from '../auth/AuthIcons'
-import { PageHead } from '../../pages/DashboardPage'
-import { StatCard, nameInitials, AVATAR_COLORS } from './DashWidgets'
+import { Icon } from '../../../auth/AuthIcons'
+import { PageHead } from '../../../../pages/DashboardPage'
+import { StatCard, nameInitials, AVATAR_COLORS } from '../../DashWidgets'
 
 function fmtDayMonth(iso: string | null) {
   if (!iso) return ''
@@ -23,20 +23,18 @@ export function DashContributions({ contributions }: DashContributionsProps) {
         sub={`${contributions.length} contribuição${contributions.length !== 1 ? 'ões' : ''} · ${confirmed.length} confirmada${confirmed.length !== 1 ? 's' : ''}`}
       />
 
-      <div className="cd-grid-stats-3" style={{ gap: 16, marginBottom: 20 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 nav:grid-cols-3 gap-4 mb-5">
         <StatCard icon={<Icon.Pix style={{ color: '#10B981' }} />} label="Total arrecadado" value={total} currency />
         <StatCard icon={<Icon.Check style={{ color: '#10B981' }} />} label="Confirmadas" value={confirmed.length} />
         <StatCard icon={<Icon.Loader style={{ color: '#F59E0B' }} />} label="Pendentes" value={pending.length} />
       </div>
 
-      <div className="ca-card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '18px 20px 12px' }}>
-          <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 15, fontWeight: 600 }}>Todas as contribuições</div>
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div className="px-5 pt-[18px] pb-3">
+          <div className="font-display text-[15px] font-semibold text-slate-900">Todas as contribuições</div>
         </div>
         {contributions.length === 0 && (
-          <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ca-muted)', fontSize: 13 }}>
-            Nenhuma contribuição ainda.
-          </div>
+          <div className="py-5 text-center text-slate-500 text-[13px]">Nenhuma contribuição ainda.</div>
         )}
         {contributions.map((c: any, i: number) => {
           const initials = nameInitials(c.guestName ?? 'A')
@@ -45,28 +43,28 @@ export function DashContributions({ contributions }: DashContributionsProps) {
           const isFailed = c.status === 'failed'
           const date = fmtDayMonth(c.createdAt)
           return (
-            <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 20px', borderTop: '1px solid var(--ca-line-soft)' }}>
-              <span style={{ width: 38, height: 38, borderRadius: 999, background: color, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#fff', fontWeight: 600, fontSize: 13 }}>
+            <div key={c.id} className="flex items-center gap-3.5 px-5 py-[13px] border-t border-slate-100">
+              <span className="w-[38px] h-[38px] rounded-full inline-flex items-center justify-center text-white font-semibold text-[13px] shrink-0" style={{ background: color }}>
                 {initials}
               </span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 500, fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-[13.5px] overflow-hidden text-ellipsis whitespace-nowrap">
                   {c.guestName ?? 'Anônimo'}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--ca-muted)', marginTop: 1 }}>
+                <div className="text-[12px] text-slate-500 mt-px">
                   {c.gift?.name ?? '—'}{date ? ` · ${date}` : ''}
                 </div>
               </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontWeight: 600, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: isConfirmed ? '#047857' : 'var(--ca-muted)' }}>
+              <div className="text-right shrink-0">
+                <div className={`font-semibold text-[14px] tabular-nums ${isConfirmed ? 'text-emerald-700' : 'text-slate-400'}`}>
                   {isConfirmed ? '+ ' : ''}R$ {(Number(c.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <div style={{ fontSize: 11, marginTop: 1 }}>
+                <div className="text-[11px] mt-px">
                   {isConfirmed
-                    ? <span style={{ color: '#10B981', fontWeight: 500 }}>Confirmado</span>
+                    ? <span className="text-emerald-500 font-medium">Confirmado</span>
                     : isFailed
-                      ? <span style={{ color: '#BE123C', fontWeight: 500 }}>Falhou</span>
-                      : <span style={{ color: '#F59E0B', fontWeight: 500 }}>Pendente</span>
+                      ? <span className="text-rose-700 font-medium">Falhou</span>
+                      : <span className="text-amber-500 font-medium">Pendente</span>
                   }
                 </div>
               </div>

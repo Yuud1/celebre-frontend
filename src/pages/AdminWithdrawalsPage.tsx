@@ -1,5 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { api } from '../lib/api'
+import { DashBtn } from '../components/dashboard/DashBtn'
+import { DashBadge } from '../components/dashboard/DashBadge'
+import { cn } from '@/lib/utils'
 
 interface WithdrawalEvent {
   id: string
@@ -39,18 +42,18 @@ function fmtCpf(raw: string | null) {
 }
 
 function StatusBadge({ w }: { w: Withdrawal }) {
-  if (w.status === 'PENDING')  return <span className="ca-badge ca-badge--warn">Pendente</span>
-  if (w.status === 'APPROVED') return <span className="ca-badge ca-badge--success">Aprovado</span>
+  if (w.status === 'PENDING')  return <DashBadge tone="warn">Pendente</DashBadge>
+  if (w.status === 'APPROVED') return <DashBadge tone="success">Aprovado</DashBadge>
   if (w.status === 'REJECTED') return (
     <div>
-      <span className="ca-badge ca-badge--error">Rejeitado</span>
-      {w.rejectionReason && <div style={{ fontSize: 11, color: 'var(--ca-muted)', marginTop: 3 }}>{w.rejectionReason}</div>}
+      <DashBadge tone="error">Rejeitado</DashBadge>
+      {w.rejectionReason && <div className="text-[11px] text-slate-500 mt-0.5">{w.rejectionReason}</div>}
     </div>
   )
   return (
     <div>
-      <span className="ca-badge ca-badge--error">Falhou</span>
-      {w.pagarmeError && <div style={{ fontSize: 11, color: 'var(--ca-muted)', marginTop: 3 }}>{w.pagarmeError}</div>}
+      <DashBadge tone="error">Falhou</DashBadge>
+      {w.pagarmeError && <div className="text-[11px] text-slate-500 mt-0.5">{w.pagarmeError}</div>}
     </div>
   )
 }
@@ -124,107 +127,101 @@ export function AdminWithdrawalsPage() {
   const pendingCount = withdrawals.filter(w => w.status === 'PENDING').length
 
   return (
-    <div className="ca-root" style={{ padding: '40px', background: 'var(--ca-bg, #F8FAFC)', minHeight: '100vh' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+    <div className="font-sans antialiased text-slate-900 bg-slate-50 min-h-screen px-10 py-10">
+      <div className="max-w-[1100px] mx-auto">
 
-        <div className="ca-row ca-row--between" style={{ marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div>
-            <h1 className="ca-display" style={{ fontSize: 26, marginBottom: 4 }}>Backoffice de Saques</h1>
+            <h1 className="font-display text-[26px] font-semibold tracking-[-0.025em] text-slate-950 mb-1">Backoffice de Saques</h1>
             {lastUpdated && (
-              <div style={{ fontSize: 12, color: 'var(--ca-muted)' }}>
+              <div className="text-[12px] text-slate-500">
                 Atualizado às {lastUpdated.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} · atualiza a cada 30s
               </div>
             )}
           </div>
-          <div className="ca-row ca-row--gap">
+          <div className="flex items-center gap-2.5">
             {pendingCount > 0 && (
-              <span className="ca-badge ca-badge--warn" style={{ fontSize: 13 }}>{pendingCount} pendente{pendingCount > 1 ? 's' : ''}</span>
+              <DashBadge tone="warn" className="text-[13px]">{pendingCount} pendente{pendingCount > 1 ? 's' : ''}</DashBadge>
             )}
-            <button className="ca-btn ca-btn--ghost" style={{ height: 36, padding: '0 14px', fontSize: 13 }} onClick={fetchWithdrawals}>
-              Atualizar
-            </button>
+            <DashBtn variant="ghost" onClick={fetchWithdrawals}>Atualizar</DashBtn>
           </div>
         </div>
 
         {error && (
-          <div style={{ background: '#FEE2E2', color: '#991B1B', padding: '10px 16px', borderRadius: 10, marginBottom: 16, fontSize: 13 }}>
-            {error}
-          </div>
+          <div className="bg-red-50 text-red-800 px-4 py-2.5 rounded-[10px] mb-4 text-[13px]">{error}</div>
         )}
 
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+        <div className="flex gap-2 mb-5 flex-wrap">
           {TABS.map(s => (
-            <button
+            <DashBtn
               key={s}
+              variant={statusFilter === s ? 'primary' : 'ghost'}
               onClick={() => setStatusFilter(s)}
-              className={statusFilter === s ? 'ca-btn ca-btn--primary' : 'ca-btn ca-btn--ghost'}
-              style={{ height: 34, padding: '0 14px', fontSize: 13 }}
+              className="h-[34px] !px-3.5 !text-[13px]"
             >
               {TAB_LABELS[s]}
-            </button>
+            </DashBtn>
           ))}
         </div>
 
-        <div className="ca-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
           {loading ? (
-            <div style={{ padding: 48, textAlign: 'center', color: 'var(--ca-muted)', fontSize: 14 }}>Carregando...</div>
+            <div className="py-12 text-center text-slate-500 text-[14px]">Carregando...</div>
           ) : withdrawals.length === 0 ? (
-            <div style={{ padding: 48, textAlign: 'center', color: 'var(--ca-muted)', fontSize: 14 }}>Nenhum saque encontrado.</div>
+            <div className="py-12 text-center text-slate-500 text-[14px]">Nenhum saque encontrado.</div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 900 }}>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left" style={{ minWidth: 900 }}>
                 <thead>
-                  <tr style={{ background: 'var(--ca-bg-soft)', borderBottom: '1px solid var(--ca-line)' }}>
+                  <tr className="bg-slate-50 border-b border-slate-200">
                     {['Data', 'Usuário', 'Evento(s)', 'Conta Bancária', 'Valor', 'Status', 'Ações'].map(h => (
-                      <th key={h} style={{ padding: '13px 18px', color: 'var(--ca-muted)', fontSize: 12, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{h}</th>
+                      <th key={h} className="px-[18px] py-[13px] text-slate-500 text-[12px] font-semibold tracking-[0.05em] uppercase">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {withdrawals.map(w => (
-                    <tr key={w.id} style={{ borderBottom: '1px solid var(--ca-line-soft)' }}>
-                      <td style={{ padding: '14px 18px', fontSize: 13, color: 'var(--ca-muted)', fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>
-                        {fmtDate(w.createdAt)}
+                    <tr key={w.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                      <td className="px-[18px] py-[14px] text-[13px] text-slate-500 font-mono whitespace-nowrap">{fmtDate(w.createdAt)}</td>
+                      <td className="px-[18px] py-[14px] text-[13px]">
+                        <div className="font-semibold">{w.user.name}</div>
+                        <div className="text-[12px] text-slate-500">{w.user.email}</div>
+                        <div className="text-[12px] text-slate-400 font-mono">{fmtCpf(w.user.cpfCnpj)}</div>
                       </td>
-                      <td style={{ padding: '14px 18px', fontSize: 13 }}>
-                        <div style={{ fontWeight: 600 }}>{w.user.name}</div>
-                        <div style={{ fontSize: 12, color: 'var(--ca-muted)' }}>{w.user.email}</div>
-                        <div style={{ fontSize: 12, color: 'var(--ca-muted-2)', fontFamily: 'JetBrains Mono, monospace' }}>{fmtCpf(w.user.cpfCnpj)}</div>
-                      </td>
-                      <td style={{ padding: '14px 18px', fontSize: 13, color: 'var(--ca-muted)', maxWidth: 180 }}>
+                      <td className="px-[18px] py-[14px] text-[13px] text-slate-500 max-w-[180px]">
                         {w.user.events?.length > 0
                           ? w.user.events.map(e => (e.data as any)?.title ?? e.slug).join(', ')
                           : '—'}
                       </td>
-                      <td style={{ padding: '14px 18px', fontSize: 13, fontFamily: 'JetBrains Mono, monospace' }}>
+                      <td className="px-[18px] py-[14px] text-[13px] font-mono">
                         <div>{w.user.bankCode ?? '—'}</div>
-                        {w.user.accountNumber && <div style={{ fontSize: 11, color: 'var(--ca-muted)' }}>cc {w.user.accountNumber}</div>}
+                        {w.user.accountNumber && <div className="text-[11px] text-slate-500">cc {w.user.accountNumber}</div>}
                       </td>
-                      <td style={{ padding: '14px 18px', fontSize: 15, fontWeight: 700, fontFamily: 'Space Grotesk, sans-serif', whiteSpace: 'nowrap' }}>
+                      <td className="px-[18px] py-[14px] text-[15px] font-display font-bold whitespace-nowrap">
                         R$ {(Number(w.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
-                      <td style={{ padding: '14px 18px', fontSize: 13 }}>
+                      <td className="px-[18px] py-[14px] text-[13px]">
                         <StatusBadge w={w} />
                       </td>
-                      <td style={{ padding: '14px 18px', fontSize: 13 }}>
+                      <td className="px-[18px] py-[14px] text-[13px]">
                         {w.status === 'PENDING' && (
-                          <div style={{ display: 'flex', gap: 8 }}>
-                            <button
+                          <div className="flex gap-2">
+                            <DashBtn
+                              variant="primary"
+                              className="h-8 !px-3 !text-[12px]"
                               disabled={actionLoading === w.id}
                               onClick={() => setApproveTarget(w)}
-                              className="ca-btn ca-btn--primary"
-                              style={{ height: 32, padding: '0 12px', fontSize: 12 }}
                             >
                               Aprovar
-                            </button>
-                            <button
+                            </DashBtn>
+                            <DashBtn
+                              variant="ghost"
+                              className={cn('h-8 !px-3 !text-[12px]', '!text-red-500 !border-red-300 hover:!bg-red-50')}
                               disabled={actionLoading === w.id}
                               onClick={() => { setRejectTarget(w); setRejectReason('') }}
-                              className="ca-btn ca-btn--ghost"
-                              style={{ height: 32, padding: '0 12px', fontSize: 12, color: '#EF4444', borderColor: '#EF4444' }}
                             >
                               Rejeitar
-                            </button>
+                            </DashBtn>
                           </div>
                         )}
                       </td>
@@ -237,50 +234,50 @@ export function AdminWithdrawalsPage() {
         </div>
       </div>
 
+      {/* Approve modal */}
       {approveTarget && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}
-          onClick={() => setApproveTarget(null)}>
-          <div className="ca-card" style={{ padding: 32, width: 420, maxWidth: '90vw' }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Confirmar aprovação</div>
-            <div style={{ fontSize: 14, color: 'var(--ca-muted)', marginBottom: 24, lineHeight: 1.6 }}>
-              Aprovar saque de <strong style={{ color: 'var(--ca-ink)' }}>R$ {(Number(approveTarget.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> para <strong style={{ color: 'var(--ca-ink)' }}>{approveTarget.user.name}</strong>?
+        <div className="fixed inset-0 bg-black/45 flex items-center justify-center z-[1000]" onClick={() => setApproveTarget(null)}>
+          <div className="bg-white rounded-2xl border border-slate-200 p-8 w-[420px] max-w-[90vw]" onClick={e => e.stopPropagation()}>
+            <div className="font-display text-[18px] font-bold mb-2">Confirmar aprovação</div>
+            <div className="text-[14px] text-slate-500 mb-6 leading-relaxed">
+              Aprovar saque de <strong className="text-slate-900">R$ {(Number(approveTarget.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> para <strong className="text-slate-900">{approveTarget.user.name}</strong>?
               <br />A transferência será realizada imediatamente via Pagar.me.
             </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button className="ca-btn ca-btn--ghost" style={{ flex: 1, height: 42 }} onClick={() => setApproveTarget(null)}>Cancelar</button>
-              <button className="ca-btn ca-btn--primary" style={{ flex: 2, height: 42 }} onClick={handleApprove}>Aprovar saque</button>
+            <div className="flex gap-2.5">
+              <DashBtn variant="ghost" className="flex-1 h-[42px] justify-center" onClick={() => setApproveTarget(null)}>Cancelar</DashBtn>
+              <DashBtn variant="primary" className="flex-[2] h-[42px] justify-center" onClick={handleApprove}>Aprovar saque</DashBtn>
             </div>
           </div>
         </div>
       )}
 
+      {/* Reject modal */}
       {rejectTarget && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}
-          onClick={() => setRejectTarget(null)}>
-          <div className="ca-card" style={{ padding: 32, width: 420, maxWidth: '90vw' }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Rejeitar saque</div>
-            <div style={{ fontSize: 14, color: 'var(--ca-muted)', marginBottom: 16 }}>
-              Saque de <strong style={{ color: 'var(--ca-ink)' }}>R$ {(Number(rejectTarget.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> — {rejectTarget.user.name}
+        <div className="fixed inset-0 bg-black/45 flex items-center justify-center z-[1000]" onClick={() => setRejectTarget(null)}>
+          <div className="bg-white rounded-2xl border border-slate-200 p-8 w-[420px] max-w-[90vw]" onClick={e => e.stopPropagation()}>
+            <div className="font-display text-[18px] font-bold mb-2">Rejeitar saque</div>
+            <div className="text-[14px] text-slate-500 mb-4">
+              Saque de <strong className="text-slate-900">R$ {(Number(rejectTarget.amount) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> — {rejectTarget.user.name}
             </div>
-            <label style={{ fontSize: 12.5, color: 'var(--ca-muted)', fontWeight: 500 }}>Motivo da rejeição <span style={{ color: '#EF4444' }}>*</span></label>
+            <label className="text-[12.5px] text-slate-500 font-medium">Motivo da rejeição <span className="text-red-500">*</span></label>
             <textarea
               value={rejectReason}
               onChange={e => setRejectReason(e.target.value)}
               placeholder="Informe o motivo para o host..."
               rows={3}
-              style={{ display: 'block', width: '100%', marginTop: 6, marginBottom: 20, padding: '10px 12px', border: '1px solid var(--ca-line)', borderRadius: 10, fontSize: 13, fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }}
+              className="block w-full mt-1.5 mb-5 px-3 py-2.5 border border-slate-200 rounded-[10px] text-[13px] resize-y focus:outline-none focus:border-indigo-400 box-border"
               autoFocus
             />
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button className="ca-btn ca-btn--ghost" style={{ flex: 1, height: 42 }} onClick={() => setRejectTarget(null)}>Cancelar</button>
-              <button
-                className="ca-btn ca-btn--primary"
-                style={{ flex: 2, height: 42, background: '#EF4444', borderColor: '#EF4444' }}
+            <div className="flex gap-2.5">
+              <DashBtn variant="ghost" className="flex-1 h-[42px] justify-center" onClick={() => setRejectTarget(null)}>Cancelar</DashBtn>
+              <DashBtn
+                variant="primary"
+                className="flex-[2] h-[42px] justify-center !bg-red-500 !border-red-500 hover:!brightness-95"
                 disabled={!rejectReason.trim()}
                 onClick={handleReject}
               >
                 Confirmar rejeição
-              </button>
+              </DashBtn>
             </div>
           </div>
         </div>

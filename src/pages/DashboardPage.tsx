@@ -2,18 +2,25 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Icon } from '../components/auth/AuthIcons'
 import { api } from '../lib/api'
-import '../styles/dash.css'
-import { DashHome } from '../components/dashboard/DashHome'
-import { DashGifts } from '../components/dashboard/DashGifts'
-import { DashContributions } from '../components/dashboard/DashContributions'
-import { Saques } from '../components/dashboard/Saques'
-import { Personalize } from '../components/dashboard/Personalize'
-import { Settings } from '../components/dashboard/Settings'
+
+import {
+  DashHome,
+  DashGifts,
+  DashContributions,
+  DashWithdrawals,
+  Personalize,
+  Settings,
+  DashInvites,
+} from '../components/dashboard/pages'
 import { Sidebar } from '../components/dashboard/Sidebar'
 import { Topbar } from '../components/dashboard/Topbar'
-import { DashConvites } from '../components/dashboard/DashConvites'
+
+import { cn } from '@/lib/utils'
+import { Bottombar } from '@/components/dashboard/Bottombar'
 
 export type ActivePage = 'dashboard' | 'gifts' | 'contrib' | 'payouts' | 'customize' | 'settings' | 'convites'
+
+// ─── PageHead ──────────────────────────────────────────────────────
 
 interface PageHeadProps {
   eyebrow?: string
@@ -22,69 +29,60 @@ interface PageHeadProps {
   sub?: string
   actions?: React.ReactNode
 }
+
 export function PageHead({ eyebrow, title, status, sub, actions }: PageHeadProps) {
   const statuses = {
     published: { c: '#047857', bg: 'rgba(16,185,129,0.10)', dot: '#10B981', label: 'Publicado' },
     pending:   { c: '#B45309', bg: 'rgba(245,158,11,0.10)', dot: '#F59E0B', label: 'Aguardando verificação' },
-    closed:    { c: '#475569', bg: 'var(--ca-bg-soft)',     dot: '#94A3B8', label: 'Encerrado' },
+    closed:    { c: '#475569', bg: '#F8FAFC',               dot: '#94A3B8', label: 'Encerrado' },
   }
   const s = status ? statuses[status] : null
   return (
-    <div className="cd-page__head">
+    <div className="flex items-end justify-between gap-5 mb-6 flex-wrap max-sm:flex-col max-sm:items-start">
       <div>
-        {eyebrow && <span className="ca-eyebrow">{eyebrow}</span>}
-        <div className="ca-row ca-row--gap" style={{ marginTop: 8 }}>
-          <h1 className="ca-display" style={{ fontSize: 30, margin: 0, letterSpacing: '-0.025em' }}>{title}</h1>
+        {eyebrow && <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400 m-0">{eyebrow}</p>}
+        <div className="flex items-center gap-2.5 mt-2">
+          <h1 className="font-display text-[30px] font-semibold tracking-[-0.025em] text-slate-950 m-0 leading-none">{title}</h1>
           {s && (
-            <span className="ca-badge" style={{ background: s.bg, color: s.c, borderColor: s.bg, marginLeft: 4, alignSelf: 'center' }}>
-              <span style={{ width: 6, height: 6, borderRadius: 999, background: s.dot }} />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold self-center ml-1" style={{ background: s.bg, color: s.c }}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.dot }} />
               {s.label}
             </span>
           )}
         </div>
-        {sub && <p style={{ color: 'var(--ca-muted)', fontSize: 14, margin: '6px 0 0', maxWidth: 540 }}>{sub}</p>}
+        {sub && <p className="text-sm text-slate-500 mt-1.5 max-w-[540px] m-0 mt-1.5">{sub}</p>}
       </div>
-      {actions && <div className="ca-row ca-row--gap">{actions}</div>}
+      {actions && <div className="flex items-center gap-2.5 flex-wrap">{actions}</div>}
     </div>
   )
 }
 
-// ─── Bottom nav icon ──────────────────────────────────────────
-function HomeIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ width: 22, height: 22 }}>
-      <path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
 
-const BOTTOM_NAV: Array<{ id: ActivePage; label: string; icon: React.ReactNode }> = [
-  { id: 'dashboard', label: 'Início',    icon: <HomeIcon /> },
-  { id: 'gifts',     label: 'Presentes', icon: <Icon.Sparkle style={{ width: 22, height: 22 }} /> },
-  { id: 'contrib',   label: 'Feed',      icon: <Icon.Pix    style={{ width: 22, height: 22 }} /> },
-  { id: 'payouts',   label: 'Saldo',     icon: <Icon.Bank   style={{ width: 22, height: 22 }} /> },
-  { id: 'settings',  label: 'Perfil',    icon: <Icon.User   style={{ width: 22, height: 22 }} /> },
-]
+// ─── Empty state ────────────────────────────────────────────────────
 
-// ─── Empty State ──────────────────────────────────────────────
 function NoEventState() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: 48, textAlign: 'center' }}>
-      <span style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--ca-violet-100)', color: 'var(--ca-indigo)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+    <div className="flex flex-col items-center justify-center flex-1 p-12 text-center">
+      <span className="w-16 h-16 rounded-2xl bg-violet-100 text-indigo-500 inline-flex items-center justify-center mb-5">
         <Icon.Sparkle style={{ width: 28, height: 28 }} />
       </span>
-      <h2 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>
+      <h2 className="font-display text-[22px] font-semibold text-slate-900 mb-2">
         Você ainda não tem nenhum evento publicado
       </h2>
-      <p style={{ fontSize: 14, color: 'var(--ca-muted)', maxWidth: 380, marginBottom: 24 }}>
+      <p className="text-[14px] text-slate-500 max-w-[380px] mb-6">
         Crie seu evento, adicione presentes e compartilhe com seus convidados.
       </p>
-      <Link to="/criar" className="ca-btn ca-btn--primary" style={{ height: 44, padding: '0 24px', fontSize: 14 }}>
+      <Link
+        to="/criar"
+        className="inline-flex items-center h-11 px-6 text-[14px] font-semibold text-white rounded-xl bg-ca-grad hover:brightness-105 transition-all no-underline"
+      >
         Criar meu primeiro evento
       </Link>
     </div>
   )
 }
+
+// ─── DashboardPage ──────────────────────────────────────────────────
 
 export function DashboardPage() {
   const [activePage, setActivePage] = useState<ActivePage>('dashboard')
@@ -93,7 +91,6 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [noEvent, setNoEvent] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-
   const [walletAvailable, setWalletAvailable] = useState<number | null>(null)
 
   const loadData = async () => {
@@ -126,9 +123,17 @@ export function DashboardPage() {
   const confirmedContrib = contributions.filter((c: any) => c.status === 'confirmed')
 
   return (
-    <div style={{ position: 'fixed', inset: 0 }} className="ca-root">
-      <div className={`cd-shell${menuOpen ? ' cd-shell--menu-open' : ''}${activePage === 'payouts' ? ' cd-shell--saques' : ''}`}>
-        {menuOpen && <div className="cd-side__overlay" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
+    <div className="fixed inset-0 font-sans antialiased text-slate-900 bg-slate-50">
+      {/* Sidebar overlay (mobile) */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/45 z-[49]"
+          onClick={() => setMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <div className="grid h-full nav:grid-cols-[252px_1fr]">
         <Sidebar
           activePage={activePage}
           onNav={setActivePage}
@@ -138,11 +143,18 @@ export function DashboardPage() {
           menuOpen={menuOpen}
           onClose={() => setMenuOpen(false)}
         />
-        <div className="cd-main">
-          <Topbar eventSlug={event?.slug} onMenuToggle={() => setMenuOpen(v => !v)} />
-          <div className="cd-page">
+        <div className="flex flex-col overflow-hidden min-w-0">
+          {activePage !== 'payouts'
+            ? <Topbar eventSlug={event?.slug} onMenuToggle={() => setMenuOpen(v => !v)} onNavigateSettings={() => setActivePage('settings')} />
+            : <div className="hidden nav:block"><Topbar eventSlug={event?.slug} onMenuToggle={() => setMenuOpen(v => !v)} onNavigateSettings={() => setActivePage('settings')} /></div>}
+          <div className={cn(
+            'flex-1 overflow-auto',
+            activePage !== 'payouts'
+              ? 'px-8 py-7 pb-10 max-[899px]:px-5 max-[899px]:py-5 max-[899px]:pb-8 max-sm:px-4 max-sm:py-4 max-sm:pb-[calc(64px+16px)]'
+              : 'px-8 py-7 pb-10 max-[899px]:px-0 max-[899px]:py-0 max-sm:pb-[calc(64px+16px)]',
+          )}>
             {loading && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--ca-muted)', fontSize: 14 }}>
+              <div className="flex items-center justify-center flex-1 text-slate-500 text-[14px] h-40">
                 Carregando…
               </div>
             )}
@@ -152,25 +164,15 @@ export function DashboardPage() {
                 {activePage === 'dashboard' && <DashHome event={event} contributions={contributions} onNavigate={setActivePage} availableBalance={walletAvailable} />}
                 {activePage === 'gifts'     && <DashGifts event={event} onReload={loadData} />}
                 {activePage === 'contrib'   && <DashContributions contributions={contributions} />}
-                {activePage === 'payouts'   && <Saques eventId={event?.id} />}
+                {activePage === 'payouts'   && <DashWithdrawals eventId={event?.id} onBack={() => setActivePage('dashboard')} />}
                 {activePage === 'customize' && <Personalize event={event} onReload={loadData} onNavigate={setActivePage} />}
                 {activePage === 'settings'  && <Settings />}
-                {activePage === 'convites'  && <DashConvites event={event} />}
+                {activePage === 'convites'  && <DashInvites event={event} />}
               </>
             )}
           </div>
-          <nav className="cd-bottom-nav">
-            {BOTTOM_NAV.map(item => (
-              <button
-                key={item.id}
-                className={`cd-bottom-nav__btn${activePage === item.id ? ' cd-bottom-nav__btn--on' : ''}`}
-                onClick={() => setActivePage(item.id)}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </nav>
+          {/* Bottom nav — mobile only */}
+          <Bottombar activePage={activePage} setActivePage={setActivePage} />
         </div>
       </div>
     </div>

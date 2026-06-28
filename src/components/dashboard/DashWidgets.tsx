@@ -1,4 +1,5 @@
 // Shared visual helpers for dashboard pages
+import { cn } from '@/lib/utils'
 
 export const AVATAR_COLORS = [
   'linear-gradient(135deg,#F472B6,#A855F7)',
@@ -23,16 +24,16 @@ export function fmtCurrencyInner(v: number) {
   const [reais, cents] = r.split(',')
   return (
     <>
-      <span className="cd-money__currency">R$</span>
+      <span className="text-[0.58em] text-slate-500 font-medium tracking-[0.02em]">R$</span>
       <span>{reais}</span>
-      <span className="cd-money__cents">,{cents}</span>
+      <span className="text-[0.55em] text-slate-500 ml-0.5">,{cents}</span>
     </>
   )
 }
 
 export function Money({ value, size }: { value: number; size: number }) {
   return (
-    <div className="cd-money" style={{ fontSize: size }}>
+    <div className="font-display font-semibold tracking-[-0.025em] tabular-nums inline-flex items-baseline gap-1" style={{ fontSize: size }}>
       {fmtCurrencyInner(value)}
     </div>
   )
@@ -88,21 +89,21 @@ export interface BarDatum { label: string; value: number; label2?: string }
 export function BarChart({ data, height = 200 }: { data: BarDatum[]; height?: number }) {
   const max = Math.max(...data.map(d => d.value))
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height, paddingTop: 8 }}>
+    <div className="flex items-end gap-2.5" style={{ height, paddingTop: 8 }}>
       {data.map((d, i) => {
         const h = Math.max(6, (d.value / max) * (height - 30))
         const isPeak = d.value === max
         return (
-          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-            <div style={{ fontSize: 11, color: isPeak ? '#6366F1' : 'var(--ca-muted-2)', fontWeight: isPeak ? 600 : 500, fontVariantNumeric: 'tabular-nums' }}>
+          <div key={i} className="flex-1 flex flex-col items-center gap-2">
+            <div className={cn('text-[11px]', isPeak ? 'text-indigo-500 font-semibold' : 'text-slate-400 font-medium')} style={{ fontVariantNumeric: 'tabular-nums' }}>
               {d.label2 ?? ''}
             </div>
             <div style={{
               width: '100%', height: h, borderRadius: 6,
-              background: isPeak ? 'var(--ca-grad)' : 'var(--ca-violet-100)',
+              background: isPeak ? 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 60%, #A855F7 100%)' : '#EDE9FE',
               boxShadow: isPeak ? '0 4px 12px rgba(99,102,241,0.28)' : 'none',
             }} />
-            <div style={{ fontSize: 11, color: 'var(--ca-muted)' }}>{d.label}</div>
+            <div className="text-[11px] text-slate-500">{d.label}</div>
           </div>
         )
       })}
@@ -122,25 +123,30 @@ export interface StatCardProps {
 }
 export function StatCard({ icon, label, value, currency = false, delta, deltaTone = 'up', spark, hint }: StatCardProps) {
   return (
-    <div className="cd-stat">
-      <div className="cd-stat__top">
+    <div className="p-[20px_22px] bg-white border border-slate-200 rounded-2xl relative overflow-hidden transition-all hover:border-slate-300 hover:shadow-ca-md hover:-translate-y-px">
+      <div className="flex items-center gap-2.5 text-[12.5px] text-slate-500 font-medium [&_svg]:w-[15px] [&_svg]:h-[15px]">
         {icon}
         <span>{label}</span>
         {delta && (
-          <span className={'cd-stat__delta cd-stat__delta--' + deltaTone} style={{ marginLeft: 'auto' }}>
+          <span className={cn(
+            'ml-auto inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full',
+            deltaTone === 'up'   && 'bg-emerald-50 text-emerald-700',
+            deltaTone === 'down' && 'bg-red-50 text-red-700',
+            deltaTone === 'flat' && 'bg-slate-50 text-slate-500',
+          )}>
             {deltaTone === 'up' ? '▲' : deltaTone === 'down' ? '▼' : '·'} {delta}
           </span>
         )}
       </div>
       {currency ? (
-        <div className="cd-stat__value" style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}>
+        <div className="font-display font-semibold text-[30px] tracking-[-0.025em] mt-2.5 tabular-nums inline-flex items-baseline gap-1">
           {fmtCurrencyInner(value as number)}
         </div>
       ) : (
-        <div className="cd-stat__value">{value}</div>
+        <div className="font-display font-semibold text-[30px] tracking-[-0.025em] mt-2.5 tabular-nums">{value}</div>
       )}
-      {hint && <div style={{ fontSize: 12, color: 'var(--ca-muted)', marginTop: 4 }}>{hint}</div>}
-      {spark && <div className="cd-stat__spark"><Sparkline data={spark} /></div>}
+      {hint && <div className="text-xs text-slate-500 mt-1">{hint}</div>}
+      {spark && <div className="mt-3.5 h-9"><Sparkline data={spark} /></div>}
     </div>
   )
 }

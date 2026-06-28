@@ -1,15 +1,76 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-:root {
-  font-family: system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-body {
-  margin: 0;
-  min-width: 320px;
+@layer base {
+  /* ── shadcn CSS variable tokens (mapped to Celebre brand) ── */
+  :root {
+    --background:   0 0% 100%;
+    --foreground:   240 17% 32%;       /* #42445d  ink */
+
+    --card:         0 0% 100%;
+    --card-foreground: 240 17% 32%;
+
+    --popover:      0 0% 100%;
+    --popover-foreground: 240 17% 32%;
+
+    --primary:      282 34% 57%;       /* #9e68ba  cb-primary */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary:    240 17% 96%;
+    --secondary-foreground: 240 17% 32%;
+
+    --muted:        240 17% 96%;
+    --muted-foreground: 304 15% 50%;   /* #805a7c  cb-muted */
+
+    --accent:       282 34% 57%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive:  0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border:       240 17% 92%;
+    --input:        240 17% 92%;
+    --ring:         282 34% 57%;
+
+    --radius: 0.75rem;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-synthesis: none;
+    line-height: 1.5;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: theme('colors.surface');
+    color: theme('colors.ink');
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
 }
 
 #root {
