@@ -5,6 +5,8 @@ import { AuthLogo } from '../auth/AuthShared'
 import { fmtDate, nameInitials } from './DashWidgets'
 import { cn } from '@/lib/utils'
 import type { ActivePage } from '../../pages/DashboardPage'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '../ui/dropdown-menu'
+import { DropdownMenuTrigger } from '../ui/dropdown-menu'
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   wedding:     'Casamento',
@@ -105,7 +107,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activePage, onNav, event, contribCount, giftCount, menuOpen, onClose }: SidebarProps) {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
 
   const main: Array<{ id: string; label: string; icon: React.ReactNode; count?: number }> = [
     { id: 'dashboard', label: 'Dashboard',     icon: <Icon.Globe   style={{ width: 17, height: 17 }} /> },
@@ -114,9 +116,6 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, men
     { id: 'gifts',     label: 'Presentes',     icon: <Icon.Sparkle style={{ width: 17, height: 17 }} />, count: giftCount || undefined },
     { id: 'contrib',   label: 'Contribuições', icon: <Icon.Pix     style={{ width: 17, height: 17 }} />, count: contribCount || undefined },
     { id: 'payouts',   label: 'Saques',        icon: <Icon.Bank    style={{ width: 17, height: 17 }} /> },
-  ]
-  const account: Array<{ id: string; label: string; icon: React.ReactNode }> = [
-    { id: 'settings', label: 'Configurações', icon: <Icon.User style={{ width: 17, height: 17 }} /> },
   ]
 
   const go = (id: string) => {
@@ -161,24 +160,53 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, men
       </div>
 
       <NavSection label="Geral"  items={main}    activePage={activePage} onGo={go} />
-      <NavSection label="Conta"  items={account} activePage={activePage} onGo={go} />
 
       {/* Footer */}
       <div className="mt-auto px-2 pt-3">
         <KycSidebarWidget />
-        <button
-          className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-[10px] cursor-pointer transition-all hover:bg-slate-50 bg-transparent border-0 mt-2.5"
-          onClick={() => go('settings')}
-        >
-          <span className="w-[30px] h-[30px] rounded-full bg-gradient-to-br from-pink-400 to-purple-500 inline-flex items-center justify-center text-white font-semibold text-xs shrink-0">
-            {userInitials}
-          </span>
-          <div className="flex-1 min-w-0 leading-[1.2] text-left">
-            <div className="font-semibold text-[13px] text-slate-900 truncate">{user?.name ?? '—'}</div>
-            <div className="text-[11.5px] text-slate-500 truncate">{user?.email ?? '—'}</div>
-          </div>
-          <Icon.ArrowRight style={{ width: 14, height: 14, color: '#94A3B8' }} />
-        </button>
+        <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-[10px] cursor-pointer transition-all hover:bg-slate-50 bg-transparent border-0 mt-2.5">
+            <span className="w-[30px] h-[30px] rounded-full bg-gradient-to-br from-pink-400 to-purple-500 inline-flex items-center justify-center text-white font-semibold text-xs shrink-0">
+              {userInitials}
+            </span>
+            <div className="flex-1 min-w-0 leading-[1.2] text-left">
+              <div className="font-semibold text-[13px] text-slate-900 truncate">{user?.name ?? '—'}</div>
+              <div className="text-[11.5px] text-slate-500 truncate">{user?.email ?? '—'}</div>
+            </div>
+            <Icon.ArrowRight style={{ width: 14, height: 14, color: '#94A3B8' }} />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-52">
+          <DropdownMenuLabel className="flex flex-col gap-0.5">
+            <span className="text-[13px] font-semibold text-slate-800 truncate">{user?.name}</span>
+            <span className="text-[11px] font-normal text-slate-500 truncate">{user?.email}</span>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="cursor-pointer gap-2 text-slate-700"
+            onClick={() => go('settings')}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-4 h-4 shrink-0 text-slate-500">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v3M12 20v3M4 12H1M23 12h-3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" strokeLinecap="round" />
+            </svg>
+            Configurações
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="cursor-pointer gap-2 text-red-600 focus:text-red-600 focus:bg-red-50"
+            onClick={logout}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-4 h-4 shrink-0">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" />
+              <polyline points="16 17 21 12 16 7" strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="21" y1="12" x2="9" y2="12" strokeLinecap="round" />
+            </svg>
+            Sair
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       </div>
     </aside>
   )

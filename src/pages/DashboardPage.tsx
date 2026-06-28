@@ -2,16 +2,21 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Icon } from '../components/auth/AuthIcons'
 import { api } from '../lib/api'
-import { DashHome } from '../components/dashboard/pages/DashHome'
-import { DashGifts } from '../components/dashboard/pages/DashGifts'
-import { DashContributions } from '../components/dashboard/pages/DashContributions'
-import { Saques } from '../components/dashboard/pages/Saques'
-import { Personalize } from '../components/dashboard/pages/Personalize'
-import { Settings } from '../components/dashboard/pages/Settings'
+
+import {
+  DashHome,
+  DashGifts,
+  DashContributions,
+  DashWithdrawals,
+  Personalize,
+  Settings,
+  DashInvites,
+} from '../components/dashboard/pages'
 import { Sidebar } from '../components/dashboard/Sidebar'
 import { Topbar } from '../components/dashboard/Topbar'
-import { DashConvites } from '../components/dashboard/pages/DashConvites'
+
 import { cn } from '@/lib/utils'
+import { Bottombar } from '@/components/dashboard/Bottombar'
 
 export type ActivePage = 'dashboard' | 'gifts' | 'contrib' | 'payouts' | 'customize' | 'settings' | 'convites'
 
@@ -52,23 +57,6 @@ export function PageHead({ eyebrow, title, status, sub, actions }: PageHeadProps
   )
 }
 
-// ─── Bottom nav icon ────────────────────────────────────────────────
-
-function HomeIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ width: 22, height: 22 }}>
-      <path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-const BOTTOM_NAV: Array<{ id: ActivePage; label: string; icon: React.ReactNode }> = [
-  { id: 'dashboard', label: 'Início',    icon: <HomeIcon /> },
-  { id: 'gifts',     label: 'Presentes', icon: <Icon.Sparkle style={{ width: 22, height: 22 }} /> },
-  { id: 'contrib',   label: 'Feed',      icon: <Icon.Pix    style={{ width: 22, height: 22 }} /> },
-  { id: 'payouts',   label: 'Saldo',     icon: <Icon.Bank   style={{ width: 22, height: 22 }} /> },
-  { id: 'settings',  label: 'Perfil',    icon: <Icon.User   style={{ width: 22, height: 22 }} /> },
-]
 
 // ─── Empty state ────────────────────────────────────────────────────
 
@@ -157,8 +145,8 @@ export function DashboardPage() {
         />
         <div className="flex flex-col overflow-hidden min-w-0">
           {activePage !== 'payouts'
-            ? <Topbar eventSlug={event?.slug} onMenuToggle={() => setMenuOpen(v => !v)} />
-            : <div className="hidden nav:block"><Topbar eventSlug={event?.slug} onMenuToggle={() => setMenuOpen(v => !v)} /></div>}
+            ? <Topbar eventSlug={event?.slug} onMenuToggle={() => setMenuOpen(v => !v)} onNavigateSettings={() => setActivePage('settings')} />
+            : <div className="hidden nav:block"><Topbar eventSlug={event?.slug} onMenuToggle={() => setMenuOpen(v => !v)} onNavigateSettings={() => setActivePage('settings')} /></div>}
           <div className={cn(
             'flex-1 overflow-auto',
             activePage !== 'payouts'
@@ -176,29 +164,15 @@ export function DashboardPage() {
                 {activePage === 'dashboard' && <DashHome event={event} contributions={contributions} onNavigate={setActivePage} availableBalance={walletAvailable} />}
                 {activePage === 'gifts'     && <DashGifts event={event} onReload={loadData} />}
                 {activePage === 'contrib'   && <DashContributions contributions={contributions} />}
-                {activePage === 'payouts'   && <Saques eventId={event?.id} onBack={() => setActivePage('dashboard')} />}
+                {activePage === 'payouts'   && <DashWithdrawals eventId={event?.id} onBack={() => setActivePage('dashboard')} />}
                 {activePage === 'customize' && <Personalize event={event} onReload={loadData} onNavigate={setActivePage} />}
                 {activePage === 'settings'  && <Settings />}
-                {activePage === 'convites'  && <DashConvites event={event} />}
+                {activePage === 'convites'  && <DashInvites event={event} />}
               </>
             )}
           </div>
           {/* Bottom nav — mobile only */}
-          <nav className="hidden max-sm:flex fixed bottom-0 inset-x-0 h-16 bg-white/95 backdrop-blur-xl border-t border-slate-200 z-50 pb-[env(safe-area-inset-bottom)]">
-            {BOTTOM_NAV.map(item => (
-              <button
-                key={item.id}
-                className={cn(
-                  'flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors border-none bg-transparent cursor-pointer py-1.5',
-                  activePage === item.id ? 'text-indigo-500' : 'text-slate-500',
-                )}
-                onClick={() => setActivePage(item.id)}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </nav>
+          <Bottombar activePage={activePage} onNav={setActivePage} setActivePage={setActivePage} />
         </div>
       </div>
     </div>

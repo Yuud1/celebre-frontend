@@ -1,12 +1,10 @@
 import { useRef, useState } from 'react'
-import { Icon } from '../../auth/AuthIcons'
-import { PageHead } from '../../../pages/DashboardPage'
-import { Money } from '../DashWidgets'
-import { DashBtn } from '../DashBtn'
-import { api } from '../../../lib/api'
+import { Icon } from '../../../auth/AuthIcons'
+import { PageHead } from '../../../../pages/DashboardPage'
+import { DashBtn } from '../../DashBtn'
+import { api } from '../../../../lib/api'
 import { cn } from '@/lib/utils'
-
-// ─── Gift Form Modal ──────────────────────────────────────────
+import { GiftCardItem } from './components/GiftCardItemProps'
 
 interface GiftFormData {
   type: 'fixed' | 'contribution'
@@ -197,90 +195,6 @@ function GiftFormModal({ eventId, gift, onClose, onSaved }: GiftFormModalProps) 
             </DashBtn>
           </div>
         </form>
-      </div>
-    </div>
-  )
-}
-
-// ─── Gift Card ────────────────────────────────────────────────
-
-interface GiftCardItemProps {
-  gift: any
-  onEdit: (gift: any) => void
-  onDelete: (giftId: string) => void
-}
-
-function GiftCardItem({ gift, onEdit, onDelete }: GiftCardItemProps) {
-  const isFixed = gift.type === 'fixed'
-  const isPurchased = gift.isPurchased
-  const collected = Number(gift.collected ?? 0)
-  const goal = Number(gift.value ?? 0)
-  const pct = isFixed
-    ? (isPurchased ? 100 : 0)
-    : (goal > 0 ? Math.min(100, (collected / goal) * 100) : 0)
-  const typeLabel = gift.type === 'fixed' ? 'Fixo' : 'Coletivo'
-
-  return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col transition-all hover:-translate-y-0.5 hover:shadow-ca-md">
-      {/* Image area */}
-      <div className="relative h-[140px] bg-slate-100">
-        {gift.imageUrl && (
-          <img src={gift.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        )}
-        <div className="absolute top-3 left-3 flex gap-1.5">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-white/85 backdrop-blur-sm text-slate-900">
-            {typeLabel}
-          </span>
-          {isPurchased && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
-              <Icon.Check style={{ width: 11, height: 11 }} />Quitado
-            </span>
-          )}
-        </div>
-        <div className="absolute top-3 right-3 flex gap-1.5">
-          <button
-            onClick={() => onEdit(gift)}
-            className="w-[30px] h-[30px] rounded-lg bg-white/85 backdrop-blur-sm inline-flex items-center justify-center border-0 cursor-pointer text-indigo-500"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ width: 14, height: 14 }}>
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <button
-            onClick={() => onDelete(gift.id)}
-            className="w-[30px] h-[30px] rounded-lg bg-white/85 backdrop-blur-sm inline-flex items-center justify-center border-0 cursor-pointer text-red-500"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ width: 14, height: 14 }}>
-              <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Body */}
-      <div className="p-[16px_18px] flex flex-col flex-1">
-        <div className="font-display font-semibold text-[15px] tracking-[-0.01em]">{gift.name}</div>
-        {gift.description && (
-          <div className="text-[12.5px] text-slate-500 mt-1 leading-snug overflow-hidden text-ellipsis whitespace-nowrap">
-            {gift.description}
-          </div>
-        )}
-        <div className="flex items-center justify-between mt-3 mb-2">
-          <Money value={isFixed ? (isPurchased ? goal : 0) : collected} size={17} />
-          {goal > 0 && <span className="text-[12px] text-slate-400 tabular-nums">de R$ {(goal / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>}
-        </div>
-        {/* Progress bar */}
-        <div className={cn('h-1.5 rounded-full overflow-hidden', isPurchased ? 'bg-emerald-100' : 'bg-slate-100')}>
-          <div
-            className={cn('h-full rounded-full transition-all', isPurchased ? 'bg-emerald-500' : 'bg-ca-grad')}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <div className="flex items-center justify-between mt-2.5">
-          <span className="text-[12px] text-slate-500">{isFixed ? (isPurchased ? 'Quitado' : 'Não quitado') : `${Math.round(pct)}% arrecadado`}</span>
-          <span className={cn('text-[12px] font-semibold', isPurchased ? 'text-emerald-700' : 'text-indigo-500')}>{Math.round(pct)}%</span>
-        </div>
       </div>
     </div>
   )

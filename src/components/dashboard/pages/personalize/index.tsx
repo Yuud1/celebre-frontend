@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { PageHead, type ActivePage } from "../../../pages/DashboardPage";
-import { api } from "../../../lib/api";
-import { ImagePicker } from "../../builder/ImagePicker";
-import { Icon } from "../../auth/AuthIcons";
-import { DashBtn } from '../DashBtn'
+import { PageHead, type ActivePage } from "@/pages/DashboardPage";
+import { api } from "@/lib/api";
+import { ImagePicker } from "@/components/builder/ImagePicker";
+import { Icon } from "@/components/auth/AuthIcons";
+import { DashBtn } from '../../DashBtn'
 import { cn } from "@/lib/utils";
 
 const PALETTES = [
@@ -23,7 +23,7 @@ const labelTextCls = 'text-[11px] font-semibold tracking-[0.06em] uppercase text
 interface PersonalizeProps { event: any | null; onReload: () => void; onNavigate: (p: ActivePage) => void }
 
 export function Personalize({ event, onReload }: PersonalizeProps) {
-  const [tab, setTab] = useState<'geral' | 'media' | 'aparencia'>('geral')
+  const [tab, setTab] = useState<'general' | 'media' | 'appearance'>('general')
   const [saving, setSaving] = useState(false)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [coverPreview, setCoverPreview] = useState('')
@@ -89,9 +89,9 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
   }
 
   const tabDefs = [
-    { id: 'geral'     as const, label: 'Geral',     icon: <Icon.Doc     style={{ width: 14, height: 14 }} /> },
-    { id: 'media'     as const, label: 'Mídia',     icon: <Icon.Camera  style={{ width: 14, height: 14 }} /> },
-    { id: 'aparencia' as const, label: 'Aparência', icon: <Icon.Sparkle style={{ width: 14, height: 14 }} /> },
+    { id: 'general'    as const, label: 'Geral',     icon: <Icon.Doc     style={{ width: 14, height: 14 }} /> },
+    { id: 'media'      as const, label: 'Mídia',     icon: <Icon.Camera  style={{ width: 14, height: 14 }} /> },
+    { id: 'appearance' as const, label: 'Aparência', icon: <Icon.Sparkle style={{ width: 14, height: 14 }} /> },
   ]
 
   return (
@@ -134,7 +134,7 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
           </div>
 
           <div className="flex flex-col gap-[18px] p-[22px]">
-            {tab === 'geral' && (
+            {tab === 'general' && (
               <>
                 <label className="flex flex-col gap-1.5">
                   <span className={labelTextCls}>Nome do evento</span>
@@ -168,7 +168,7 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
               />
             )}
 
-            {tab === 'aparencia' && (
+            {tab === 'appearance' && (
               <>
                 <div>
                   <div className="flex items-center justify-between mb-2.5">

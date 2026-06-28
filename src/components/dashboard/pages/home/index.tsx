@@ -1,11 +1,10 @@
 import { useState, useMemo } from 'react'
-import { useAuth } from '../../../contexts/AuthContext'
-import { Icon } from '../../auth/AuthIcons'
-import { PageHead } from '../../../pages/DashboardPage'
-import type { ActivePage } from '../../../pages/DashboardPage'
-import { Money, StatCard, BarChart, Donut, AVATAR_COLORS, fmtDate, nameInitials } from '../DashWidgets'
-import { DashBtn } from '../DashBtn'
-import { DashBadge } from '../DashBadge'
+import { useAuth } from '@/contexts/AuthContext'
+import { Icon } from '@/components/auth/AuthIcons'
+import { PageHead, type ActivePage } from '@/pages/DashboardPage'
+import { Money, StatCard, BarChart, Donut, AVATAR_COLORS, fmtDate, nameInitials } from "@/components/dashboard/DashWidgets"
+import { DashBtn } from '../../DashBtn'
+import { DashBadge } from '../../DashBadge'
 import { cn } from '@/lib/utils'
 
 type Period = '7' | '14' | '30' | 'all'

@@ -1,14 +1,23 @@
 import { useAuth } from '../../contexts/AuthContext'
 import { Icon } from '../auth/AuthIcons'
 import { nameInitials } from './DashWidgets'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu'
 
 interface TopbarProps {
   eventSlug?: string
   onMenuToggle?: () => void
+  onNavigateSettings?: () => void
 }
 
-export function Topbar({ eventSlug, onMenuToggle }: TopbarProps) {
-  const { user } = useAuth()
+export function Topbar({ eventSlug, onMenuToggle, onNavigateSettings }: TopbarProps) {
+  const { user, logout } = useAuth()
   const userInitials = nameInitials(user?.name)
 
   return (
@@ -68,9 +77,42 @@ export function Topbar({ eventSlug, onMenuToggle }: TopbarProps) {
 
       <span className="w-px h-6 bg-slate-200" />
 
-      <span className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 inline-flex items-center justify-center text-white font-semibold text-[13px] shrink-0">
-        {userInitials}
-      </span>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 inline-flex items-center justify-center text-white font-semibold text-[13px] shrink-0 cursor-pointer outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-pink-400">
+            {userInitials}
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-52">
+          <DropdownMenuLabel className="flex flex-col gap-0.5">
+            <span className="text-[13px] font-semibold text-slate-800 truncate">{user?.name}</span>
+            <span className="text-[11px] font-normal text-slate-500 truncate">{user?.email}</span>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="cursor-pointer gap-2 text-slate-700"
+            onClick={onNavigateSettings}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-4 h-4 shrink-0 text-slate-500">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v3M12 20v3M4 12H1M23 12h-3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" strokeLinecap="round" />
+            </svg>
+            Configurações
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="cursor-pointer gap-2 text-red-600 focus:text-red-600 focus:bg-red-50"
+            onClick={logout}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-4 h-4 shrink-0">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" />
+              <polyline points="16 17 21 12 16 7" strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="21" y1="12" x2="9" y2="12" strokeLinecap="round" />
+            </svg>
+            Sair
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }

@@ -1,11 +1,11 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Icon } from '../../auth/AuthIcons'
-import { Money, Sparkline } from '../DashWidgets'
-import { DashBadge } from '../DashBadge'
-import { api } from '../../../lib/api'
+import { Icon } from '../../../auth/AuthIcons'
+import { Money, Sparkline } from '../../DashWidgets'
+import { DashBadge } from '../../DashBadge'
+import { api } from '../../../../lib/api'
 import { cn } from '@/lib/utils'
-import { DashPageHeader } from '../DashPageHeader'
-import { PageHead } from '../../../pages/DashboardPage'
+import { DashPageHeader } from '../../DashPageHeader'
+import { PageHead } from '../../../../pages/DashboardPage'
 import { File } from 'lucide-react'
 
 type Summary = {
@@ -57,9 +57,9 @@ function buildSparkData(transactions: Transaction[]): number[] {
   return buckets
 }
 
-interface SaquesProps { eventId?: string | null; onBack?: () => void }
+interface WithdrawalsProps { eventId?: string | null; onBack?: () => void }
 
-export function Saques({ eventId: _eventId, onBack }: SaquesProps) {
+export function DashWithdrawals({ eventId: _eventId, onBack }: WithdrawalsProps) {
   const [summary, setSummary] = useState<Summary | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [withdrawals, setWithdrawals] = useState<any[]>([])

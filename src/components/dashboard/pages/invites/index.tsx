@@ -1,13 +1,13 @@
 import { useRef, useState, useEffect } from 'react'
 import { toPng } from 'html-to-image'
 import QRCode from 'qrcode'
-import { PageHead } from '../../../pages/DashboardPage'
-import { ConviteRenderer, ConviteWaPreview, CvMiniInvite } from '../../convites/ConviteRenderer'
-import { DashBtn } from '../DashBtn'
+import { PageHead } from '@/pages/DashboardPage'
+import { InviteRenderer, InviteWhatsAppPreview, MiniInvite } from './components/InviteRenderer'
+import { DashBtn } from '../../DashBtn'
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? ''
 
-interface DashConvitesProps { event: any }
+interface DashInvitesProps { event: any }
 
 const ACCENTS: Record<string, string> = {
   casamento: '#74865f',
@@ -59,7 +59,7 @@ async function fetchAsDataUrl(url: string): Promise<string | undefined> {
   }
 }
 
-export function DashConvites({ event }: DashConvitesProps) {
+export function DashInvites({ event }: DashInvitesProps) {
   const hiddenRef = useRef<HTMLDivElement>(null)
   const [qrDataUrl, setQrDataUrl] = useState('')
   const [fontEmbedCSS, setFontEmbedCSS] = useState('')
@@ -107,7 +107,7 @@ export function DashConvites({ event }: DashConvitesProps) {
           const blob = await res.blob()
           if (!cancelled) setPregenFile(new File([blob], `convite-${slug || 'evento'}.png`, { type: 'image/png' }))
         } catch (e) {
-          console.error('[DashConvites] pregen failed:', e)
+          console.error('[DashInvites] pregen failed:', e)
         }
       })
     })
@@ -201,7 +201,7 @@ export function DashConvites({ event }: DashConvitesProps) {
           <div className="flex flex-col items-center" style={{ height: previewH + 48 }}>
             <div style={{ width: PREVIEW_W, height: previewH, overflow: 'hidden', borderRadius: 12, boxShadow: '0 4px 24px rgba(30,24,30,0.12)' }}>
               <div style={{ transform: `scale(${previewScale})`, transformOrigin: 'top left', width: 1080, height: 1920 }}>
-                <ConviteRenderer event={event} qrDataUrl={qrDataUrl} />
+                <InviteRenderer event={event} qrDataUrl={qrDataUrl} />
               </div>
             </div>
           </div>
@@ -212,11 +212,11 @@ export function DashConvites({ event }: DashConvitesProps) {
         <div className="flex flex-col items-center gap-5 flex-1">
           <div style={{ width: waW, height: waH, overflow: 'hidden', borderRadius: 24, boxShadow: '0 8px 32px rgba(30,24,30,0.14)' }}>
             <div style={{ transform: `scale(${WA_SCALE})`, transformOrigin: 'top left', width: 460, height: 940 }}>
-              <ConviteWaPreview event={event} accent={accent}>
-                <CvMiniInvite w={330}>
-                  <ConviteRenderer event={event} qrDataUrl={qrDataUrl} />
-                </CvMiniInvite>
-              </ConviteWaPreview>
+              <InviteWhatsAppPreview event={event} accent={accent}>
+                <MiniInvite w={330}>
+                  <InviteRenderer event={event} qrDataUrl={qrDataUrl} />
+                </MiniInvite>
+              </InviteWhatsAppPreview>
             </div>
           </div>
 
@@ -258,7 +258,7 @@ export function DashConvites({ event }: DashConvitesProps) {
       {/* Hidden 1080×1920 render for PNG capture */}
       <div aria-hidden="true" className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1] overflow-hidden" style={{ width: 1080, height: 1920 }}>
         <div ref={hiddenRef} style={{ width: 1080, height: 1920 }}>
-          <ConviteRenderer event={captureEvent} qrDataUrl={qrDataUrl} />
+          <InviteRenderer event={captureEvent} qrDataUrl={qrDataUrl} />
         </div>
       </div>
     </div>

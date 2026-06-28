@@ -1,6 +1,6 @@
-import { Icon } from '../../auth/AuthIcons'
-import { PageHead } from '../../../pages/DashboardPage'
-import { StatCard, nameInitials, AVATAR_COLORS } from '../DashWidgets'
+import { Icon } from '../../../auth/AuthIcons'
+import { PageHead } from '../../../../pages/DashboardPage'
+import { StatCard, nameInitials, AVATAR_COLORS } from '../../DashWidgets'
 
 function fmtDayMonth(iso: string | null) {
   if (!iso) return ''
