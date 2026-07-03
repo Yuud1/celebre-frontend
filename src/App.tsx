@@ -152,7 +152,7 @@ export default function App() {
             <Route path="/verificacao" element={<ProtectedRoute><KycPage /></ProtectedRoute>} />
             <Route path="/criar" element={<BuilderPage />} />
             <Route path="/criar/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute requireKyc><DashboardPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/p/:slug" element={<PublicEventPage />} />
             <Route path="/admin/saques" element={<AdminRoute><AdminWithdrawalsPage /></AdminRoute>} />
           </Routes>

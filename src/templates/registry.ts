@@ -85,28 +85,28 @@ export const PALETTES: PaletteDefinition[] = [
 
 const giftsByType: Record<EventTypeId, EventContent['gifts']> = {
   casamento: [
-    { id: 'g1', type: 'contribution', name: 'Lua de mel no Chile', value: 12000, meta: 12000, description: 'Atacama, Valparaiso e alguns jantares sem pressa.', featured: true },
-    { id: 'g2', type: 'fixed', name: 'Aparelho de jantar', value: 1280, description: 'Servico para receber a familia nos domingos.' },
-    { id: 'g3', type: 'fixed', name: 'Maquina de espresso', value: 2890, description: 'Cafe bom para a casa nova.' },
-    { id: 'g4', type: 'contribution', name: 'Moveis da sala', value: 8000, meta: 8000, description: 'Uma casa com cara de comeco.' },
+    { id: 'g1', type: 'contribution', name: 'Lua de mel no Chile', value: 1200000, meta: 1200000, description: 'Atacama, Valparaiso e alguns jantares sem pressa.', featured: true },
+    { id: 'g2', type: 'fixed', name: 'Aparelho de jantar', value: 128000, description: 'Servico para receber a familia nos domingos.' },
+    { id: 'g3', type: 'fixed', name: 'Maquina de espresso', value: 289000, description: 'Cafe bom para a casa nova.' },
+    { id: 'g4', type: 'contribution', name: 'Moveis da sala', value: 800000, meta: 800000, description: 'Uma casa com cara de comeco.' },
   ],
   'cha-bebe': [
-    { id: 'g1', type: 'contribution', name: 'Quarto da Olivia', value: 8000, meta: 8000, description: 'Berco, comoda, poltrona e enxoval.', featured: true },
-    { id: 'g2', type: 'fixed', name: 'Kit higiene', value: 380, description: 'Porcelana, bandeja e potinhos.' },
-    { id: 'g3', type: 'fixed', name: 'Fraldas do primeiro mes', value: 290, description: 'O basico que salva os primeiros dias.' },
-    { id: 'g4', type: 'contribution', name: 'Carrinho de bebe', value: 5400, meta: 5400, description: 'Passeios com conforto desde cedo.' },
+    { id: 'g1', type: 'contribution', name: 'Quarto da Olivia', value: 800000, meta: 800000, description: 'Berco, comoda, poltrona e enxoval.', featured: true },
+    { id: 'g2', type: 'fixed', name: 'Kit higiene', value: 38000, description: 'Porcelana, bandeja e potinhos.' },
+    { id: 'g3', type: 'fixed', name: 'Fraldas do primeiro mes', value: 29000, description: 'O basico que salva os primeiros dias.' },
+    { id: 'g4', type: 'contribution', name: 'Carrinho de bebe', value: 540000, meta: 540000, description: 'Passeios com conforto desde cedo.' },
   ],
   'cha-revelacao': [
-    { id: 'g1', type: 'contribution', name: 'Enxoval surpresa', value: 4200, meta: 4200, description: 'Depois da revelacao, a gente completa as primeiras escolhas.', featured: true },
-    { id: 'g2', type: 'fixed', name: 'Decoracao do cha', value: 520, description: 'Mesa, arranjos e os detalhes do momento.' },
-    { id: 'g3', type: 'fixed', name: 'Body neutro', value: 160, description: 'Para guardar a primeira lembranca.' },
-    { id: 'g4', type: 'contribution', name: 'Primeiros cuidados', value: 2500, meta: 2500, description: 'Farmacinha, bolsas, manta e banho.' },
+    { id: 'g1', type: 'contribution', name: 'Enxoval surpresa', value: 420000, meta: 420000, description: 'Depois da revelacao, a gente completa as primeiras escolhas.', featured: true },
+    { id: 'g2', type: 'fixed', name: 'Decoracao do cha', value: 52000, description: 'Mesa, arranjos e os detalhes do momento.' },
+    { id: 'g3', type: 'fixed', name: 'Body neutro', value: 16000, description: 'Para guardar a primeira lembranca.' },
+    { id: 'g4', type: 'contribution', name: 'Primeiros cuidados', value: 250000, meta: 250000, description: 'Farmacinha, bolsas, manta e banho.' },
   ],
   'cha-panela': [
-    { id: 'g1', type: 'fixed', name: 'Jogo de panelas', value: 890, description: 'O primeiro jantar da casa nova.', room: 'cozinha' },
-    { id: 'g2', type: 'contribution', name: 'Moveis da cozinha', value: 6500, meta: 6500, description: 'Armarios, bancada e uma mesa cheia.', featured: true, room: 'cozinha' },
-    { id: 'g3', type: 'fixed', name: 'Liquidificador premium', value: 320, description: 'Para receitas de todo dia.', room: 'cozinha' },
-    { id: 'g4', type: 'fixed', name: 'Jogo de cama', value: 540, description: 'Aconchego para inaugurar a fase nova.', room: 'quarto' },
+    { id: 'g1', type: 'fixed', name: 'Jogo de panelas', value: 89000, description: 'O primeiro jantar da casa nova.', room: 'cozinha' },
+    { id: 'g2', type: 'contribution', name: 'Moveis da cozinha', value: 650000, meta: 650000, description: 'Armarios, bancada e uma mesa cheia.', featured: true, room: 'cozinha' },
+    { id: 'g3', type: 'fixed', name: 'Liquidificador premium', value: 32000, description: 'Para receitas de todo dia.', room: 'cozinha' },
+    { id: 'g4', type: 'fixed', name: 'Jogo de cama', value: 54000, description: 'Aconchego para inaugurar a fase nova.', room: 'quarto' },
   ],
 }
 

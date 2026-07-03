@@ -36,6 +36,16 @@ export function unmask(value: string): string {
   return value.replace(/\D/g, '')
 }
 
+export function maskCurrencyInput(raw: string): string {
+  const digits = raw.replace(/\D/g, '')
+  const cents = parseInt(digits || '0', 10)
+  return (cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+export function parseCurrencyToCents(masked: string): number {
+  return parseInt(masked.replace(/\D/g, '') || '0', 10)
+}
+
 export function maskPIXKey(value: string): string {
   const type = recognizePixKey(value)
   if (type === 'CPF') return maskCPF(value)

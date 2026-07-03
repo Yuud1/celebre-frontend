@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AuthLogo } from '../components/auth/AuthShared'
+import { api } from '../lib/api'
+import { derivePlanFeatures, type ApiPlan } from '../lib/plans'
 
 const FEATURE_CARDS = [
   {
@@ -23,7 +25,18 @@ const FEATURE_CARDS = [
   },
 ]
 
-const PLANS = [
+type PlanCard = {
+  name: string
+  price: string
+  period: string
+  features: string[]
+  cta: string
+  href: string
+  popular: boolean
+  apiName?: string
+}
+
+const PLANS: PlanCard[] = [
   {
     name: 'Essencial',
     price: 'R$ 21,90',
@@ -190,6 +203,22 @@ function Stars({ count }: { count: number }) {
 
 export function HomePage() {
   const pricingRef = useRef<HTMLDivElement>(null)
+  const [plans, setPlans] = useState<PlanCard[]>(PLANS)
+
+  useEffect(() => {
+    api.listPlans().then((data) => {
+      setPlans(data.map((p): PlanCard => ({
+        name: p.label,
+        price: `R$ ${((p.displayPrice ?? p.publicationFee) / 100).toFixed(2).replace('.', ',')}`,
+        period: '/por evento',
+        features: derivePlanFeatures(p as ApiPlan),
+        cta: 'Escolher plano',
+        href: '/criar-conta',
+        popular: p.name === 'pro',
+        apiName: p.name,
+      })))
+    }).catch(() => {})
+  }, [])
 
   useEffect(() => {
     const track = pricingRef.current
@@ -198,7 +227,7 @@ export function HomePage() {
     if (!popular) return
     const left = popular.offsetLeft - (track.clientWidth - popular.offsetWidth) / 2
     track.scrollTo({ left: Math.max(0, left), behavior: 'auto' })
-  }, [])
+  }, [plans])
 
   return (
     <div className="home-page">
@@ -337,7 +366,7 @@ export function HomePage() {
 
         <div className="home-pricing-track">
           <div className="home-pricing" ref={pricingRef} aria-label="Planos disponíveis">
-          {PLANS.map(plan => (
+          {plans.map(plan => (
             <article key={plan.name} className={'home-price-card' + (plan.popular ? ' home-price-card--popular' : '')}>
               {plan.popular && <span className="home-price-card__tag">Popular</span>}
               <h3>{plan.name}</h3>
@@ -353,6 +382,7 @@ export function HomePage() {
               <Link
                 to={plan.href}
                 className={'home-btn' + (plan.popular ? ' home-btn--grad home-btn--block' : ' home-btn--outline home-btn--block')}
+                onClick={() => { if (plan.apiName) localStorage.setItem('celebre_plan', plan.apiName) }}
               >
                 {plan.cta}
               </Link>

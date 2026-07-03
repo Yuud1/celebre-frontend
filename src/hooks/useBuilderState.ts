@@ -163,8 +163,8 @@ export function useBuilderState() {
       id,
       type,
       name: type === 'fixed' ? 'Novo presente' : 'Nova vaquinha',
-      value: type === 'fixed' ? 100 : 1000,
-      meta: type === 'contribution' ? 1000 : undefined,
+      value: type === 'fixed' ? 10000 : 100000,
+      meta: type === 'contribution' ? 100000 : undefined,
       description: '',
       featured: options?.featured ?? false,
     }

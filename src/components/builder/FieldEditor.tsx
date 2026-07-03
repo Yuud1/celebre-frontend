@@ -4,6 +4,7 @@ import { fieldLabel, giftFieldId } from '../../types/editor'
 import { ImagePicker } from './ImagePicker'
 import { api } from '../../lib/api'
 import { FONT_OPTIONS } from '../../data/fontOptions'
+import { maskCurrencyInput, parseCurrencyToCents } from '../../lib/mask'
 
 interface Props {
   field: EditableField
@@ -96,18 +97,18 @@ export function FieldEditor({
         <label>
           Valor (R$)
           <input
-            type="number"
-            value={gift.value / 100}
-            onChange={(e) => onGift(giftId, { value: Math.round(Number(e.target.value) * 100) })}
+            value={maskCurrencyInput(String(gift.value))}
+            placeholder="0,00"
+            onChange={(e) => onGift(giftId, { value: parseCurrencyToCents(e.target.value) })}
           />
         </label>
         {gift.type === 'contribution' ? (
           <label>
             Meta (R$)
             <input
-              type="number"
-              value={(gift.meta ?? gift.value) / 100}
-              onChange={(e) => onGift(giftId, { meta: Math.round(Number(e.target.value) * 100) })}
+              value={maskCurrencyInput(String(gift.meta ?? gift.value))}
+              placeholder="0,00"
+              onChange={(e) => onGift(giftId, { meta: parseCurrencyToCents(e.target.value) })}
             />
           </label>
         ) : null}

@@ -90,9 +90,10 @@ export const api = {
       body: JSON.stringify(payload),
     });
   },
-  publishDraft(id: string) {
+  publishDraft(id: string, planId?: string) {
     return request<{ chargeUrl: string }>(`/drafts/${id}/publish`, {
       method: "POST",
+      ...(planId ? { body: JSON.stringify({ planId }) } : {}),
     });
   },
   getDraftStatus(id: string) {
@@ -230,6 +231,22 @@ export const api = {
   // ─── Public Event ───────────────────────────────────────────
   getPublicEvent(slug: string) {
     return request<any>(`/pub/${slug}`);
+  },
+
+  // ─── Plans ──────────────────────────────────────────────────
+  listPlans() {
+    return request<Array<{
+      id: string
+      name: string
+      label: string
+      publicationFee: number
+      transactionFeePct: string
+      maxPublishedEvents: number | null
+      maxAdmins: number
+      features: Record<string, boolean | number>
+      displayPrice: number | null
+      sortOrder: number
+    }>>('/plans')
   },
 
   // ─── Contributions ──────────────────────────────────────────

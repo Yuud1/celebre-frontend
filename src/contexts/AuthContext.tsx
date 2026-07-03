@@ -3,6 +3,13 @@ import type { ReactNode } from 'react'
 import { api } from '../lib/api'
 import { clearBuilderStorage } from '../hooks/useBuilderState'
 
+interface UserPlan {
+  name: string
+  label: string
+  features: Record<string, boolean | number>
+  transactionFeePct: string
+}
+
 interface User {
   id: string
   email: string
@@ -13,6 +20,7 @@ interface User {
   bankConfigured: boolean
   kycStatus: string
   createdAt: string
+  plan: UserPlan | null
 }
 
 interface AuthContextValue {

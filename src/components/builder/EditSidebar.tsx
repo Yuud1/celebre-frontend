@@ -4,6 +4,7 @@ import type { EditableField } from '../../types/editor'
 import { ImagePicker } from './ImagePicker'
 import { api } from '../../lib/api'
 import { FONT_OPTIONS } from '../../data/fontOptions'
+import { maskCurrencyInput, parseCurrencyToCents } from '../../lib/mask'
 
 interface Props {
   eventType: EventTypeId
@@ -567,20 +568,18 @@ export function EditSidebar({
             <label>
               Valor (R$)
               <input
-                type="number"
-                value={gift.value / 100}
-                placeholder="Valor (R$)"
-                onChange={(e) => onGift(gift.id, { value: Math.round(Number(e.target.value) * 100) })}
+                value={maskCurrencyInput(String(gift.value))}
+                placeholder="0,00"
+                onChange={(e) => onGift(gift.id, { value: parseCurrencyToCents(e.target.value) })}
               />
             </label>
             {gift.type === 'contribution' ? (
               <label>
                 Meta (R$)
                 <input
-                  type="number"
-                  value={(gift.meta ?? gift.value) / 100}
-                  placeholder="Meta (R$)"
-                  onChange={(e) => onGift(gift.id, { meta: Math.round(Number(e.target.value) * 100) })}
+                  value={maskCurrencyInput(String(gift.meta ?? gift.value))}
+                  placeholder="0,00"
+                  onChange={(e) => onGift(gift.id, { meta: parseCurrencyToCents(e.target.value) })}
                 />
               </label>
             ) : null}

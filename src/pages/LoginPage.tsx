@@ -32,14 +32,7 @@ export function LoginPage() {
       const { user } = await api.login({ email, password })
       setUser(user)
       const redirect = searchParams.get('redirect')
-      if (publishFlow) {
-        navigate(redirect ?? '/dashboard', { replace: true })
-      } else if (user.kycStatus !== 'bank_configured') {
-        const next = redirect ? `/verificacao?redirect=${encodeURIComponent(redirect)}` : '/verificacao'
-        navigate(next, { replace: true })
-      } else {
-        navigate(redirect ?? '/dashboard', { replace: true })
-      }
+      navigate(redirect ?? '/dashboard', { replace: true })
     } catch (err: any) {
       setError(err.message || 'E-mail ou senha inválidos')
     } finally {

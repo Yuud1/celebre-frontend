@@ -64,7 +64,7 @@ export default defineConfig({
     allowedHosts: ['frontend.celebre.fun'],
     port: 5173,
     proxy: {
-      '^/(auth|drafts|events|upload|pub|contributions|admin|wallet)': {
+      '^/(auth|drafts|events|upload|pub|contributions|admin|wallet|plans)': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         bypass: (req) => {

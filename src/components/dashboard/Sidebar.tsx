@@ -163,6 +163,16 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, men
 
       {/* Footer */}
       <div className="mt-auto px-2 pt-3">
+        {user?.plan && (
+          <div className="flex items-center justify-between px-3 py-2 mb-2 rounded-[10px] bg-slate-50 border border-slate-100">
+            <span className="text-[12px] font-semibold text-slate-600">
+              {user.plan.name === 'essencial' ? '🌿' : user.plan.name === 'pro' ? '🚀' : '👑'} {user.plan.label}
+            </span>
+            <Link to="/#planos" className="text-[11.5px] font-semibold text-indigo-600 no-underline hover:text-indigo-700">
+              Upgrade →
+            </Link>
+          </div>
+        )}
         <KycSidebarWidget />
         <DropdownMenu>
         <DropdownMenuTrigger asChild>

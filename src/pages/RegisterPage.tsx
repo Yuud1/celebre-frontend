@@ -5,7 +5,6 @@ import { Icon } from '../components/auth/AuthIcons'
 import { maskCPF } from '../lib/mask'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
-import { isCheckoutPublishRedirect } from '../lib/builderDraft'
 import { cn } from '@/lib/utils'
 
 // ─── Password strength ───────────────────────────────────────────────────────
@@ -101,14 +100,10 @@ function StepAccount({ form, setForm }: {
     setLoading(true)
     setError('')
     try {
-      const res = await api.register({ name, email: email.trim().toLowerCase(), cpfCnpj: cpf, password })
+      const res = await api.register({ name, email: email.trim().toLowerCase(), cpfCnpj: cpf.replace(/\D/g, ''), password })
       if (!res?.user) throw new Error('Resposta inválida ao criar conta')
       setUser(res.user)
-      const publishFlow = isCheckoutPublishRedirect(redirect)
-      const next = publishFlow && redirect
-        ? redirect
-        : redirect ? `/verificacao?redirect=${encodeURIComponent(redirect)}` : '/dashboard'
-      navigate(next, { replace: true })
+      navigate(redirect ?? '/dashboard', { replace: true })
     } catch (err: any) {
       setError(err?.message || 'Erro ao criar conta')
     } finally {
