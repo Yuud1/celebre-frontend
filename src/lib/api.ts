@@ -176,7 +176,31 @@ export const api = {
       method: "DELETE",
     });
   },
-  
+
+  // ─── Gallery ────────────────────────────────────────────────
+  getGallery(eventId: string) {
+    return request<any[]>(`/events/${eventId}/gallery`);
+  },
+  uploadGalleryImages(eventId: string, files: File[]) {
+    const form = new FormData();
+    files.forEach((f) => form.append("files", f));
+    return request<any[]>(`/events/${eventId}/gallery`, {
+      method: "POST",
+      body: form,
+    });
+  },
+  updateGalleryImage(eventId: string, imageId: string, payload: { caption: string }) {
+    return request<any>(`/events/${eventId}/gallery/${imageId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+  },
+  deleteGalleryImage(eventId: string, imageId: string) {
+    return request<any>(`/events/${eventId}/gallery/${imageId}`, {
+      method: "DELETE",
+    });
+  },
+
   // ─── Wallet ─────────────────────────────────────────────────
   getWalletSummary() {
     return request<{
@@ -231,6 +255,9 @@ export const api = {
   // ─── Public Event ───────────────────────────────────────────
   getPublicEvent(slug: string) {
     return request<any>(`/pub/${slug}`);
+  },
+  getPublicGallery(slug: string) {
+    return request<any[]>(`/pub/${slug}/gallery`);
   },
 
   // ─── Plans ──────────────────────────────────────────────────

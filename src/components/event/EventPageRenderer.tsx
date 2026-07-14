@@ -17,6 +17,7 @@ import { GuessWallSection } from './sections/GuessWallSection'
 import { HomeStatsSection } from './sections/HomeStatsSection'
 import { HomeChecklistSection } from './sections/HomeChecklistSection'
 import { RoomWishlistSection } from './sections/RoomWishlistSection'
+import { GallerySection, type GalleryImage } from './sections/GallerySection'
 import './event-page.css'
 import './event-sections.css'
 
@@ -33,6 +34,7 @@ interface Props {
   onGiftAction?: (gift: GiftItem) => void
   messages?: GuestMessage[]
   eventSlug?: string
+  galleryImages?: GalleryImage[]
 }
 
 const layoutCopy: Record<LayoutId, {
@@ -105,6 +107,7 @@ export function EventPageRenderer({
   onGiftAction,
   messages,
   eventSlug,
+  galleryImages,
 }: Props) {
   const copy = layoutCopy[layout]
   const sections = content.sections
@@ -287,6 +290,8 @@ export function EventPageRenderer({
       {isPanela && sections?.checklist ? (
         <HomeChecklistSection items={sections.checklist} gifts={content.gifts} />
       ) : null}
+
+      {galleryImages ? <GallerySection images={galleryImages} /> : null}
 
       {featuredGifts.length > 0 || (editable && onAddGift) ? (
         <div className="ep-featured-zone">

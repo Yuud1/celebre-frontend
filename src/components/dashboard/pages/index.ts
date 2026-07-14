@@ -5,5 +5,6 @@ import { Personalize } from './personalize'
 import { Settings } from './settings'
 import { DashInvites } from './invites'
 import { DashHome } from './home'
+import { DashGallery } from './gallery'
 
-export { DashContributions, DashGifts, DashWithdrawals, Personalize, Settings, DashInvites, DashHome }
+export { DashContributions, DashGifts, DashWithdrawals, Personalize, Settings, DashInvites, DashHome, DashGallery }
