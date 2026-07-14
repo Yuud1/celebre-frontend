@@ -116,11 +116,12 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, men
     { id: 'gifts',     label: 'Presentes',     icon: <Icon.Sparkle style={{ width: 17, height: 17 }} />, count: giftCount || undefined },
     { id: 'gallery',   label: 'Galeria',       icon: <Icon.Camera  style={{ width: 17, height: 17 }} /> },
     { id: 'contrib',   label: 'Contribuições', icon: <Icon.Pix     style={{ width: 17, height: 17 }} />, count: contribCount || undefined },
+    { id: 'reports',   label: 'Relatórios',    icon: <Icon.BarChart style={{ width: 17, height: 17 }} /> },
     { id: 'payouts',   label: 'Saques',        icon: <Icon.Bank    style={{ width: 17, height: 17 }} /> },
   ]
 
   const go = (id: string) => {
-    const validPages: ActivePage[] = ['dashboard', 'gifts', 'contrib', 'payouts', 'customize', 'settings', 'convites', 'gallery']
+    const validPages: ActivePage[] = ['dashboard', 'gifts', 'contrib', 'payouts', 'customize', 'settings', 'convites', 'gallery', 'reports']
     if (validPages.includes(id as ActivePage)) {
       onClose?.()
       onNav(id as ActivePage)

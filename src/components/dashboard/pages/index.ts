@@ -6,5 +6,6 @@ import { Settings } from './settings'
 import { DashInvites } from './invites'
 import { DashHome } from './home'
 import { DashGallery } from './gallery'
+import { DashReports } from './reports'
 
-export { DashContributions, DashGifts, DashWithdrawals, Personalize, Settings, DashInvites, DashHome, DashGallery }
+export { DashContributions, DashGifts, DashWithdrawals, Personalize, Settings, DashInvites, DashHome, DashGallery, DashReports }
