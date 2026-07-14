@@ -102,6 +102,10 @@ export function DashHome({ event, contributions, onNavigate, availableBalance: a
     (event?.gifts ?? []).find((g: any) => g.type === 'contribution' && Number(g.value) > 0) ?? null,
     [event?.gifts]
   )
+  const giftsRemaining = useMemo(() =>
+    (event?.gifts ?? []).filter((g: any) => !g.isPurchased).length,
+    [event?.gifts]
+  )
   const goalPct = goalGift ? Math.min(1, Number(goalGift.collected ?? 0) / Number(goalGift.value)) : 0
 
   const eventStatus: 'published' | 'pending' | 'closed' =
@@ -137,7 +141,7 @@ export function DashHome({ event, contributions, onNavigate, availableBalance: a
       <div className="grid grid-cols-1 sm:grid-cols-2 nav:grid-cols-4 gap-4">
         <StatCard icon={<Icon.Pix style={{ color: '#10B981' }} />} label="Total arrecadado" value={totalCollected} currency spark={sparkData} />
         <StatCard icon={<Icon.Heart style={{ color: '#EC4899' }} />} label="Contribuições" value={confirmedCount} hint={avgTicket > 0 ? `Média R$ ${(avgTicket / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} por contribuição` : undefined} />
-        <StatCard icon={<Icon.Sparkle style={{ color: '#8B5CF6' }} />} label="Conversão da página" value="—" hint="Dados de visitas indisponíveis" />
+        <StatCard icon={<Icon.Sparkle style={{ color: '#8B5CF6' }} />} label="Presentes restantes" value={giftsRemaining} hint="Ainda não resgatados" />
         <StatCard icon={<Icon.Bank style={{ color: '#6366F1' }} />} label="Saldo disponível" value={availableBalance} currency hint="Saldo líquido acumulado" />
       </div>
 
