@@ -200,6 +200,16 @@ export const api = {
       method: "DELETE",
     });
   },
+  getEventReport(eventId: string) {
+    return request<{
+      summary: { totalGross: number; totalNet: number; totalFee: number; count: number; avgTicket: number }
+      topGifts: { giftId: string; name: string; total: number; count: number }[]
+      paymentBreakdown: { pix: { count: number; total: number }; creditCard: { count: number; total: number } }
+      timeline: { date: string; count: number; total: number }[]
+      contributors: { id: string; name: string; amount: number; giftName: string; createdAt: string }[]
+      remainingGifts: { id: string; name: string; value: number }[]
+    }>(`/events/${eventId}/report`);
+  },
 
   // ─── Wallet ─────────────────────────────────────────────────
   getWalletSummary() {
