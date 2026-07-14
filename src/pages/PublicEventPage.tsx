@@ -4,6 +4,7 @@ import { EventPageRenderer } from '../components/event/EventPageRenderer'
 import { ContributionModal } from '../components/event/ContributionModal'
 import { getTemplateById, getDefaultTemplateByEventType, resolveEventContent } from '../templates/registry'
 import type { EventContent, EventTheme, EventTypeId, GiftItem, LayoutId } from '../types/event'
+import type { GalleryImage } from '../components/event/sections/GallerySection'
 import { api } from '../lib/api'
 
 const LAYOUT_LABELS: Record<LayoutId, string> = {
@@ -78,6 +79,7 @@ export function PublicEventPage() {
   const [resolved, setResolved] = useState<ResolvedEvent | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [activeGift, setActiveGift] = useState<GiftItem | null>(null)
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([])
 
   useEffect(() => {
     if (!slug) return
@@ -88,6 +90,9 @@ export function PublicEventPage() {
         document.title = `${LAYOUT_LABELS[r.layout]} — ${r.content.name}`
       })
       .catch(() => setNotFound(true))
+    api.getPublicGallery(slug)
+      .then((images: any[]) => setGalleryImages(images))
+      .catch(() => setGalleryImages([]))
     return () => { document.title = 'Celebre' }
   }, [slug])
 
@@ -117,6 +122,7 @@ export function PublicEventPage() {
         messages={resolved.messages}
         eventSlug={slug}
         onGiftAction={setActiveGift}
+        galleryImages={galleryImages}
       />
       <ContributionModal gift={activeGift} onClose={() => setActiveGift(null)} />
     </>
