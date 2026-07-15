@@ -16,6 +16,7 @@ interface Props {
   onGift: (id: string, patch: Partial<EventContent['gifts'][0]>) => void
   onAddGift: (type: 'fixed' | 'contribution') => void
   onRemoveGift: (id: string) => void
+  hideGifts?: boolean
 }
 
 type EditTab = 'geral' | 'sections' | 'presentes' | 'aparencia'
@@ -53,6 +54,7 @@ export function EditSidebar({
   onGift,
   onAddGift,
   onRemoveGift,
+  hideGifts,
 }: Props) {
   const [activeTab, setActiveTab] = useState<EditTab>('geral')
   const focus = mapFieldToFocus(activeField ?? null)
@@ -60,6 +62,10 @@ export function EditSidebar({
   useEffect(() => {
     if (focus) setActiveTab(focus.tab)
   }, [focus])
+
+  useEffect(() => {
+    if (hideGifts && activeTab === 'presentes') setActiveTab('geral')
+  }, [hideGifts, activeTab])
 
   const giftsByRoom = useMemo(() => {
     const map: Record<HomeRoomId, number> = {
@@ -677,9 +683,11 @@ export function EditSidebar({
         <button type="button" role="tab" aria-selected={activeTab === 'sections'} className={activeTab === 'sections' ? 'is-active' : ''} onClick={() => setActiveTab('sections')}>
           Seções
         </button>
-        <button type="button" role="tab" aria-selected={activeTab === 'presentes'} className={activeTab === 'presentes' ? 'is-active' : ''} onClick={() => setActiveTab('presentes')}>
-          Presentes
-        </button>
+        {!hideGifts ? (
+          <button type="button" role="tab" aria-selected={activeTab === 'presentes'} className={activeTab === 'presentes' ? 'is-active' : ''} onClick={() => setActiveTab('presentes')}>
+            Presentes
+          </button>
+        ) : null}
         <button type="button" role="tab" aria-selected={activeTab === 'aparencia'} className={activeTab === 'aparencia' ? 'is-active' : ''} onClick={() => setActiveTab('aparencia')}>
           Aparência
         </button>
@@ -688,7 +696,7 @@ export function EditSidebar({
       <div className="edit-panel__body">
         {activeTab === 'geral' ? renderGeneral(focus?.tab === 'geral' ? focus.group : null) : null}
         {activeTab === 'sections' ? renderEventSections(focus?.tab === 'sections' ? focus.group : null) : null}
-        {activeTab === 'presentes' ? renderGifts(activeField?.startsWith('gift:') ? activeField.slice(5) : null) : null}
+        {activeTab === 'presentes' && !hideGifts ? renderGifts(activeField?.startsWith('gift:') ? activeField.slice(5) : null) : null}
         {activeTab === 'aparencia' ? renderAppearance() : null}
       </div>
     </aside>

@@ -19,6 +19,7 @@ interface User {
   bankCode: string | null
   bankConfigured: boolean
   kycStatus: string
+  onboardingRequired: boolean
   createdAt: string
   plan: UserPlan | null
 }
