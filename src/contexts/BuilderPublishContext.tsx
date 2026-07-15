@@ -3,6 +3,7 @@ import { createContext, useContext, useMemo, useState, type ReactNode } from 're
 interface BuilderPublishState {
   canPublish: boolean
   publish: (() => void) | null
+  label?: string
 }
 
 interface BuilderPublishContextValue extends BuilderPublishState {
@@ -12,6 +13,7 @@ interface BuilderPublishContextValue extends BuilderPublishState {
 const defaultState: BuilderPublishState = {
   canPublish: false,
   publish: null,
+  label: undefined,
 }
 
 const BuilderPublishContext = createContext<BuilderPublishContextValue | null>(null)

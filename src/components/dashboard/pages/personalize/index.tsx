@@ -5,11 +5,15 @@ import { ImagePicker } from "@/components/builder/ImagePicker";
 import { Icon } from "@/components/auth/AuthIcons";
 import { DashBtn } from '../../DashBtn'
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PALETTES = [
   ['#0F172A', '#6366F1'], ['#3F2A1D', '#B8543A'],
   ['#1F3D2C', '#5B8C5E'], ['#1E1B4B', '#A855F7'],
   ['#0C4A6E', '#0EA5E9'], ['#831843', '#EC4899'],
+  ['#052E16', '#22C55E'], ['#1E293B', '#38BDF8'],
+  ['#450A0A', '#F87171'], ['#3B0764', '#C084FC'],
+  ['#082F49', '#2DD4BF'], ['#422006', '#F59E0B'],
 ]
 const FONTS = [
   { id: 'grotesk' as const, label: 'Geometric', sub: 'Space Grotesk',   family: 'Space Grotesk, sans-serif',      weight: 600 },
@@ -23,6 +27,8 @@ const labelTextCls = 'text-[11px] font-semibold tracking-[0.06em] uppercase text
 interface PersonalizeProps { event: any | null; onReload: () => void; onNavigate: (p: ActivePage) => void }
 
 export function Personalize({ event, onReload }: PersonalizeProps) {
+  const { user } = useAuth()
+  const isEssencial = user?.plan?.name === 'essencial'
   const [tab, setTab] = useState<'general' | 'media' | 'appearance'>('general')
   const [saving, setSaving] = useState(false)
   const [coverFile, setCoverFile] = useState<File | null>(null)
@@ -30,6 +36,8 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
   const [form, setForm] = useState({ name: '', message: '', eventDate: '', hosts: '', subtitle: '' })
   const [colorIdx, setColorIdx] = useState(0)
   const [font, setFont] = useState<'grotesk' | 'serif' | 'sans'>('grotesk')
+  const [fontScale, setFontScale] = useState(1)
+  const [darkMode, setDarkMode] = useState(false)
 
   const resetFromEvent = (ev: any) => {
     if (!ev) return
@@ -47,11 +55,15 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
     setColorIdx(pi >= 0 ? pi : 0)
     const matchedFont = FONTS.find(f => f.family === d.theme?.fontFamily)
     setFont(matchedFont?.id ?? 'grotesk')
+    setFontScale(d.theme?.fontScale ?? 1)
+    setDarkMode(d.theme?.darkMode ?? false)
   }
 
   useEffect(() => { resetFromEvent(event) }, [event])
 
   const selectedFont = FONTS.find(f => f.id === font)!
+  const effectiveFontScale = isEssencial ? 1 : fontScale
+  const effectiveDarkMode = isEssencial ? false : darkMode
 
   const handleSave = async () => {
     if (!event?.id || saving) return
@@ -75,6 +87,8 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
             primary:    PALETTES[colorIdx][0],
             secondary:  PALETTES[colorIdx][1],
             fontFamily: selectedFont.family,
+            fontScale:  isEssencial ? 1 : fontScale,
+            darkMode:   isEssencial ? false : darkMode,
           },
         },
         coverUrl:  finalCoverUrl,
@@ -175,17 +189,27 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
                     <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-slate-400">Paleta</span>
                   </div>
                   <div className="grid grid-cols-6 gap-2">
-                    {PALETTES.map((p, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setColorIdx(i)}
-                        className={cn(
-                          'w-9 h-9 rounded-[10px] border-2 cursor-pointer transition-transform hover:scale-105',
-                          colorIdx === i ? 'border-slate-900 shadow-[0_0_0_2px_#fff_inset]' : 'border-transparent',
-                        )}
-                        style={{ background: `linear-gradient(135deg, ${p[0]} 50%, ${p[1]} 50%)` }}
-                      />
-                    ))}
+                    {PALETTES.map((p, i) => {
+                      const locked = isEssencial && i >= 6
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => { if (!locked) setColorIdx(i) }}
+                          disabled={locked}
+                          title={locked ? 'Disponível no plano Pro' : undefined}
+                          className={cn(
+                            'relative w-9 h-9 rounded-[10px] border-2 transition-transform',
+                            locked ? 'cursor-not-allowed opacity-40' : 'cursor-pointer hover:scale-105',
+                            colorIdx === i ? 'border-slate-900 shadow-[0_0_0_2px_#fff_inset]' : 'border-transparent',
+                          )}
+                          style={{ background: `linear-gradient(135deg, ${p[0]} 50%, ${p[1]} 50%)` }}
+                        >
+                          {locked && (
+                            <Icon.Lock style={{ width: 11, height: 11 }} className="absolute inset-0 m-auto text-white drop-shadow" />
+                          )}
+                        </button>
+                      )
+                    })}
                   </div>
                   <div className="flex items-center gap-2.5 mt-3 px-3 py-2.5 bg-slate-50 rounded-[10px]">
                     <span className="w-[22px] h-[22px] rounded-md shrink-0" style={{ background: PALETTES[colorIdx][0] }} />
@@ -220,6 +244,42 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
                     ))}
                   </div>
                 </div>
+
+                <div className={cn('relative', isEssencial && 'opacity-40')}>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-slate-400">
+                      Tamanho do texto ({Math.round(fontScale * 100)}%)
+                    </span>
+                    {isEssencial && <Icon.Lock style={{ width: 11, height: 11 }} className="text-slate-400" />}
+                  </div>
+                  <input
+                    type="range"
+                    min={0.8}
+                    max={1.3}
+                    step={0.05}
+                    value={fontScale}
+                    disabled={isEssencial}
+                    onChange={e => setFontScale(Number(e.target.value))}
+                    className={cn('w-full', isEssencial && 'cursor-not-allowed')}
+                  />
+                </div>
+
+                <label className={cn('flex items-center gap-2.5 px-3 py-2.5 bg-slate-50 rounded-[10px]', isEssencial ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer')}>
+                  <input
+                    type="checkbox"
+                    checked={darkMode}
+                    disabled={isEssencial}
+                    onChange={e => setDarkMode(e.target.checked)}
+                  />
+                  <span className="text-[13px] text-slate-700 font-medium">Modo escuro</span>
+                  {isEssencial && <Icon.Lock style={{ width: 11, height: 11 }} className="ml-auto text-slate-400" />}
+                </label>
+
+                {isEssencial && (
+                  <div className="text-[12px] text-indigo-600 bg-indigo-50 rounded-[10px] px-3 py-2.5">
+                    Paletas extras, tamanho do texto e modo escuro são recursos do plano Pro.
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -242,15 +302,18 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
           </div>
 
           <div className="flex justify-center p-7">
-            <div className="w-full max-w-[540px] bg-white rounded-[14px] overflow-hidden shadow-[0_20px_50px_rgba(15,23,42,0.10)] border border-slate-200">
+            <div
+              className="w-full max-w-[540px] rounded-[14px] overflow-hidden shadow-[0_20px_50px_rgba(15,23,42,0.10)] border border-slate-200 transition-colors"
+              style={{ background: effectiveDarkMode ? '#0F172A' : '#FFFFFF' }}
+            >
               <div className="relative overflow-hidden" style={{ height: 'clamp(140px, 20vh, 240px)', background: `linear-gradient(135deg, ${PALETTES[colorIdx][0]} 0%, ${PALETTES[colorIdx][1]} 100%)` }}>
                 {coverPreview && (
                   <img src={coverPreview} alt="" className="absolute inset-0 w-full h-full object-cover" />
                 )}
                 <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(120% 80% at 30% 20%, rgba(255,255,255,0.18), transparent 60%)' }} />
                 <div className="absolute bottom-5 left-6 right-6 text-white">
-                  {form.subtitle && <div className="text-[11px] opacity-70 tracking-[0.16em] uppercase">{form.subtitle}</div>}
-                  <div className="mt-1 leading-none tracking-[-0.02em]" style={{ fontFamily: selectedFont.family, fontSize: 'clamp(22px, 4vw, 36px)', fontWeight: selectedFont.weight }}>
+                  {form.subtitle && <div style={{ fontSize: 11 * effectiveFontScale }} className="opacity-70 tracking-[0.16em] uppercase">{form.subtitle}</div>}
+                  <div className="mt-1 leading-none tracking-[-0.02em]" style={{ fontFamily: selectedFont.family, fontSize: `calc(clamp(22px, 4vw, 36px) * ${effectiveFontScale})`, fontWeight: selectedFont.weight }}>
                     {form.hosts || form.name || '—'}
                   </div>
                 </div>
@@ -258,11 +321,11 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
               <div className="p-6">
                 {form.message && (
                   <>
-                    <div className="text-[11px] text-slate-500 tracking-[0.12em] uppercase">Mensagem</div>
-                    <p className="text-[14px] text-slate-600 leading-[1.65] mt-2">{form.message}</p>
+                    <div style={{ fontSize: 11 * effectiveFontScale }} className={cn('tracking-[0.12em] uppercase', effectiveDarkMode ? 'text-slate-400' : 'text-slate-500')}>Mensagem</div>
+                    <p style={{ fontSize: 14 * effectiveFontScale }} className={cn('leading-[1.65] mt-2', effectiveDarkMode ? 'text-slate-300' : 'text-slate-600')}>{form.message}</p>
                   </>
                 )}
-                <button className="mt-4 w-full h-11 rounded-xl text-white font-semibold text-[14px] border-0 cursor-pointer" style={{ background: PALETTES[colorIdx][1] }}>
+                <button style={{ background: PALETTES[colorIdx][1], fontSize: 14 * effectiveFontScale }} className="mt-4 w-full h-11 rounded-xl text-white font-semibold border-0 cursor-pointer">
                   Contribuir com um presente
                 </button>
               </div>

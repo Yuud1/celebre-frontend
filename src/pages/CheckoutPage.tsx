@@ -66,7 +66,7 @@ export function CheckoutPage() {
         if (status === 'published' && eventSlug) {
           clearInterval(interval)
           localStorage.removeItem('celebre_plan')
-          navigate('/dashboard', { replace: true })
+          navigate(user?.kycStatus === 'bank_configured' ? '/dashboard' : '/verificacao', { replace: true })
         }
       } catch {
         // ignore transient poll errors
@@ -74,7 +74,7 @@ export function CheckoutPage() {
     }, 3000)
 
     return () => clearInterval(interval)
-  }, [draftId, chargeUrl, navigate])
+  }, [draftId, chargeUrl, navigate, user])
 
   async function handlePublish() {
     if (!draftId) return

@@ -21,7 +21,7 @@ export function ProtectedRoute({ children, requireKyc }: Props) {
     )
   }
 
-  if (requireKyc && user.kycStatus !== 'bank_configured') {
+  if (requireKyc && user.onboardingRequired && user.kycStatus !== 'bank_configured') {
     return <Navigate to="/verificacao" replace />
   }
 

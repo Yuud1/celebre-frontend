@@ -276,13 +276,6 @@ function KycBankPending({ redirectTarget }: { redirectTarget?: string }) {
             <div className="mt-6 px-3.5 py-3 bg-slate-50 rounded-xl text-xs text-slate-500 leading-relaxed">
               A verificação geralmente leva alguns minutos. Esta página atualiza automaticamente quando sua conta for ativada.
             </div>
-
-            <button
-              className="mt-4 w-full bg-transparent border-0 text-indigo-600 text-[13px] font-semibold cursor-pointer py-2 hover:underline"
-              onClick={() => navigate('/dashboard')}
-            >
-              Ir para o painel enquanto isso →
-            </button>
           </div>
         </div>
       </div>
@@ -300,19 +293,35 @@ export function KycPage() {
   const publishFlow = isCheckoutPublishRedirect(redirect)
   const initialStep = user?.kycStatus === 'recipient_created' ? 1 : 0
   const [step, setStep] = useState(initialStep)
+  const [onboardingEventId, setOnboardingEventId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!user?.onboardingRequired || redirect) return
+    let cancelled = false
+    api.listEvents().then((events) => {
+      if (!cancelled && events[0]) setOnboardingEventId(events[0].id)
+    }).catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.onboardingRequired, redirect])
+
+  const target = redirect && publishFlow
+    ? redirect
+    : onboardingEventId
+      ? `/criar?event=${onboardingEventId}`
+      : '/dashboard'
 
   useEffect(() => {
     if (user?.kycStatus === 'bank_configured') {
-      navigate(redirect ?? '/dashboard', { replace: true })
+      navigate(target, { replace: true })
     }
-  }, [user?.kycStatus, navigate, redirect])
+  }, [user?.kycStatus, navigate, target])
 
   if (user?.kycStatus === 'bank_configured') return null
 
   return (
     <div className="fixed inset-0 overflow-auto font-display">
       {step === 0 && <KycBankSetup onNext={() => setStep(1)} />}
-      {step === 1 && <KycBankPending redirectTarget={publishFlow && redirect ? redirect : undefined} />}
+      {step === 1 && <KycBankPending redirectTarget={target} />}
     </div>
   )
 }

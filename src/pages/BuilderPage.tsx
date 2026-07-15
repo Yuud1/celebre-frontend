@@ -11,18 +11,21 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
 import { getBuilderChatCopy, getBuilderQuestions } from '../data/builderChat'
 import { FONT_OPTIONS } from '../data/fontOptions'
 import {
+  createDefaultContent,
+  createThemeFromPalette,
   getDefaultTemplateByEventType,
   getTemplateById,
   PALETTES,
   toDraftPayload,
 } from '../templates/registry'
-import type { EventTypeId } from '../types/event'
+import type { EventContent, EventTheme, EventTypeId } from '../types/event'
 import type { EditableField } from '../types/editor'
 import { giftFieldId } from '../types/editor'
 import { useBuilderPublishHeader } from '../contexts/BuilderPublishContext'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
 import { CHECKOUT_PUBLISH_REDIRECT } from '../lib/builderDraft'
+import { AuthField, AuthInput, AuthBtn } from '../components/auth/AuthShared'
 
 type GenMode = null | 'type' | 'palette'
 type PreviewSize = 'mobile' | 'tablet' | 'full'
@@ -59,6 +62,71 @@ const previewSizeLabels: Record<PreviewSize, string> = {
   full: 'Desktop',
 }
 
+function IntakeForm({
+  submitting,
+  onBack,
+  onSubmit,
+}: {
+  submitting: boolean
+  onBack: () => void
+  onSubmit: (values: { name: string; eventDate: string; hosts: string }) => void
+}) {
+  const [name, setName] = useState('')
+  const [eventDate, setEventDate] = useState('')
+  const [hosts, setHosts] = useState('')
+
+  const canSubmit = name.trim().length >= 2 && !submitting
+
+  return (
+    <div style={{ maxWidth: 420, margin: '10vh auto 0', padding: '0 1.5rem' }}>
+      <h1 style={{ fontSize: 'clamp(1.3rem, 3vw, 1.6rem)', letterSpacing: '-0.02em', marginBottom: '0.4rem' }}>
+        Sobre o seu evento
+      </h1>
+      <p style={{ color: 'var(--cb-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+        Só o essencial pra gente montar sua página. Você personaliza tudo mais tarde.
+      </p>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (canSubmit) onSubmit({ name: name.trim(), eventDate, hosts: hosts.trim() })
+        }}
+        style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+      >
+        <AuthField label="Nome do evento">
+          <AuthInput
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ex: Casamento Júlia & Marcos"
+            autoFocus
+          />
+        </AuthField>
+        <AuthField label="Anfitriões">
+          <AuthInput
+            value={hosts}
+            onChange={(e) => setHosts(e.target.value)}
+            placeholder="Ex: Júlia & Marcos"
+          />
+        </AuthField>
+        <AuthField label="Data do evento">
+          <AuthInput
+            type="date"
+            value={eventDate}
+            onChange={(e) => setEventDate(e.target.value)}
+          />
+        </AuthField>
+
+        <AuthBtn type="submit" block disabled={!canSubmit}>
+          {submitting ? 'Criando...' : 'Continuar'}
+        </AuthBtn>
+        <AuthBtn type="button" variant="ghost" block onClick={onBack} disabled={submitting}>
+          Voltar
+        </AuthBtn>
+      </form>
+    </div>
+  )
+}
+
 interface QuestionAnswer {
   question: string
   answer: string
@@ -87,6 +155,57 @@ export function BuilderPage() {
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('chat')
   const [isFinalizingPreview, setIsFinalizingPreview] = useState(false)
   const finalizeTimerRef = useRef<number | null>(null)
+  const [pendingEventType, setPendingEventType] = useState<EventTypeId | null>(null)
+  const [intakeSubmitting, setIntakeSubmitting] = useState(false)
+
+  const eventIdParam = searchParams.get('event')
+  const [eventEditLoading, setEventEditLoading] = useState(!!eventIdParam)
+  const [eventEdit, setEventEdit] = useState<{
+    id: string
+    eventType: EventTypeId
+    templateId: string
+    theme: EventTheme
+    content: EventContent
+  } | null>(null)
+  const isEventEdit = !!eventEdit
+
+  useEffect(() => {
+    if (!eventIdParam) return
+    let cancelled = false
+    api.getEvent(eventIdParam)
+      .then((ev: any) => {
+        if (cancelled) return
+        const d = ev.data ?? {}
+        const eventType: EventTypeId = d.eventType
+        const template = d.templateId ? getTemplateById(d.templateId) : getDefaultTemplateByEventType(eventType)
+        setEventEdit({
+          id: ev.id,
+          eventType,
+          templateId: template?.id ?? getDefaultTemplateByEventType(eventType).id,
+          theme: d.theme ?? createThemeFromPalette(PALETTES[0].id),
+          content: {
+            ...createDefaultContent(eventType),
+            name: d.name ?? '',
+            subtitle: d.subtitle ?? '',
+            hosts: d.hosts ?? '',
+            eventDate: ev.eventDate ? String(ev.eventDate).slice(0, 10) : '',
+            location: d.location ?? '',
+            message: d.description ?? '',
+            signature: d.signature ?? '',
+            coverUrl: ev.coverUrl ?? '',
+            gifts: [],
+          },
+        })
+        setEventEditLoading(false)
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setEventEditLoading(false)
+          navigate('/dashboard', { replace: true })
+        }
+      })
+    return () => { cancelled = true }
+  }, [eventIdParam, navigate])
 
   const {
     state,
@@ -167,10 +286,29 @@ export function BuilderPage() {
     setMobilePanel('chat')
   }
 
-  const showPreview = phase === 'ready' && state.theme && template && state.eventType && !isFinalizingPreview
-  const hideChatOnDesktop = !isMobile && !!showPreview
+  const activeEventType = isEventEdit ? eventEdit!.eventType : state.eventType
+  const activeTemplate = isEventEdit ? getTemplateById(eventEdit!.templateId) ?? template : template
+  const activeTheme = isEventEdit ? eventEdit!.theme : state.theme
+  const activeContent = isEventEdit ? eventEdit!.content : state.content
+
+  const updateEventEditContent = useCallback((patch: Partial<EventContent>) => {
+    setEventEdit((s) => (s ? { ...s, content: { ...s.content, ...patch } } : s))
+  }, [])
+  const updateEventEditTheme = useCallback((patch: Partial<EventTheme>) => {
+    setEventEdit((s) => (s ? { ...s, theme: { ...s.theme, ...patch } } : s))
+  }, [])
+  const noopGift = useCallback(() => {}, [])
+  const noopAddGift = useCallback(() => '', [])
+
+  const activeUpdateContent = isEventEdit ? updateEventEditContent : updateContent
+  const activeUpdateTheme = isEventEdit ? updateEventEditTheme : updateTheme
+
+  const showPreview = isEventEdit
+    ? !eventEditLoading
+    : !!(phase === 'ready' && state.theme && template && state.eventType && !isFinalizingPreview)
+  const hideChatOnDesktop = isEventEdit || (!isMobile && !!showPreview)
   const showStuckState =
-    state.step === 2 && (!state.theme || !template || !state.eventType)
+    !isEventEdit && state.step === 2 && (!state.theme || !template || !state.eventType)
   const isGenerating = genMode !== null
 
   const canvasMessage = showPreview
@@ -228,20 +366,43 @@ export function BuilderPage() {
 
   // Auto-cria draft assim que o builder chega em ready (usuário logado)
   useEffect(() => {
-    if (!user || phase !== 'ready' || state.draftId || !state.eventType || !state.templateId || !state.theme) return
+    if (isEventEdit || !user || phase !== 'ready' || state.draftId || !state.eventType || !state.templateId || !state.theme) return
     const payload = toDraftPayload({ eventType: state.eventType, templateId: state.templateId, theme: state.theme, content: state.content })
     api.createDraft(payload).then((d) => setDraftId(d.id)).catch(() => {})
-  }, [user, phase, state.draftId, state.eventType, state.templateId, state.theme]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isEventEdit, user, phase, state.draftId, state.eventType, state.templateId, state.theme]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-save debounced quando conteúdo muda (usuário logado)
   useEffect(() => {
-    if (!user || !state.draftId || phase !== 'ready' || !state.eventType || !state.templateId || !state.theme) return
+    if (isEventEdit || !user || !state.draftId || phase !== 'ready' || !state.eventType || !state.templateId || !state.theme) return
     const t = setTimeout(() => {
       const payload = toDraftPayload({ eventType: state.eventType!, templateId: state.templateId!, theme: state.theme!, content: state.content })
       api.updateDraft(state.draftId!, payload).catch(() => {})
     }, 1500)
     return () => clearTimeout(t)
-  }, [state.content, state.theme, state.draftId, phase]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isEventEdit, state.content, state.theme, state.draftId, phase]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-save debounced do evento já publicado (modo edição pós-pagamento)
+  useEffect(() => {
+    if (!isEventEdit || !eventEdit) return
+    const t = setTimeout(() => {
+      const { theme, content, id } = eventEdit
+      api.updateEvent(id, {
+        data: {
+          name: content.name,
+          hosts: content.hosts,
+          subtitle: content.subtitle,
+          description: content.message,
+          location: content.location,
+          signature: content.signature,
+          coverUrl: content.coverUrl,
+          theme,
+        },
+        coverUrl: content.coverUrl,
+        eventDate: content.eventDate || null,
+      }).catch(() => {})
+    }, 1500)
+    return () => clearTimeout(t)
+  }, [isEventEdit, eventEdit])
 
   const handlePublish = useCallback(async () => {
     if (!state.eventType || !state.templateId || !state.theme) return
@@ -273,32 +434,57 @@ export function BuilderPage() {
   }, [navigate, setDraftId, state.content, state.draftId, state.eventType, state.templateId, state.theme, user])
 
   useEffect(() => {
+    if (isEventEdit) {
+      setPublishState({
+        canPublish: true,
+        publish: () => navigate('/dashboard'),
+        label: 'Concluir',
+      })
+      return () => setPublishState({ canPublish: false, publish: null })
+    }
     setPublishState({
       canPublish: !!showPreview,
       publish: showPreview ? handlePublish : null,
     })
     return () => setPublishState({ canPublish: false, publish: null })
-  }, [handlePublish, setPublishState, showPreview])
+  }, [handlePublish, setPublishState, showPreview, isEventEdit, navigate])
 
   function handleSelectEventType(eventType: EventTypeId) {
     if (genMode) return
-    if (finalizeTimerRef.current) {
-      window.clearTimeout(finalizeTimerRef.current)
-      finalizeTimerRef.current = null
+    setPendingEventType(eventType)
+  }
+
+  async function handleIntakeSubmit(intake: { name: string; eventDate: string; hosts: string }) {
+    if (!pendingEventType) return
+    const eventType = pendingEventType
+    const template = getDefaultTemplateByEventType(eventType)
+    const theme = createThemeFromPalette(PALETTES[0].id)
+    const content: EventContent = {
+      ...createDefaultContent(eventType),
+      name: intake.name,
+      hosts: intake.hosts,
+      signature: intake.hosts,
+      eventDate: intake.eventDate,
+      subtitle: intake.eventDate ? formatDateLabel(intake.eventDate) : '',
     }
-    selectEventType(eventType)
-    setQuestionIndex(0)
-    setAnsweredQuestions([])
-    setPersonalizationDone(false)
-    setIsFinalizingPreview(false)
-    setPaletteUserPrompt(null)
-    setFontUserPrompt(null)
-    setFontChosen(false)
-    sessionStorage.setItem(
-      'celebre-template-preview',
-      getDefaultTemplateByEventType(eventType).id,
-    )
-    setGenMode('type')
+
+    if (!user) {
+      selectEventType(eventType)
+      updateContent(content)
+      navigate(`/criar-conta?redirect=${encodeURIComponent(CHECKOUT_PUBLISH_REDIRECT)}`)
+      return
+    }
+
+    setIntakeSubmitting(true)
+    const payload = toDraftPayload({ eventType, templateId: template.id, theme, content })
+    try {
+      const draft = await api.createDraft(payload)
+      setDraftId(draft.id)
+      navigate(`/criar/checkout?draft=${draft.id}`)
+    } catch (err: any) {
+      setIntakeSubmitting(false)
+      alert(err.message ?? 'Erro ao criar rascunho. Tente novamente.')
+    }
   }
 
   function handleSelectPalette(paletteId: string) {
@@ -403,6 +589,30 @@ export function BuilderPage() {
     if (isMobile) setActiveField(giftFieldId(id))
   }
 
+  useEffect(() => {
+    if (isEventEdit) setMobilePanel('preview')
+  }, [isEventEdit])
+
+  if (eventIdParam && eventEditLoading) {
+    return (
+      <div className="ai-builder builder-theme--celebre">
+        <CanvasIdle message="Carregando seu evento..." />
+      </div>
+    )
+  }
+
+  if (!isEventEdit && pendingEventType) {
+    return (
+      <div className="ai-builder builder-theme--celebre">
+        <IntakeForm
+          submitting={intakeSubmitting}
+          onBack={() => setPendingEventType(null)}
+          onSubmit={handleIntakeSubmit}
+        />
+      </div>
+    )
+  }
+
   return (
     <div
       className={
@@ -421,7 +631,7 @@ export function BuilderPage() {
         </div>
       ) : (
         <>
-          {!hideChatOnDesktop ? (
+          {!hideChatOnDesktop && !isEventEdit ? (
             <BuilderChat
               phase={phase}
               eventType={state.eventType}
@@ -456,15 +666,16 @@ export function BuilderPage() {
                 <div className="preview-layout">
                   {!isMobile ? (
                     <EditSidebar
-                      eventType={state.eventType!}
-                      content={state.content}
-                      theme={state.theme!}
+                      eventType={activeEventType!}
+                      content={activeContent}
+                      theme={activeTheme!}
                       activeField={activeField}
-                      onContent={updateContent}
-                      onTheme={updateTheme}
-                      onGift={updateGift}
-                      onAddGift={addGift}
-                      onRemoveGift={removeGift}
+                      onContent={activeUpdateContent}
+                      onTheme={activeUpdateTheme}
+                      onGift={isEventEdit ? noopGift : updateGift}
+                      onAddGift={isEventEdit ? noopAddGift : addGift}
+                      onRemoveGift={isEventEdit ? noopGift : removeGift}
+                      hideGifts={isEventEdit}
                     />
                   ) : null}
                   <div className="preview-column">
@@ -492,15 +703,15 @@ export function BuilderPage() {
                       }
                     >
                       <EventPageRenderer
-                        eventType={state.eventType!}
-                        layout={template!.layout}
-                        theme={state.theme!}
-                        content={state.content}
+                        eventType={activeEventType!}
+                        layout={activeTemplate!.layout}
+                        theme={activeTheme!}
+                        content={activeContent}
                         preview
                         editable
                         activeField={activeField}
                         onEditField={handleEditField}
-                        onAddGift={isMobile ? handleAddGiftMobile : undefined}
+                        onAddGift={isMobile && !isEventEdit ? handleAddGiftMobile : undefined}
                       />
                     </div>
                   </div>
@@ -510,15 +721,15 @@ export function BuilderPage() {
                   <EditSheet
                     open={activeField !== null}
                     field={activeField}
-                    content={state.content}
-                    theme={state.theme!}
+                    content={activeContent}
+                    theme={activeTheme!}
                     onClose={() => setActiveField(null)}
-                    onContent={updateContent}
-                    onTheme={updateTheme}
-                    onGift={updateGift}
-                    onAddGift={addGift}
+                    onContent={activeUpdateContent}
+                    onTheme={activeUpdateTheme}
+                    onGift={isEventEdit ? noopGift : updateGift}
+                    onAddGift={isEventEdit ? noopAddGift : addGift}
                     onRemoveGift={(id) => {
-                      removeGift(id)
+                      if (!isEventEdit) removeGift(id)
                       setActiveField(null)
                     }}
                   />
@@ -528,7 +739,7 @@ export function BuilderPage() {
             ) : null}
           </section>
 
-          {isMobile ? (
+          {isMobile && !isEventEdit ? (
             <BuilderMobileTabs
               active={mobilePanel}
               onChange={setMobilePanel}

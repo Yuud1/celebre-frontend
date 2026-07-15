@@ -89,6 +89,7 @@ export interface EventTheme {
   ink: string
   fontScale: number
   fontFamily?: string
+  darkMode?: boolean
 }
 
 export interface EventContent {

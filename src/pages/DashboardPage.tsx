@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Icon } from '../components/auth/AuthIcons'
 import { api } from '../lib/api'
+import { useAuth } from '../contexts/AuthContext'
 
 import {
   DashHome,
@@ -87,6 +88,8 @@ function NoEventState() {
 // ─── DashboardPage ──────────────────────────────────────────────────
 
 export function DashboardPage() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [activePage, setActivePage] = useState<ActivePage>('dashboard')
   const [event, setEvent] = useState<any | null>(null)
   const [contributions, setContributions] = useState<any[]>([])
@@ -100,8 +103,16 @@ export function DashboardPage() {
       document.title = 'Dashboard — Celebre'
       const events = await api.listEvents()
       if (events.length === 0) {
+        if (user?.onboardingRequired) {
+          navigate('/criar', { replace: true })
+          return
+        }
         setNoEvent(true)
         setLoading(false)
+        return
+      }
+      if (user?.onboardingRequired && user.kycStatus !== 'bank_configured') {
+        navigate('/verificacao', { replace: true })
         return
       }
       const firstId = events[0].id
@@ -120,7 +131,7 @@ export function DashboardPage() {
     }
   }
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadData() }, [user?.onboardingRequired])
 
   const confirmedContrib = contributions.filter((c: any) => c.status === 'confirmed')
 

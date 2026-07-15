@@ -61,6 +61,7 @@ export default defineConfig({
     alias: { '@': path.resolve(__dirname, './src') },
   },
   server: {
+    host: true,
     allowedHosts: ['frontend.celebre.fun'],
     port: 5173,
     proxy: {

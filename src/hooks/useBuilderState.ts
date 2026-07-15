@@ -6,6 +6,7 @@ import {
   createThemeFromPalette,
   getDefaultTemplateByEventType,
   resolveEventContent,
+  PALETTES,
 } from '../templates/registry'
 
 const STORAGE_KEY = 'celebre-builder-v2'
@@ -109,6 +110,7 @@ export function useBuilderState() {
       eventType,
       templateId: template.id,
       content: createDefaultContent(eventType),
+      theme: createThemeFromPalette(PALETTES[0].id),
       step: 1,
     }))
   }, [])
