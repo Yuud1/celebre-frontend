@@ -7,5 +7,6 @@ import { DashInvites } from './invites'
 import { DashHome } from './home'
 import { DashGallery } from './gallery'
 import { DashReports } from './reports'
+import { DashAdmins } from './admins'
 
-export { DashContributions, DashGifts, DashWithdrawals, Personalize, Settings, DashInvites, DashHome, DashGallery, DashReports }
+export { DashContributions, DashGifts, DashWithdrawals, Personalize, Settings, DashInvites, DashHome, DashGallery, DashReports, DashAdmins }

@@ -8,6 +8,7 @@ interface UserPlan {
   label: string
   features: Record<string, boolean | number>
   transactionFeePct: string
+  maxAdmins: number
 }
 
 interface User {

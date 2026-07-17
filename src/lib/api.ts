@@ -270,6 +270,46 @@ export const api = {
     return request<any[]>(`/pub/${slug}/gallery`);
   },
 
+  // ─── Event Admins ───────────────────────────────────────────
+  listEventAdmins(eventId: string) {
+    return request<Array<{
+      id: string
+      eventId: string
+      email: string
+      userId: string | null
+      role: string
+      accepted: boolean
+      createdAt: string
+      user: { id: string; name: string; email: string } | null
+    }>>(`/events/${eventId}/admins`);
+  },
+  inviteEventAdmin(eventId: string, email: string) {
+    return request<any>(`/events/${eventId}/admins`, {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+  removeEventAdmin(eventId: string, adminId: string) {
+    return request<any>(`/events/${eventId}/admins/${adminId}`, {
+      method: "DELETE",
+    });
+  },
+  peekAdminInvite(token: string) {
+    return request<{
+      email: string
+      eventName: string
+      hostName: string
+      hasAccount: boolean
+      accepted: boolean
+    }>(`/admin-invites/${token}`);
+  },
+  acceptAdminInvite(token: string, payload?: { name: string; password: string }) {
+    return request<any>(`/admin-invites/${token}/accept`, {
+      method: "POST",
+      body: JSON.stringify(payload ?? {}),
+    });
+  },
+
   // ─── Plans ──────────────────────────────────────────────────
   listPlans() {
     return request<Array<{
