@@ -12,6 +12,7 @@ import { PublicEventPage } from './pages/PublicEventPage'
 import { LoginPage } from './pages/LoginPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { AcceptCoHostInvitePage } from './pages/AcceptCoHostInvitePage'
 import { KycPage } from './pages/KycPage'
 import { AdminWithdrawalsPage } from './pages/AdminWithdrawalsPage'
 import { InfoPage } from './pages/InfoPage'
@@ -52,7 +53,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const isBuilder = pathname.startsWith('/criar') && !pathname.startsWith('/criar-conta')
   const isBuilderMain = pathname === '/criar'
-  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/esqueci-senha') || pathname.startsWith('/criar-conta') || pathname.startsWith('/verificacao') || pathname.startsWith('/dashboard') || pathname.startsWith('/admin')
+  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/esqueci-senha') || pathname.startsWith('/criar-conta') || pathname.startsWith('/verificacao') || pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/convites/co-anfitriao')
   const publishHeader = useOptionalBuilderPublishHeader()
   const isPublicEvent = pathname.startsWith('/p/')
 
@@ -154,6 +155,7 @@ export default function App() {
             <Route path="/criar/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/p/:slug" element={<PublicEventPage />} />
+            <Route path="/convites/co-anfitriao" element={<AcceptCoHostInvitePage />} />
             <Route path="/admin/saques" element={<AdminRoute><AdminWithdrawalsPage /></AdminRoute>} />
           </Routes>
         </AppLayout>

@@ -117,11 +117,12 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, men
     { id: 'gallery',   label: 'Galeria',       icon: <Icon.Camera  style={{ width: 17, height: 17 }} /> },
     { id: 'contrib',   label: 'Contribuições', icon: <Icon.Pix     style={{ width: 17, height: 17 }} />, count: contribCount || undefined },
     { id: 'reports',   label: 'Relatórios',    icon: <Icon.BarChart style={{ width: 17, height: 17 }} /> },
+    { id: 'admins',    label: 'Co-anfitriões', icon: <Icon.User    style={{ width: 17, height: 17 }} /> },
     { id: 'payouts',   label: 'Saques',        icon: <Icon.Bank    style={{ width: 17, height: 17 }} /> },
   ]
 
   const go = (id: string) => {
-    const validPages: ActivePage[] = ['dashboard', 'gifts', 'contrib', 'payouts', 'customize', 'settings', 'convites', 'gallery', 'reports']
+    const validPages: ActivePage[] = ['dashboard', 'gifts', 'contrib', 'payouts', 'customize', 'settings', 'convites', 'gallery', 'reports', 'admins']
     if (validPages.includes(id as ActivePage)) {
       onClose?.()
       onNav(id as ActivePage)
@@ -132,6 +133,8 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, men
   const eventTypeLabel = EVENT_TYPE_LABELS[event?.data?.eventType] ?? event?.data?.eventType ?? '—'
   const eventDate      = fmtDate(event?.eventDate)
   const userInitials   = nameInitials(user?.name)
+  const isCoHost       = !!event && !!user && event.userId !== user.id
+  const ownerName      = event?.user?.name ?? ''
 
   return (
     <aside className={cn(
@@ -155,6 +158,11 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, men
         <div className="flex-1 min-w-0 leading-[1.2]">
           <b className="font-display font-semibold text-[13.5px] text-slate-900 block truncate tracking-[-0.01em]">{eventName}</b>
           <small className="text-[11.5px] text-slate-500">{eventTypeLabel} · {eventDate}</small>
+          {isCoHost && (
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-600">
+              Co-anfitrião{ownerName ? ` de ${ownerName}` : ''}
+            </span>
+          )}
         </div>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-3.5 h-3.5 text-slate-400 shrink-0">
           <path d="M8 9l4-4 4 4M8 15l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
@@ -165,7 +173,7 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, men
 
       {/* Footer */}
       <div className="mt-auto px-2 pt-3">
-        {user?.plan && (
+        {user?.plan && user.plan.name != 'premium' && (
           <div className="flex items-center justify-between px-3 py-2 mb-2 rounded-[10px] bg-slate-50 border border-slate-100">
             <span className="text-[12px] font-semibold text-slate-600">
               {user.plan.name === 'essencial' ? '🌿' : user.plan.name === 'pro' ? '🚀' : '👑'} {user.plan.label}
