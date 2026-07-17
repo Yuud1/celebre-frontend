@@ -115,6 +115,7 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, men
     { id: 'convites',  label: 'Convite',       icon: <Icon.Mail    style={{ width: 17, height: 17 }} /> },
     { id: 'gifts',     label: 'Presentes',     icon: <Icon.Sparkle style={{ width: 17, height: 17 }} />, count: giftCount || undefined },
     { id: 'gallery',   label: 'Galeria',       icon: <Icon.Camera  style={{ width: 17, height: 17 }} /> },
+    { id: 'rsvp',      label: 'Presença',      icon: <Icon.Check   style={{ width: 17, height: 17 }} /> },
     { id: 'contrib',   label: 'Contribuições', icon: <Icon.Pix     style={{ width: 17, height: 17 }} />, count: contribCount || undefined },
     { id: 'reports',   label: 'Relatórios',    icon: <Icon.BarChart style={{ width: 17, height: 17 }} /> },
     { id: 'admins',    label: 'Co-anfitriões', icon: <Icon.User    style={{ width: 17, height: 17 }} /> },
@@ -122,7 +123,7 @@ export function Sidebar({ activePage, onNav, event, contribCount, giftCount, men
   ]
 
   const go = (id: string) => {
-    const validPages: ActivePage[] = ['dashboard', 'gifts', 'contrib', 'payouts', 'customize', 'settings', 'convites', 'gallery', 'reports', 'admins']
+    const validPages: ActivePage[] = ['dashboard', 'gifts', 'contrib', 'payouts', 'customize', 'settings', 'convites', 'gallery', 'reports', 'admins', 'rsvp']
     if (validPages.includes(id as ActivePage)) {
       onClose?.()
       onNav(id as ActivePage)

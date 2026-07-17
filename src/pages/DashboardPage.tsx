@@ -15,6 +15,7 @@ import {
   DashGallery,
   DashReports,
   DashAdmins,
+  DashRsvp,
 } from '../components/dashboard/pages'
 import { Sidebar } from '../components/dashboard/Sidebar'
 import { Topbar } from '../components/dashboard/Topbar'
@@ -22,7 +23,7 @@ import { Topbar } from '../components/dashboard/Topbar'
 import { cn } from '@/lib/utils'
 import { Bottombar } from '@/components/dashboard/Bottombar'
 
-export type ActivePage = 'dashboard' | 'gifts' | 'contrib' | 'payouts' | 'customize' | 'settings' | 'convites' | 'gallery' | 'reports' | 'admins'
+export type ActivePage = 'dashboard' | 'gifts' | 'contrib' | 'payouts' | 'customize' | 'settings' | 'convites' | 'gallery' | 'reports' | 'admins' | 'rsvp'
 
 // ─── PageHead ──────────────────────────────────────────────────────
 
@@ -183,6 +184,7 @@ export function DashboardPage() {
                 {activePage === 'settings'  && <Settings />}
                 {activePage === 'convites'  && <DashInvites event={event} />}
                 {activePage === 'gallery'   && <DashGallery event={event} onReload={loadData} />}
+                {activePage === 'rsvp'      && <DashRsvp event={event} onReload={loadData} />}
                 {activePage === 'reports'   && <DashReports event={event} />}
                 {activePage === 'admins'    && <DashAdmins event={event} />}
               </>

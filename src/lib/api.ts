@@ -342,4 +342,37 @@ export const api = {
       body: JSON.stringify(payload),
     })
   },
+
+  // ─── RSVP ─────────────────────────────────────────────────────
+  submitRsvp(slug: string, payload: {
+    guestName: string
+    guestEmail: string
+    status: 'confirmed' | 'declined'
+    plusOnes?: number
+    dietaryRestrictions?: string
+    message?: string
+  }) {
+    return request<any>(`/pub/${slug}/rsvp`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  },
+  listRsvps(eventId: string) {
+    return request<Array<{
+      id: string
+      guestName: string
+      guestEmail: string
+      status: 'pending' | 'confirmed' | 'declined'
+      plusOnes: number
+      dietaryRestrictions: string | null
+      message: string | null
+      createdAt: string
+    }>>(`/events/${eventId}/rsvps`)
+  },
+  updateRsvpStatus(eventId: string, rsvpId: string, status: 'pending' | 'confirmed' | 'declined') {
+    return request<any>(`/events/${eventId}/rsvps/${rsvpId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    })
+  },
 };
