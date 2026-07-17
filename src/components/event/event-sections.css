@@ -29,6 +29,67 @@
   word-break: break-word;
 }
 
+/* RSVP */
+.ep-rsvp__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 32rem;
+  margin-top: 1.5rem;
+}
+
+.ep-rsvp__form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.ep-rsvp__form input,
+.ep-rsvp__form textarea {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(26, 22, 20, 0.15);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.ep-rsvp__form input:focus,
+.ep-rsvp__form textarea:focus {
+  outline: none;
+  border-color: var(--ep-accent, #b8543a);
+}
+
+.ep-rsvp__attending {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.ep-rsvp__attending label {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 400;
+}
+
+.ep-rsvp__attending input {
+  width: auto;
+}
+
+.ep-rsvp__error {
+  color: #c0392b;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.ep-rsvp__done {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  color: var(--ep-muted);
+}
+
 /* Countdown */
 .ep-countdown__grid {
   display: grid;

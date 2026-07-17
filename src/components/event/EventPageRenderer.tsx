@@ -18,6 +18,7 @@ import { HomeStatsSection } from './sections/HomeStatsSection'
 import { HomeChecklistSection } from './sections/HomeChecklistSection'
 import { RoomWishlistSection } from './sections/RoomWishlistSection'
 import { GallerySection, type GalleryImage } from './sections/GallerySection'
+import { RsvpSection } from './sections/RsvpSection'
 import './event-page.css'
 import './event-sections.css'
 
@@ -292,6 +293,8 @@ export function EventPageRenderer({
       ) : null}
 
       {galleryImages ? <GallerySection images={galleryImages} /> : null}
+
+      {eventSlug ? <RsvpSection eventSlug={eventSlug} /> : null}
 
       {featuredGifts.length > 0 || (editable && onAddGift) ? (
         <div className="ep-featured-zone">
