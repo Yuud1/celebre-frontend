@@ -1,7 +1,9 @@
 import { useRef, useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { toPng } from 'html-to-image'
 import QRCode from 'qrcode'
 import { PageHead } from '@/pages/DashboardPage'
+import { useAuth } from '@/contexts/AuthContext'
 import { InviteRenderer, InviteWhatsAppPreview, MiniInvite } from './components/InviteRenderer'
 import { DashBtn } from '../../DashBtn'
 
@@ -18,6 +20,18 @@ const ACCENTS: Record<string, string> = {
 
 const GFONTS_URL =
   'https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=Pinyon+Script&family=Yellowtail&display=swap'
+
+const DIACRITICS_RE = /[̀-ͯ]/g
+
+function slugifyGuestName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(DIACRITICS_RE, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
 
 function arrayBufferToBase64(buf: ArrayBuffer): string {
   const bytes = new Uint8Array(buf)
@@ -60,12 +74,17 @@ async function fetchAsDataUrl(url: string): Promise<string | undefined> {
 }
 
 export function DashInvites({ event }: DashInvitesProps) {
+  const { user } = useAuth()
   const hiddenRef = useRef<HTMLDivElement>(null)
   const [qrDataUrl, setQrDataUrl] = useState('')
   const [fontEmbedCSS, setFontEmbedCSS] = useState('')
   const [coverDataUrl, setCoverDataUrl] = useState<string | undefined>()
   const [capturing, setCapturing] = useState(false)
   const [pregenFile, setPregenFile] = useState<File | null>(null)
+  const [guestName, setGuestName] = useState('')
+  const [individualMode, setIndividualMode] = useState(false)
+
+  const hasIndividualInvites = Boolean(user?.plan?.features?.individualInvites)
 
   const eventType = event?.data?.eventType ?? 'casamento'
   const accent = event?.data?.theme?.accent ?? ACCENTS[eventType] ?? '#74865f'
@@ -76,7 +95,7 @@ export function DashInvites({ event }: DashInvitesProps) {
 
   useEffect(() => {
     if (!slug) return
-    QRCode.toDataURL(`https://celebre.com.br/p/${slug}`, {
+    QRCode.toDataURL(`https://celebre.fun/p/${slug}`, {
       width: 320, margin: 1,
       color: { dark: '#34302e', light: '#ffffff' },
     }).then(setQrDataUrl).catch(() => {})
@@ -174,6 +193,38 @@ export function DashInvites({ event }: DashInvitesProps) {
     }
   }
 
+  const downloadIndividual = async () => {
+    if (capturing || !hasIndividualInvites || !guestName.trim()) return
+    setCapturing(true)
+    setIndividualMode(true)
+    try {
+      await new Promise(requestAnimationFrame)
+      await new Promise(requestAnimationFrame)
+      const dataUrl = await capture()
+      const a = document.createElement('a')
+      const fileSlug = slugifyGuestName(guestName)
+      a.href = dataUrl
+      a.download = `convite-${slug || 'evento'}-${fileSlug || 'convidado'}.png`
+      a.click()
+    } catch (error: unknown) {
+      console.error(error)
+      alert('Não foi possível gerar a imagem. Tente novamente.')
+    } finally {
+      setIndividualMode(false)
+      setCapturing(false)
+    }
+  }
+
+  const shareIndividualWhatsApp = () => {
+    if (!hasIndividualInvites) return
+    const name = guestName.trim()
+    const link = `https://celebre.fun/p/${slug}`
+    const text = name
+      ? `Olá, ${name}! Você está convidado(a) para o nosso evento 💛 Baixe a imagem do seu convite e acesse: ${link}`
+      : `Você está convidado(a) para o nosso evento 💛 Acesse: ${link}`
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
+  }
+
   if (!event) return null
 
   const PREVIEW_W = 320
@@ -248,9 +299,50 @@ export function DashInvites({ event }: DashInvitesProps) {
 
           <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[12.5px] text-slate-600 max-w-[280px]">
             Link do evento:<br />
-            <a href={`https://celebre.com.br/p/${slug}`} target="_blank" rel="noreferrer" className="text-indigo-500 font-medium break-all">
-              celebre.com.br/p/{slug}
+            <a href={`https://celebre.fun/p/${slug}`} target="_blank" rel="noreferrer" className="text-indigo-500 font-medium break-all">
+              celebre.fun/p/{slug}
             </a>
+          </div>
+
+          <div className="w-full max-w-[280px] flex flex-col gap-2.5 border-t border-slate-200 pt-5">
+            <p className="text-[13px] font-semibold text-slate-700">Convite individual</p>
+            <input
+              type="text"
+              value={guestName}
+              onChange={e => setGuestName(e.target.value)}
+              placeholder="Nome do convidado"
+              disabled={!hasIndividualInvites}
+              className="h-[42px] px-3.5 rounded-[10px] border border-slate-200 text-[14px] text-slate-700 disabled:bg-slate-50 disabled:text-slate-400"
+            />
+
+            <DashBtn
+              variant="primary"
+              size="lg"
+              className="w-full justify-center"
+              onClick={downloadIndividual}
+              disabled={!hasIndividualInvites || capturing || !ready || !guestName.trim()}
+              title={!hasIndividualInvites ? 'Disponível no plano Premium' : undefined}
+            >
+              {capturing && individualMode ? 'Gerando…' : 'Gerar convite individual'}
+            </DashBtn>
+
+            <DashBtn
+              variant="ghost"
+              size="lg"
+              className="w-full justify-center"
+              onClick={shareIndividualWhatsApp}
+              disabled={!hasIndividualInvites}
+              title={!hasIndividualInvites ? 'Disponível no plano Premium' : undefined}
+            >
+              Compartilhar link no WhatsApp
+            </DashBtn>
+
+            {!hasIndividualInvites && (
+              <p className="text-[12px] text-slate-500 leading-relaxed">
+                Convites individuais por convidado é um recurso do plano Premium.{' '}
+                <Link to="/#planos" className="text-indigo-500 font-medium">Fazer upgrade →</Link>
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -258,7 +350,7 @@ export function DashInvites({ event }: DashInvitesProps) {
       {/* Hidden 1080×1920 render for PNG capture */}
       <div aria-hidden="true" className="fixed top-0 left-0 opacity-0 pointer-events-none z-[-1] overflow-hidden" style={{ width: 1080, height: 1920 }}>
         <div ref={hiddenRef} style={{ width: 1080, height: 1920 }}>
-          <InviteRenderer event={captureEvent} qrDataUrl={qrDataUrl} />
+          <InviteRenderer event={captureEvent} qrDataUrl={qrDataUrl} guestName={individualMode ? guestName.trim() : undefined} />
         </div>
       </div>
     </div>

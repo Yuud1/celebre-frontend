@@ -99,16 +99,21 @@ export function InviteFooter({ names, dateLabel, nameCls, nameSize, mark, wave =
   )
 }
 
-export function InviteHeaderOverlay({ icon, headline, headCls, headSize, mark, label, coverUrl }: {
-  icon: IconName; headline: string; headCls: string; headSize: number; mark: MarkName; label: string; coverUrl?: string
+export function InviteHeaderOverlay({ icon, headline, headCls, headSize, mark, label, coverUrl, guestName }: {
+  icon: IconName; headline: string; headCls: string; headSize: number; mark: MarkName; label: string; coverUrl?: string; guestName?: string
 }) {
   return (
     <div style={{ position: 'relative', height: 700, flex: '0 0 auto' }}>
       <InvitePlaceholder style={{ position: 'absolute', inset: 0 }} coverUrl={coverUrl} />
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(178deg, var(--cv-overlay-top) 0%, transparent 26%, transparent 48%, var(--cv-overlay-bottom) 100%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, var(--cv-overlay-top) 0%, transparent 34%, transparent 46%, var(--cv-overlay-bottom) 100%)' }} />
       <div style={{ position: 'absolute', top: 50, left: 0, right: 0 }}>
         <InviteBadge icon={icon} />
       </div>
+      {guestName && (
+        <div className="cv-eyebrow" style={{ position: 'absolute', top: 22, left: 0, right: 0, textAlign: 'center', color: 'rgba(255,255,255,0.94)', textShadow: '0 2px 12px rgba(20,12,24,0.4)' }}>
+          Para {guestName}
+        </div>
+      )}
       <div style={{ position: 'absolute', left: 70, right: 70, bottom: 132, textAlign: 'center', color: '#fff' }}>
         <div className="cv-eyebrow" style={{ color: 'rgba(255,255,255,0.94)' }}>{label}</div>
         <h1 className={headCls} style={{ marginTop: 26, fontSize: headSize, color: '#fff', lineHeight: 1.04, whiteSpace: 'pre-line', textShadow: '0 2px 24px rgba(20,12,24,0.3)', fontStyle: headCls === 'cv-serif' ? 'italic' : undefined, fontWeight: headCls === 'cv-serif' ? 600 : undefined }}>
@@ -121,8 +126,8 @@ export function InviteHeaderOverlay({ icon, headline, headCls, headSize, mark, l
   )
 }
 
-export function InviteHeaderArch({ icon, headline, headCls, headSize, label, coverUrl }: {
-  icon: IconName; headline: string; headCls: string; headSize: number; label: string; coverUrl?: string
+export function InviteHeaderArch({ icon, headline, headCls, headSize, label, coverUrl, guestName }: {
+  icon: IconName; headline: string; headCls: string; headSize: number; label: string; coverUrl?: string; guestName?: string
 }) {
   const dots = [
     { x: 70,  y: 120, s: 12, c: 'var(--accent-soft)', r: true },
@@ -135,6 +140,9 @@ export function InviteHeaderArch({ icon, headline, headCls, headSize, label, cov
   return (
     <div style={{ position: 'relative', padding: '44px 88px 0', textAlign: 'center', flex: '0 0 auto' }}>
       <InviteScatter items={dots} />
+      {guestName && (
+        <div className="cv-eyebrow" style={{ marginBottom: 10, color: 'var(--accent-deep)' }}>Para {guestName}</div>
+      )}
       <div className="cv-eyebrow" style={{ marginBottom: 24 }}>{label}</div>
       <InviteBadge icon={icon} size={100} />
       <div style={{ marginTop: 28, height: 344, borderRadius: '180px 180px 38px 38px', overflow: 'hidden', position: 'relative', boxShadow: '0 24px 60px var(--cv-arch-shadow)' }}>

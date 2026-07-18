@@ -97,7 +97,7 @@ export function computeThemeVars(accent: string): Record<string, string> {
     '--cv-ph-bg-end':       mixOklab(accent, 40, '#d9ccba'),
     '--cv-ph-tag-color':    mixOklab(accentDeep, 70, '#ffffff'),
     '--cv-badge-shadow':    toRgba(accent, 0.40),
-    '--cv-overlay-top':     toRgba(accent, 0.30),
+    '--cv-overlay-top':     toRgba(mixOklab(accent, 35, ink), 0.58),
     '--cv-overlay-bottom':  toRgba(accentDeep, 0.78),
     '--cv-arch-shadow':     toRgba(accent, 0.24),
     '--cv-qr-glow':         toRgba(accent, 0.18),

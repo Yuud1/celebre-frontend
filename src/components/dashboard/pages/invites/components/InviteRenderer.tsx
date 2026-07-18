@@ -28,9 +28,10 @@ export interface InviteRendererProps {
     }
   }
   qrDataUrl: string
+  guestName?: string
 }
 
-export function InviteRenderer({ event, qrDataUrl }: InviteRendererProps) {
+export function InviteRenderer({ event, qrDataUrl, guestName }: InviteRendererProps) {
   const eventType: EventTypeId = (event.data.eventType as EventTypeId) ?? 'casamento'
   const tpl = TEMPLATES[eventType] ?? TEMPLATES['casamento']
   const accent = event.data.theme?.accent ?? tpl.defaultAccent
@@ -59,8 +60,8 @@ export function InviteRenderer({ event, qrDataUrl }: InviteRendererProps) {
   return (
     <div className="cv-invite" style={themeVars as React.CSSProperties}>
       {useOverlay
-        ? <InviteHeaderOverlay icon={tpl.icon} headline={tpl.headline} headCls={tpl.headCls} headSize={tpl.headSize} mark={tpl.mark} label={tpl.label} coverUrl={coverUrl} />
-        : <InviteHeaderArch   icon={tpl.icon} headline={tpl.headline} headCls={tpl.headCls} headSize={tpl.headSize} label={tpl.label} coverUrl={coverUrl} />
+        ? <InviteHeaderOverlay icon={tpl.icon} headline={tpl.headline} headCls={tpl.headCls} headSize={tpl.headSize} mark={tpl.mark} label={tpl.label} coverUrl={coverUrl} guestName={guestName} />
+        : <InviteHeaderArch   icon={tpl.icon} headline={tpl.headline} headCls={tpl.headCls} headSize={tpl.headSize} label={tpl.label} coverUrl={coverUrl} guestName={guestName} />
       }
       <InviteBody
         message={tpl.defaultMessage}
