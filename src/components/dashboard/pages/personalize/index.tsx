@@ -18,7 +18,6 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
   const isEssencial = user?.plan?.name === 'essencial'
   const [tab, setTab] = useState<'general' | 'media' | 'appearance'>('general')
   const [saving, setSaving] = useState(false)
-  const [coverFile, setCoverFile] = useState<File | null>(null)
   const [coverPreview, setCoverPreview] = useState('')
   const [form, setForm] = useState({ name: '', message: '', eventDate: '', hosts: '', subtitle: '' })
   const [paletteId, setPaletteId] = useState(PALETTES[0].id)
@@ -37,7 +36,6 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
       subtitle:  d.subtitle    ?? '',
     })
     setCoverPreview(ev.coverUrl ?? d.coverUrl ?? '')
-    setCoverFile(null)
     const matchedPalette = getPaletteById(d.theme?.paletteId) ?? PALETTES.find(p => p.primary === d.theme?.primary)
     setPaletteId(matchedPalette?.id ?? PALETTES[0].id)
     const matchedFont = FONT_OPTIONS.find(f => f.family === d.theme?.fontFamily)
@@ -57,11 +55,6 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
     if (!event?.id || saving) return
     setSaving(true)
     try {
-      let finalCoverUrl = coverPreview
-      if (coverFile) {
-        const { url } = await api.uploadEventCover(event.id, coverFile)
-        finalCoverUrl = url
-      }
       await api.updateEvent(event.id, {
         data: {
           name:        form.name,
@@ -69,7 +62,7 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
           message:     form.message,
           hosts:       form.hosts,
           subtitle:    form.subtitle,
-          coverUrl:    finalCoverUrl,
+          coverUrl:    coverPreview,
           theme: {
             ...(event.data?.theme ?? {}),
             ...createThemeFromPalette(paletteId),
@@ -78,7 +71,7 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
             darkMode:   isEssencial ? false : darkMode,
           },
         },
-        coverUrl:  finalCoverUrl,
+        coverUrl:  coverPreview,
         eventDate: form.eventDate || null,
       })
       onReload()
@@ -164,7 +157,8 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
               <ImagePicker
                 label="Foto de capa"
                 value={coverPreview}
-                onChange={(dataUrl) => { setCoverPreview(dataUrl); setCoverFile(null) }}
+                onChange={setCoverPreview}
+                uploadFn={(file) => api.uploadImage(file, 'event')}
                 hint="JPG, PNG ou WebP · até 5 MB"
               />
             )}

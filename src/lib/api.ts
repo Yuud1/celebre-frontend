@@ -103,23 +103,9 @@ export const api = {
   },
 
   // ─── Upload ─────────────────────────────────────────────────
-  uploadEventCover(eventId: string, file: File) {
-    const form = new FormData();
-    form.append("file", file);
-    return request<{ url: string }>(`/upload/events/${eventId}/cover`, {
-      method: "POST",
-      body: form,
-    });
-  },
-  uploadGiftImage(eventId: string, file: File) {
-    const form = new FormData();
-    form.append("file", file);
-    return request<{ url: string }>(`/upload/events/${eventId}/gift-image`, {
-      method: "POST",
-      body: form,
-    });
-  },
-  uploadDraftImage(file: File) {
+  // Endpoint único para imagens de draft e de evento publicado (Dashboard e Builder).
+  // `context` não afeta a chamada hoje, mas mantém o call site explícito sobre a origem.
+  uploadImage(file: File, _context: "draft" | "event" = "draft") {
     const form = new FormData();
     form.append("file", file);
     return request<{ url: string }>("/upload/draft-image", {
@@ -135,7 +121,18 @@ export const api = {
       })
     })
   },
-  
+  uploadDraftImage(file: File) {
+    return api.uploadImage(file, "draft");
+  },
+  uploadGiftImage(eventId: string, file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    return request<{ url: string }>(`/upload/events/${eventId}/gift-image`, {
+      method: "POST",
+      body: form,
+    });
+  },
+
   // ─── Events ─────────────────────────────────────────────────
   listEvents() {
     return request<any[]>("/events");
