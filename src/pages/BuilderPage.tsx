@@ -506,7 +506,7 @@ export function BuilderPage() {
   }
 
   function handleSelectFont(fontFamily: string) {
-    const chosen = FONT_OPTIONS.find((f) => f.value === fontFamily)
+    const chosen = FONT_OPTIONS.find((f) => f.family === fontFamily)
     updateTheme({ fontFamily: fontFamily || undefined })
     setFontUserPrompt(`Quero usar a tipografia ${chosen?.label ?? 'Padrão do tema'}.`)
     setFontChosen(true)
