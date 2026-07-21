@@ -8,6 +8,7 @@ import { EditSheet } from '../components/builder/EditSheet'
 import { EventPageRenderer } from '../components/event/EventPageRenderer'
 import { useBuilderState } from '../hooks/useBuilderState'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { useAutoSave } from '../hooks/useAutoSave'
 import { getBuilderChatCopy, getBuilderQuestions } from '../data/builderChat'
 import { FONT_OPTIONS } from '../data/fontOptions'
 import {
@@ -372,21 +373,20 @@ export function BuilderPage() {
   }, [isEventEdit, user, phase, state.draftId, state.eventType, state.templateId, state.theme]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-save debounced quando conteúdo muda (usuário logado)
-  useEffect(() => {
-    if (isEventEdit || !user || !state.draftId || phase !== 'ready' || !state.eventType || !state.templateId || !state.theme) return
-    const t = setTimeout(() => {
+  useAutoSave(
+    () => {
       const payload = toDraftPayload({ eventType: state.eventType!, templateId: state.templateId!, theme: state.theme!, content: state.content })
-      api.updateDraft(state.draftId!, payload).catch(() => {})
-    }, 1500)
-    return () => clearTimeout(t)
-  }, [isEventEdit, state.content, state.theme, state.draftId, phase]) // eslint-disable-line react-hooks/exhaustive-deps
+      return api.updateDraft(state.draftId!, payload)
+    },
+    [state.content, state.theme, state.draftId],
+    { enabled: !isEventEdit && !!user && !!state.draftId && phase === 'ready' && !!state.eventType && !!state.templateId && !!state.theme },
+  )
 
   // Auto-save debounced do evento já publicado (modo edição pós-pagamento)
-  useEffect(() => {
-    if (!isEventEdit || !eventEdit) return
-    const t = setTimeout(() => {
-      const { theme, content, id } = eventEdit
-      api.updateEvent(id, {
+  useAutoSave(
+    () => {
+      const { theme, content, id } = eventEdit!
+      return api.updateEvent(id, {
         data: {
           name: content.name,
           hosts: content.hosts,
@@ -399,10 +399,11 @@ export function BuilderPage() {
         },
         coverUrl: content.coverUrl,
         eventDate: content.eventDate || null,
-      }).catch(() => {})
-    }, 1500)
-    return () => clearTimeout(t)
-  }, [isEventEdit, eventEdit])
+      })
+    },
+    [eventEdit],
+    { enabled: isEventEdit && !!eventEdit },
+  )
 
   const handlePublish = useCallback(async () => {
     if (!state.eventType || !state.templateId || !state.theme) return

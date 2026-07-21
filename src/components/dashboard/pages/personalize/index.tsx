@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { PageHead, type ActivePage } from "@/pages/DashboardPage";
 import { api } from "@/lib/api";
 import { Icon } from "@/components/auth/AuthIcons";
-import { DashBtn } from '../../DashBtn'
 import { cn } from "@/lib/utils";
 import { EventEditor } from "@/components/shared/EventEditor";
+import { useAutoSave } from "@/hooks/useAutoSave";
 import { PALETTES, createThemeFromPalette, getPaletteById } from "@/lib/themeCatalog";
 import type { EventContent, EventTheme, EventTypeId } from "@/types/event";
 
@@ -22,8 +22,7 @@ const emptyContent: EventContent = {
   gifts: [],
 }
 
-export function Personalize({ event, onReload }: PersonalizeProps) {
-  const [saving, setSaving] = useState(false)
+export function Personalize({ event }: PersonalizeProps) {
   const [eventType, setEventType] = useState<EventTypeId>('casamento')
   const [content, setContent] = useState<EventContent>(emptyContent)
   const [theme, setTheme] = useState<EventTheme>(() => createThemeFromPalette(PALETTES[0].id))
@@ -60,49 +59,42 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
   const noopGift = () => {}
   const noopAddGift = () => {}
 
-  const handleSave = async () => {
-    if (!event?.id || saving) return
-    setSaving(true)
-    try {
-      await api.updateEvent(event.id, {
-        data: {
-          name:        content.name,
-          description: content.message,
-          message:     content.message,
-          hosts:       content.hosts,
-          subtitle:    content.subtitle,
-          location:    content.location,
-          signature:   content.signature,
-          sections:    content.sections,
-          coverUrl:    content.coverUrl,
-          theme,
-        },
-        coverUrl:  content.coverUrl,
-        eventDate: content.eventDate || null,
-      })
-      onReload()
-    } catch (e: any) {
-      alert(e.message)
-    } finally {
-      setSaving(false)
-    }
-  }
+  // Mesmo mecanismo de auto-save debounced do Builder (ver BuilderPage.tsx).
+  const { saving } = useAutoSave(
+    () => api.updateEvent(event.id, {
+      data: {
+        name:        content.name,
+        description: content.message,
+        message:     content.message,
+        hosts:       content.hosts,
+        subtitle:    content.subtitle,
+        location:    content.location,
+        signature:   content.signature,
+        sections:    content.sections,
+        coverUrl:    content.coverUrl,
+        theme,
+      },
+      coverUrl:  content.coverUrl,
+      eventDate: content.eventDate || null,
+    }),
+    [content, theme],
+    { enabled: !!event?.id },
+  )
 
   return (
     <>
       <PageHead
         eyebrow="Personalização"
         title="Sua página, do seu jeito"
-        sub="Edite informações, foto de capa e aparência. As mudanças ficam visíveis ao salvar."
+        sub="Edite informações, foto de capa e aparência. As mudanças salvam automaticamente."
         actions={
-          <>
-            <DashBtn variant="ghost" onClick={() => resetFromEvent(event)} disabled={saving}>
-              Descartar alterações
-            </DashBtn>
-            <DashBtn variant="primary" onClick={handleSave} disabled={saving}>
-              <Icon.Check style={{ width: 15, height: 15 }} />{saving ? 'Salvando…' : 'Publicar mudanças'}
-            </DashBtn>
-          </>
+          <span className="flex items-center gap-1.5 text-[13px] text-slate-500">
+            {saving ? (
+              <>Salvando…</>
+            ) : (
+              <><Icon.Check style={{ width: 14, height: 14 }} className="text-emerald-500" />Salvo</>
+            )}
+          </span>
         }
       />
 
