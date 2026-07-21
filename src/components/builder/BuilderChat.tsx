@@ -301,12 +301,12 @@ export function BuilderChat({
               <div className="ai-chat__palette-grid">
                 {FONT_OPTIONS.map((font) => (
                   <button
-                    key={font.label}
+                    key={font.id}
                     type="button"
-                    className={'ai-chat__palette-btn' + ((selectedFontFamily ?? '') === font.value ? ' is-selected' : '')}
+                    className={'ai-chat__palette-btn' + ((selectedFontFamily ?? '') === font.family ? ' is-selected' : '')}
                     disabled={disabled}
-                    onClick={() => onSelectFont(font.value)}
-                    style={{ fontFamily: font.value || "Inter, system-ui, -apple-system, 'Segoe UI', sans-serif" }}
+                    onClick={() => onSelectFont(font.family)}
+                    style={{ fontFamily: font.family || "Inter, system-ui, -apple-system, 'Segoe UI', sans-serif" }}
                   >
                     <span>{font.label}</span>
                   </button>

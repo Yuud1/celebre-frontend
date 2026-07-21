@@ -52,7 +52,7 @@ export function FieldEditor({
             onChange={(e) => onTheme({ fontFamily: e.target.value || undefined })}
           >
             {FONT_OPTIONS.map((font) => (
-              <option key={font.label} value={font.value}>
+              <option key={font.id} value={font.family}>
                 {font.label}
               </option>
             ))}

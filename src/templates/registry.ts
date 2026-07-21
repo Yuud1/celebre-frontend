@@ -3,10 +3,12 @@ import type {
   EventTheme,
   EventTypeDefinition,
   EventTypeId,
-  PaletteDefinition,
   TemplateDefinition,
 } from '../types/event'
 import { applyGiftRooms, createDefaultSections, mergeSections } from '../data/defaultSections'
+import { PALETTES, createThemeFromPalette, getPaletteById } from '../lib/themeCatalog'
+
+export { PALETTES, createThemeFromPalette, getPaletteById }
 
 export const EVENT_TYPES: EventTypeDefinition[] = [
   {
@@ -32,54 +34,6 @@ export const EVENT_TYPES: EventTypeDefinition[] = [
     label: 'Chá de panela',
     emoji: '🏠',
     description: 'Presentes e vaquinhas para montar o primeiro lar.',
-  },
-]
-
-export const PALETTES: PaletteDefinition[] = [
-  {
-    id: 'linen',
-    name: 'Linen',
-    primary: '#6f675a',
-    secondary: '#2f2a24',
-    background: '#f7f4ee',
-    accent: '#b9a587',
-    ink: '#201c18',
-  },
-  {
-    id: 'sage',
-    name: 'Sage',
-    primary: '#6f7f62',
-    secondary: '#2d3728',
-    background: '#f5f3ec',
-    accent: '#d8a35d',
-    ink: '#20231c',
-  },
-  {
-    id: 'blush',
-    name: 'Blush',
-    primary: '#b66f8f',
-    secondary: '#4a3240',
-    background: '#fcf2f7',
-    accent: '#e2a9c1',
-    ink: '#2b1f28',
-  },
-  {
-    id: 'mist',
-    name: 'Mist',
-    primary: '#56758a',
-    secondary: '#20313d',
-    background: '#f4f7f7',
-    accent: '#9eb8c4',
-    ink: '#18242b',
-  },
-  {
-    id: 'clay',
-    name: 'Clay',
-    primary: '#a05f3d',
-    secondary: '#3b271c',
-    background: '#f9efe5',
-    accent: '#dda176',
-    ink: '#24170f',
   },
 ]
 
@@ -208,10 +162,6 @@ export function getDefaultTemplateByEventType(eventType: EventTypeId) {
   return TEMPLATES.find((t) => t.eventType === eventType) ?? TEMPLATES[0]
 }
 
-export function getPaletteById(id: string) {
-  return PALETTES.find((p) => p.id === id)
-}
-
 export function createDefaultContent(eventType: EventTypeId): EventContent {
   const content = structuredClone(contentByType[eventType])
   content.sections = createDefaultSections(eventType, content)
@@ -230,19 +180,6 @@ export function resolveEventContent(
     sections: mergeSections(eventType, { ...base, ...partial }, partial.sections),
   }
   return applyGiftRooms(merged)
-}
-
-export function createThemeFromPalette(paletteId: string): EventTheme {
-  const palette = getPaletteById(paletteId) ?? PALETTES[0]
-  return {
-    paletteId: palette.id,
-    primary: palette.primary,
-    secondary: palette.secondary,
-    background: palette.background,
-    accent: palette.accent,
-    ink: palette.ink,
-    fontScale: 1,
-  }
 }
 
 export function toDraftPayload(state: {
