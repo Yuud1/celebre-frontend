@@ -6,20 +6,7 @@ import { Icon } from "@/components/auth/AuthIcons";
 import { DashBtn } from '../../DashBtn'
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-
-const PALETTES = [
-  ['#0F172A', '#6366F1'], ['#3F2A1D', '#B8543A'],
-  ['#1F3D2C', '#5B8C5E'], ['#1E1B4B', '#A855F7'],
-  ['#0C4A6E', '#0EA5E9'], ['#831843', '#EC4899'],
-  ['#052E16', '#22C55E'], ['#1E293B', '#38BDF8'],
-  ['#450A0A', '#F87171'], ['#3B0764', '#C084FC'],
-  ['#082F49', '#2DD4BF'], ['#422006', '#F59E0B'],
-]
-const FONTS = [
-  { id: 'grotesk' as const, label: 'Geometric', sub: 'Space Grotesk',   family: 'Space Grotesk, sans-serif',      weight: 600 },
-  { id: 'serif'   as const, label: 'Editorial', sub: 'Instrument Serif', family: 'Instrument Serif, Georgia, serif', weight: 400 },
-  { id: 'sans'    as const, label: 'Modern',    sub: 'Inter',            family: 'Inter, sans-serif',               weight: 600 },
-]
+import { PALETTES, FONT_OPTIONS, getFontById, getPaletteById, createThemeFromPalette } from "@/lib/themeCatalog";
 
 const inputCls = 'w-full px-2.5 py-2 rounded-lg border border-slate-200 text-[13px] text-slate-900 bg-white focus:outline-none focus:border-indigo-400 box-border'
 const labelTextCls = 'text-[11px] font-semibold tracking-[0.06em] uppercase text-slate-500'
@@ -34,8 +21,8 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [coverPreview, setCoverPreview] = useState('')
   const [form, setForm] = useState({ name: '', message: '', eventDate: '', hosts: '', subtitle: '' })
-  const [colorIdx, setColorIdx] = useState(0)
-  const [font, setFont] = useState<'grotesk' | 'serif' | 'sans'>('grotesk')
+  const [paletteId, setPaletteId] = useState(PALETTES[0].id)
+  const [fontId, setFontId] = useState('space-grotesk')
   const [fontScale, setFontScale] = useState(1)
   const [darkMode, setDarkMode] = useState(false)
 
@@ -51,17 +38,18 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
     })
     setCoverPreview(ev.coverUrl ?? d.coverUrl ?? '')
     setCoverFile(null)
-    const pi = PALETTES.findIndex(p => p[0] === d.theme?.primary)
-    setColorIdx(pi >= 0 ? pi : 0)
-    const matchedFont = FONTS.find(f => f.family === d.theme?.fontFamily)
-    setFont(matchedFont?.id ?? 'grotesk')
+    const matchedPalette = getPaletteById(d.theme?.paletteId) ?? PALETTES.find(p => p.primary === d.theme?.primary)
+    setPaletteId(matchedPalette?.id ?? PALETTES[0].id)
+    const matchedFont = FONT_OPTIONS.find(f => f.family === d.theme?.fontFamily)
+    setFontId(matchedFont?.id ?? 'space-grotesk')
     setFontScale(d.theme?.fontScale ?? 1)
     setDarkMode(d.theme?.darkMode ?? false)
   }
 
   useEffect(() => { resetFromEvent(event) }, [event])
 
-  const selectedFont = FONTS.find(f => f.id === font)!
+  const selectedPalette = getPaletteById(paletteId) ?? PALETTES[0]
+  const selectedFont = getFontById(fontId) ?? FONT_OPTIONS[0]
   const effectiveFontScale = isEssencial ? 1 : fontScale
   const effectiveDarkMode = isEssencial ? false : darkMode
 
@@ -84,8 +72,7 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
           coverUrl:    finalCoverUrl,
           theme: {
             ...(event.data?.theme ?? {}),
-            primary:    PALETTES[colorIdx][0],
-            secondary:  PALETTES[colorIdx][1],
+            ...createThemeFromPalette(paletteId),
             fontFamily: selectedFont.family,
             fontScale:  isEssencial ? 1 : fontScale,
             darkMode:   isEssencial ? false : darkMode,
@@ -188,50 +175,49 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
                   <div className="flex items-center justify-between mb-2.5">
                     <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-slate-400">Paleta</span>
                   </div>
-                  <div className="grid grid-cols-6 gap-2">
-                    {PALETTES.map((p, i) => {
-                      const locked = isEssencial && i >= 6
-                      return (
-                        <button
-                          key={i}
-                          onClick={() => { if (!locked) setColorIdx(i) }}
-                          disabled={locked}
-                          title={locked ? 'Disponível no plano Pro' : undefined}
-                          className={cn(
-                            'relative w-9 h-9 rounded-[10px] border-2 transition-transform',
-                            locked ? 'cursor-not-allowed opacity-40' : 'cursor-pointer hover:scale-105',
-                            colorIdx === i ? 'border-slate-900 shadow-[0_0_0_2px_#fff_inset]' : 'border-transparent',
-                          )}
-                          style={{ background: `linear-gradient(135deg, ${p[0]} 50%, ${p[1]} 50%)` }}
-                        >
-                          {locked && (
-                            <Icon.Lock style={{ width: 11, height: 11 }} className="absolute inset-0 m-auto text-white drop-shadow" />
-                          )}
-                        </button>
-                      )
-                    })}
+                  <div className="flex flex-wrap gap-2">
+                    {PALETTES.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => setPaletteId(p.id)}
+                        title={p.name}
+                        className={cn(
+                          'relative w-9 h-9 rounded-[10px] border-2 overflow-hidden flex cursor-pointer transition-transform hover:scale-105',
+                          paletteId === p.id ? 'border-slate-900 shadow-[0_0_0_2px_#fff_inset]' : 'border-transparent',
+                        )}
+                      >
+                        <span className="flex-1" style={{ background: p.primary }} />
+                        <span className="flex-1" style={{ background: p.secondary }} />
+                        <span className="flex-1" style={{ background: p.background }} />
+                        <span className="flex-1" style={{ background: p.accent }} />
+                        <span className="flex-1" style={{ background: p.ink }} />
+                      </button>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-2.5 mt-3 px-3 py-2.5 bg-slate-50 rounded-[10px]">
-                    <span className="w-[22px] h-[22px] rounded-md shrink-0" style={{ background: PALETTES[colorIdx][0] }} />
-                    <span className="font-mono text-[11px] text-slate-500">{PALETTES[colorIdx][0]}</span>
-                    <span className="w-[22px] h-[22px] rounded-md ml-auto shrink-0" style={{ background: PALETTES[colorIdx][1] }} />
-                    <span className="font-mono text-[11px] text-slate-500">{PALETTES[colorIdx][1]}</span>
+                  <div className="flex items-center gap-2.5 mt-3 px-3 py-2.5 bg-slate-50 rounded-[10px] flex-wrap">
+                    <span className="text-[12px] font-semibold text-slate-700">{selectedPalette.name}</span>
+                    {(['primary', 'secondary', 'background', 'accent', 'ink'] as const).map((key) => (
+                      <span key={key} className="inline-flex items-center gap-1">
+                        <span className="w-[16px] h-[16px] rounded-md shrink-0 border border-slate-200" style={{ background: selectedPalette[key] }} />
+                        <span className="font-mono text-[10px] text-slate-500">{selectedPalette[key]}</span>
+                      </span>
+                    ))}
                   </div>
                 </div>
 
                 <div>
                   <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-slate-400 mb-2.5">Tipografia</div>
                   <div className="flex flex-col gap-1.5">
-                    {FONTS.map(f => (
+                    {FONT_OPTIONS.map(f => (
                       <button
                         key={f.id}
-                        onClick={() => setFont(f.id)}
+                        onClick={() => setFontId(f.id)}
                         className={cn(
                           'relative w-full p-3 rounded-[10px] border-[1.5px] cursor-pointer text-left transition-all bg-white',
-                          font === f.id ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-200 hover:border-slate-300',
+                          fontId === f.id ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-200 hover:border-slate-300',
                         )}
                       >
-                        {font === f.id && (
+                        {fontId === f.id && (
                           <span className="absolute top-2.5 right-2.5 w-[18px] h-[18px] rounded-full bg-indigo-500 text-white inline-flex items-center justify-center">
                             <Icon.Check style={{ width: 10, height: 10 }} />
                           </span>
@@ -277,7 +263,7 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
 
                 {isEssencial && (
                   <div className="text-[12px] text-indigo-600 bg-indigo-50 rounded-[10px] px-3 py-2.5">
-                    Paletas extras, tamanho do texto e modo escuro são recursos do plano Pro.
+                    Tamanho do texto e modo escuro são recursos do plano Pro.
                   </div>
                 )}
               </>
@@ -306,7 +292,7 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
               className="w-full max-w-[540px] rounded-[14px] overflow-hidden shadow-[0_20px_50px_rgba(15,23,42,0.10)] border border-slate-200 transition-colors"
               style={{ background: effectiveDarkMode ? '#0F172A' : '#FFFFFF' }}
             >
-              <div className="relative overflow-hidden" style={{ height: 'clamp(140px, 20vh, 240px)', background: `linear-gradient(135deg, ${PALETTES[colorIdx][0]} 0%, ${PALETTES[colorIdx][1]} 100%)` }}>
+              <div className="relative overflow-hidden" style={{ height: 'clamp(140px, 20vh, 240px)', background: `linear-gradient(135deg, ${selectedPalette.primary} 0%, ${selectedPalette.accent} 100%)` }}>
                 {coverPreview && (
                   <img src={coverPreview} alt="" className="absolute inset-0 w-full h-full object-cover" />
                 )}
@@ -325,7 +311,7 @@ export function Personalize({ event, onReload }: PersonalizeProps) {
                     <p style={{ fontSize: 14 * effectiveFontScale }} className={cn('leading-[1.65] mt-2', effectiveDarkMode ? 'text-slate-300' : 'text-slate-600')}>{form.message}</p>
                   </>
                 )}
-                <button style={{ background: PALETTES[colorIdx][1], fontSize: 14 * effectiveFontScale }} className="mt-4 w-full h-11 rounded-xl text-white font-semibold border-0 cursor-pointer">
+                <button style={{ background: selectedPalette.accent, fontSize: 14 * effectiveFontScale }} className="mt-4 w-full h-11 rounded-xl text-white font-semibold border-0 cursor-pointer">
                   Contribuir com um presente
                 </button>
               </div>
