@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { BuilderState, EventContent, EventTheme, EventTypeId } from '../types/event'
 import { insertGift } from '../lib/gifts'
+import { hydrateFromDraft } from '../lib/builderDraft'
 import {
   createDefaultContent,
   createThemeFromPalette,
@@ -98,6 +99,22 @@ export function useBuilderState() {
   useEffect(() => {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }, [state])
+
+  // sessionStorage é só cache local (estado inicial acima, sem esperar rede).
+  // O backend é a fonte de verdade: ao montar, se já existe um draftId, tenta
+  // re-hidratar de lá pra reload nunca perder trabalho salvo em outra aba/sessão.
+  useEffect(() => {
+    if (!state.draftId) return
+    let cancelled = false
+    hydrateFromDraft(state.draftId).then((hydrated) => {
+      if (cancelled || !hydrated) return
+      setState(hydrated)
+    })
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const setStep = useCallback((step: number) => {
     setState((s) => ({ ...s, step }))

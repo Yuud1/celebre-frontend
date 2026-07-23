@@ -31,6 +31,7 @@ export function LoginPage() {
     try {
       const { user } = await api.login({ email, password })
       setUser(user)
+      await api.promoteDraft().catch(() => {})
       const redirect = searchParams.get('redirect')
       navigate(redirect ?? '/dashboard', { replace: true })
     } catch (err: any) {
