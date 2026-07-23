@@ -26,7 +26,6 @@ import { useBuilderPublishHeader } from '../contexts/BuilderPublishContext'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
 import { CHECKOUT_PUBLISH_REDIRECT } from '../lib/builderDraft'
-import { AuthField, AuthInput, AuthBtn } from '../components/auth/AuthShared'
 
 type GenMode = null | 'type' | 'palette'
 type PreviewSize = 'mobile' | 'tablet' | 'full'
@@ -63,71 +62,6 @@ const previewSizeLabels: Record<PreviewSize, string> = {
   full: 'Desktop',
 }
 
-function IntakeForm({
-  submitting,
-  onBack,
-  onSubmit,
-}: {
-  submitting: boolean
-  onBack: () => void
-  onSubmit: (values: { name: string; eventDate: string; hosts: string }) => void
-}) {
-  const [name, setName] = useState('')
-  const [eventDate, setEventDate] = useState('')
-  const [hosts, setHosts] = useState('')
-
-  const canSubmit = name.trim().length >= 2 && !submitting
-
-  return (
-    <div style={{ maxWidth: 420, margin: '10vh auto 0', padding: '0 1.5rem' }}>
-      <h1 style={{ fontSize: 'clamp(1.3rem, 3vw, 1.6rem)', letterSpacing: '-0.02em', marginBottom: '0.4rem' }}>
-        Sobre o seu evento
-      </h1>
-      <p style={{ color: 'var(--cb-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-        Só o essencial pra gente montar sua página. Você personaliza tudo mais tarde.
-      </p>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (canSubmit) onSubmit({ name: name.trim(), eventDate, hosts: hosts.trim() })
-        }}
-        style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-      >
-        <AuthField label="Nome do evento">
-          <AuthInput
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Ex: Casamento Júlia & Marcos"
-            autoFocus
-          />
-        </AuthField>
-        <AuthField label="Anfitriões">
-          <AuthInput
-            value={hosts}
-            onChange={(e) => setHosts(e.target.value)}
-            placeholder="Ex: Júlia & Marcos"
-          />
-        </AuthField>
-        <AuthField label="Data do evento">
-          <AuthInput
-            type="date"
-            value={eventDate}
-            onChange={(e) => setEventDate(e.target.value)}
-          />
-        </AuthField>
-
-        <AuthBtn type="submit" block disabled={!canSubmit}>
-          {submitting ? 'Criando...' : 'Continuar'}
-        </AuthBtn>
-        <AuthBtn type="button" variant="ghost" block onClick={onBack} disabled={submitting}>
-          Voltar
-        </AuthBtn>
-      </form>
-    </div>
-  )
-}
-
 interface QuestionAnswer {
   question: string
   answer: string
@@ -156,8 +90,6 @@ export function BuilderPage() {
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('chat')
   const [isFinalizingPreview, setIsFinalizingPreview] = useState(false)
   const finalizeTimerRef = useRef<number | null>(null)
-  const [pendingEventType, setPendingEventType] = useState<EventTypeId | null>(null)
-  const [intakeSubmitting, setIntakeSubmitting] = useState(false)
 
   const eventIdParam = searchParams.get('event')
   const [eventEditLoading, setEventEditLoading] = useState(!!eventIdParam)
@@ -365,21 +297,22 @@ export function BuilderPage() {
     }
   }, [genMode, state.eventType])
 
-  // Auto-cria draft assim que o builder chega em ready (usuário logado)
+  // Auto-cria draft assim que o builder chega em ready (usuário logado ou
+  // convidado via guestToken em cookie httpOnly — ver CEL-47/48)
   useEffect(() => {
-    if (isEventEdit || !user || phase !== 'ready' || state.draftId || !state.eventType || !state.templateId || !state.theme) return
+    if (isEventEdit || phase !== 'ready' || state.draftId || !state.eventType || !state.templateId || !state.theme) return
     const payload = toDraftPayload({ eventType: state.eventType, templateId: state.templateId, theme: state.theme, content: state.content })
     api.createDraft(payload).then((d) => setDraftId(d.id)).catch(() => {})
-  }, [isEventEdit, user, phase, state.draftId, state.eventType, state.templateId, state.theme]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isEventEdit, phase, state.draftId, state.eventType, state.templateId, state.theme]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-save debounced quando conteúdo muda (usuário logado)
+  // Auto-save debounced quando conteúdo muda (usuário logado ou convidado)
   useAutoSave(
     () => {
       const payload = toDraftPayload({ eventType: state.eventType!, templateId: state.templateId!, theme: state.theme!, content: state.content })
       return api.updateDraft(state.draftId!, payload)
     },
     [state.content, state.theme, state.draftId],
-    { enabled: !isEventEdit && !!user && !!state.draftId && phase === 'ready' && !!state.eventType && !!state.templateId && !!state.theme },
+    { enabled: !isEventEdit && !!state.draftId && phase === 'ready' && !!state.eventType && !!state.templateId && !!state.theme },
   )
 
   // Auto-save debounced do evento já publicado (modo edição pós-pagamento)
@@ -452,40 +385,7 @@ export function BuilderPage() {
 
   function handleSelectEventType(eventType: EventTypeId) {
     if (genMode) return
-    setPendingEventType(eventType)
-  }
-
-  async function handleIntakeSubmit(intake: { name: string; eventDate: string; hosts: string }) {
-    if (!pendingEventType) return
-    const eventType = pendingEventType
-    const template = getDefaultTemplateByEventType(eventType)
-    const theme = createThemeFromPalette(PALETTES[0].id)
-    const content: EventContent = {
-      ...createDefaultContent(eventType),
-      name: intake.name,
-      hosts: intake.hosts,
-      signature: intake.hosts,
-      eventDate: intake.eventDate,
-      subtitle: intake.eventDate ? formatDateLabel(intake.eventDate) : '',
-    }
-
-    if (!user) {
-      selectEventType(eventType)
-      updateContent(content)
-      navigate(`/criar-conta?redirect=${encodeURIComponent(CHECKOUT_PUBLISH_REDIRECT)}`)
-      return
-    }
-
-    setIntakeSubmitting(true)
-    const payload = toDraftPayload({ eventType, templateId: template.id, theme, content })
-    try {
-      const draft = await api.createDraft(payload)
-      setDraftId(draft.id)
-      navigate(`/criar/checkout?draft=${draft.id}`)
-    } catch (err: any) {
-      setIntakeSubmitting(false)
-      alert(err.message ?? 'Erro ao criar rascunho. Tente novamente.')
-    }
+    selectEventType(eventType)
   }
 
   function handleSelectPalette(paletteId: string) {
@@ -598,18 +498,6 @@ export function BuilderPage() {
     return (
       <div className="ai-builder builder-theme--celebre">
         <CanvasIdle message="Carregando seu evento..." />
-      </div>
-    )
-  }
-
-  if (!isEventEdit && pendingEventType) {
-    return (
-      <div className="ai-builder builder-theme--celebre">
-        <IntakeForm
-          submitting={intakeSubmitting}
-          onBack={() => setPendingEventType(null)}
-          onSubmit={handleIntakeSubmit}
-        />
       </div>
     )
   }
