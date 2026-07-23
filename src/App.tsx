@@ -40,7 +40,7 @@ function HeaderNavLinks({ user, onNavigate }: { user: ReturnType<typeof useAuth>
       <Link to="/login" className="btn btn-ghost" onClick={close}>
         Login
       </Link>
-      <Link to="#planos" className="btn btn-primary app-header__cta" onClick={close}>
+      <Link to="/criar" className="btn btn-primary app-header__cta" onClick={close}>
         Criar evento
       </Link>
     </>
