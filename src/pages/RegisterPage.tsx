@@ -103,6 +103,7 @@ function StepAccount({ form, setForm }: {
       const res = await api.register({ name, email: email.trim().toLowerCase(), cpfCnpj: cpf.replace(/\D/g, ''), password })
       if (!res?.user) throw new Error('Resposta inválida ao criar conta')
       setUser(res.user)
+      await api.promoteDraft().catch(() => {})
       navigate(redirect ?? '/dashboard', { replace: true })
     } catch (err: any) {
       setError(err?.message || 'Erro ao criar conta')

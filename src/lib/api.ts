@@ -90,6 +90,18 @@ export const api = {
       body: JSON.stringify(payload),
     });
   },
+  getDraft(id: string) {
+    return request<{ id: string; status: string; payload: Record<string, unknown> }>(
+      `/drafts/${id}`,
+    );
+  },
+  // Vincula o draft de convidado (guestToken em cookie httpOnly) ao usuário
+  // recém-logado/cadastrado. Idempotente, sem args — cookie viaja sozinho.
+  promoteDraft() {
+    return request<{ draftId: string } | null>("/drafts/promote", {
+      method: "POST",
+    });
+  },
   publishDraft(id: string, planId?: string) {
     return request<{ chargeUrl: string }>(`/drafts/${id}/publish`, {
       method: "POST",

@@ -4,6 +4,7 @@ import type { EditableField } from '../../types/editor'
 import { ImagePicker } from '../builder/ImagePicker'
 import { api } from '../../lib/api'
 import { FONT_OPTIONS } from '../../data/fontOptions'
+import { PALETTES, createThemeFromPalette } from '../../templates/registry'
 import { maskCurrencyInput, parseCurrencyToCents } from '../../lib/mask'
 
 export interface EventEditorProps {
@@ -630,22 +631,31 @@ export function EventEditor({
     return (
       <div className="edit-panel__group">
         <h4>Cores e tipografia</h4>
-        <label>
-          Cor principal
-          <input type="color" value={theme.primary} onChange={(e) => onTheme({ primary: e.target.value })} />
-        </label>
-        <label>
-          Cor de destaque
-          <input type="color" value={theme.accent} onChange={(e) => onTheme({ accent: e.target.value })} />
-        </label>
-        <label>
-          Fundo
-          <input type="color" value={theme.background} onChange={(e) => onTheme({ background: e.target.value })} />
-        </label>
-        <label>
-          Cor do texto
-          <input type="color" value={theme.ink} onChange={(e) => onTheme({ ink: e.target.value })} />
-        </label>
+        <label>Paleta</label>
+        <div className="ai-chat__palette-grid">
+          {PALETTES.map((palette) => (
+            <button
+              key={palette.id}
+              type="button"
+              className={'ai-chat__palette-btn' + (theme.paletteId === palette.id ? ' is-selected' : '')}
+              onClick={() =>
+                onTheme({
+                  ...createThemeFromPalette(palette.id),
+                  fontFamily: theme.fontFamily,
+                  fontScale: theme.fontScale,
+                  darkMode: theme.darkMode,
+                })
+              }
+            >
+              <span className="ai-chat__swatches">
+                <i style={{ background: palette.primary }} />
+                <i style={{ background: palette.accent }} />
+                <i style={{ background: palette.background }} />
+              </span>
+              <span>{palette.name}</span>
+            </button>
+          ))}
+        </div>
         <label>
           Tipografia
           <select
