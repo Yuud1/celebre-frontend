@@ -5,7 +5,8 @@ import { Icon } from "@/components/auth/AuthIcons";
 import { cn } from "@/lib/utils";
 import { EventEditor } from "@/components/shared/EventEditor";
 import { useAutoSave } from "@/hooks/useAutoSave";
-import { PALETTES, createThemeFromPalette, getPaletteById } from "@/lib/themeCatalog";
+import { createThemeFromPalette, getPaletteById } from "@/lib/themeCatalog";
+import { usePaletteCatalog, FALLBACK_PALETTE } from "@/contexts/PaletteCatalogContext";
 import type { EventContent, EventTheme, EventTypeId } from "@/types/event";
 
 interface PersonalizeProps { event: any | null; onReload: () => void; onNavigate: (p: ActivePage) => void }
@@ -23,9 +24,10 @@ const emptyContent: EventContent = {
 }
 
 export function Personalize({ event }: PersonalizeProps) {
+  const { palettes } = usePaletteCatalog()
   const [eventType, setEventType] = useState<EventTypeId>('casamento')
   const [content, setContent] = useState<EventContent>(emptyContent)
-  const [theme, setTheme] = useState<EventTheme>(() => createThemeFromPalette(PALETTES[0].id))
+  const [theme, setTheme] = useState<EventTheme>(() => createThemeFromPalette(FALLBACK_PALETTE.id, [FALLBACK_PALETTE]))
 
   const resetFromEvent = (ev: any) => {
     if (!ev) return
@@ -43,16 +45,16 @@ export function Personalize({ event }: PersonalizeProps) {
       gifts:     [],
       sections:  d.sections,
     })
-    const matchedPalette = getPaletteById(d.theme?.paletteId) ?? PALETTES.find(p => p.primary === d.theme?.primary)
+    const matchedPalette = getPaletteById(d.theme?.paletteId, palettes) ?? palettes.find(p => p.primary === d.theme?.primary)
     setTheme({
-      ...createThemeFromPalette(matchedPalette?.id ?? PALETTES[0].id),
+      ...createThemeFromPalette(matchedPalette?.id ?? FALLBACK_PALETTE.id, palettes.length ? palettes : [FALLBACK_PALETTE]),
       fontFamily: d.theme?.fontFamily ?? '',
       fontScale:  d.theme?.fontScale ?? 1,
       darkMode:   d.theme?.darkMode ?? false,
     })
   }
 
-  useEffect(() => { resetFromEvent(event) }, [event])
+  useEffect(() => { resetFromEvent(event) }, [event, palettes])
 
   const handleContent = (patch: Partial<EventContent>) => setContent((c) => ({ ...c, ...patch }))
   const handleTheme = (patch: Partial<EventTheme>) => setTheme((t) => ({ ...t, ...patch }))

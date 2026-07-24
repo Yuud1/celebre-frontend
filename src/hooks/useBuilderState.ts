@@ -7,8 +7,8 @@ import {
   createThemeFromPalette,
   getDefaultTemplateByEventType,
   resolveEventContent,
-  PALETTES,
 } from '../templates/registry'
+import { usePaletteCatalog, FALLBACK_PALETTE } from '../contexts/PaletteCatalogContext'
 
 const STORAGE_KEY = 'celebre-builder-v2'
 
@@ -95,6 +95,8 @@ function normalizeState(raw: Partial<BuilderState>): BuilderState {
 
 export function useBuilderState() {
   const [state, setState] = useState<BuilderState>(loadState)
+  const { palettes } = usePaletteCatalog()
+  const defaultPaletteId = palettes[0]?.id ?? FALLBACK_PALETTE.id
 
   useEffect(() => {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state))
@@ -127,10 +129,10 @@ export function useBuilderState() {
       eventType,
       templateId: template.id,
       content: createDefaultContent(eventType),
-      theme: createThemeFromPalette(PALETTES[0].id),
+      theme: createThemeFromPalette(defaultPaletteId, palettes),
       step: 1,
     }))
-  }, [])
+  }, [defaultPaletteId, palettes])
 
   const selectTemplate = useCallback((templateId: string) => {
     setState((s) => {
@@ -147,10 +149,10 @@ export function useBuilderState() {
   const selectPalette = useCallback((paletteId: string) => {
     setState((s) => ({
       ...s,
-      theme: createThemeFromPalette(paletteId),
+      theme: createThemeFromPalette(paletteId, palettes),
       step: 2,
     }))
-  }, [])
+  }, [palettes])
 
   const updateTheme = useCallback((patch: Partial<EventTheme>) => {
     setState((s) => ({

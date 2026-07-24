@@ -3025,6 +3025,20 @@
   margin-top: 0.75rem;
 }
 
+.ai-chat__palette-tag {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #7a5a1e;
+  background: rgba(212, 168, 83, 0.18);
+}
+
 .ai-chat__palette-btn.is-locked {
   display: inline-flex;
   flex-direction: row;

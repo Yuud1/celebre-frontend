@@ -16,7 +16,6 @@ import {
   createThemeFromPalette,
   getDefaultTemplateByEventType,
   getTemplateById,
-  PALETTES,
   toDraftPayload,
 } from '../templates/registry'
 import type { EventContent, EventTheme, EventTypeId } from '../types/event'
@@ -24,6 +23,7 @@ import type { EditableField } from '../types/editor'
 import { giftFieldId } from '../types/editor'
 import { useBuilderPublishHeader } from '../contexts/BuilderPublishContext'
 import { useAuth } from '../contexts/AuthContext'
+import { usePaletteCatalog, FALLBACK_PALETTE } from '../contexts/PaletteCatalogContext'
 import { api } from '../lib/api'
 import { CHECKOUT_PUBLISH_REDIRECT } from '../lib/builderDraft'
 
@@ -73,6 +73,7 @@ const THINK_MS = 900
 export function BuilderPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { palettes } = usePaletteCatalog()
   const { setPublishState } = useBuilderPublishHeader()
   const [searchParams, setSearchParams] = useSearchParams()
   const isMobile = useMediaQuery('(max-width: 899px)')
@@ -115,7 +116,7 @@ export function BuilderPage() {
           id: ev.id,
           eventType,
           templateId: template?.id ?? getDefaultTemplateByEventType(eventType).id,
-          theme: d.theme ?? createThemeFromPalette(PALETTES[0].id),
+          theme: d.theme ?? createThemeFromPalette(FALLBACK_PALETTE.id, [FALLBACK_PALETTE]),
           content: {
             ...createDefaultContent(eventType),
             name: d.name ?? '',
@@ -394,7 +395,7 @@ export function BuilderPage() {
       window.clearTimeout(finalizeTimerRef.current)
       finalizeTimerRef.current = null
     }
-    const palette = PALETTES.find((p) => p.id === paletteId)
+    const palette = palettes.find((p) => p.id === paletteId)
     setPaletteUserPrompt(`Quero usar a paleta ${palette?.name ?? paletteId}.`)
     setQuestionIndex(0)
     setAnsweredQuestions([])

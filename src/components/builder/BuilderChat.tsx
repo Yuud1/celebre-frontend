@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { EVENT_TYPES, PALETTES } from '../../templates/registry'
+import { EVENT_TYPES } from '../../templates/registry'
 import type { BuilderQuestion, BuilderTask } from '../../data/builderChat'
 import { WELCOME_ASSISTANT } from '../../data/builderChat'
 import type { EventTypeId } from '../../types/event'
 import { FONT_OPTIONS } from '../../data/fontOptions'
+import { usePaletteCatalog } from '../../contexts/PaletteCatalogContext'
 
 export type BuilderChatPhase =
   | 'welcome'
@@ -151,6 +152,7 @@ export function BuilderChat({
 }: BuilderChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [draftAnswer, setDraftAnswer] = useState('')
+  const { palettes } = usePaletteCatalog()
   const pastWelcome = phase !== 'welcome'
   const typeGenerating = phase === 'generating-type'
   const typeDone = pastWelcome && !typeGenerating
@@ -160,7 +162,7 @@ export function BuilderChat({
   const askingQuestions = phase === 'questions'
   const showPaletteGrid = phase === 'palette' && !disabled
   const selectedPalette = selectedPaletteId
-    ? PALETTES.find((p) => p.id === selectedPaletteId)
+    ? palettes.find((p) => p.id === selectedPaletteId)
     : null
 
   useEffect(() => {
@@ -253,7 +255,7 @@ export function BuilderChat({
               <p>{palettePrompt}</p>
               {showPaletteGrid ? (
                 <div className="ai-chat__palette-grid">
-                  {PALETTES.map((p) => (
+                  {palettes.map((p) => (
                     <button
                       key={p.id}
                       type="button"
@@ -266,7 +268,10 @@ export function BuilderChat({
                         <i style={{ background: p.accent }} />
                         <i style={{ background: p.background }} />
                       </span>
-                      <span>{p.name}</span>
+                      <span>
+                        {p.name}
+                        {p.tier === 'premium' && <em className="ai-chat__palette-tag">Premium</em>}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -278,7 +283,10 @@ export function BuilderChat({
                       <i style={{ background: selectedPalette.accent }} />
                       <i style={{ background: selectedPalette.background }} />
                     </span>
-                    <span>{selectedPalette.name}</span>
+                    <span>
+                      {selectedPalette.name}
+                      {selectedPalette.tier === 'premium' && <em className="ai-chat__palette-tag">Premium</em>}
+                    </span>
                   </div>
                 </div>
               ) : null}

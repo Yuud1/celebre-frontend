@@ -6,9 +6,9 @@ import type {
   TemplateDefinition,
 } from '../types/event'
 import { applyGiftRooms, createDefaultSections, mergeSections } from '../data/defaultSections'
-import { PALETTES, createThemeFromPalette, getPaletteById } from '../lib/themeCatalog'
+import { createThemeFromPalette, getPaletteById } from '../lib/themeCatalog'
 
-export { PALETTES, createThemeFromPalette, getPaletteById }
+export { createThemeFromPalette, getPaletteById }
 
 export const EVENT_TYPES: EventTypeDefinition[] = [
   {
