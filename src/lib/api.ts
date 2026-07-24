@@ -93,7 +93,7 @@ export const api = {
     });
   },
   getDraft(id: string) {
-    return request<{ id: string; status: string; payload: Record<string, unknown> }>(
+    return request<{ id: string; status: string; payload: Record<string, unknown>; tierAnalysis: TierAnalysis }>(
       `/drafts/${id}`,
     );
   },

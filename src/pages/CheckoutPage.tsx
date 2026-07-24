@@ -41,6 +41,24 @@ export function CheckoutPage() {
     }).catch(() => {})
   }, [])
 
+  // Calcula o plano mínimo exigido pelo rascunho (ex: paleta premium) ANTES
+  // de publicar, pra já vir selecionado no checkout em vez de só avisar
+  // depois que o usuário clicar em pagar.
+  useEffect(() => {
+    if (!draftId || plans.length === 0) return
+    api.getDraft(draftId).then(({ tierAnalysis: analysis }) => {
+      if (!analysis) return
+      setTierAnalysis(analysis)
+      const requiredPlan = plans.find(p => p.name === analysis.minimumPlan)
+      if (!requiredPlan) return
+      setSelectedPlanId((current) => {
+        const currentPlan = plans.find(p => p.id === current)
+        const currentCovers = currentPlan && currentPlan.sortOrder >= requiredPlan.sortOrder
+        return currentCovers ? current : requiredPlan.id
+      })
+    }).catch(() => {})
+  }, [draftId, plans])
+
   useEffect(() => {
     if (authLoading || !user || draftId || !publishIntent) return
 
