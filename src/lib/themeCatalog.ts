@@ -54,6 +54,36 @@ export const PALETTES: PaletteDefinition[] = [
     accent: '#dda176',
     ink: '#24170f',
   },
+  {
+    id: 'onyx',
+    name: 'Onyx',
+    tier: 'premium',
+    primary: '#c9a24b',
+    secondary: '#0f0f11',
+    background: '#161618',
+    accent: '#e4c780',
+    ink: '#f4f0e6',
+  },
+  {
+    id: 'emerald',
+    name: 'Emerald',
+    tier: 'premium',
+    primary: '#1f6f5c',
+    secondary: '#0c2b23',
+    background: '#0f2a22',
+    accent: '#c9a94e',
+    ink: '#f0ede0',
+  },
+  {
+    id: 'bordeaux',
+    name: 'Bordeaux',
+    tier: 'premium',
+    primary: '#7a2436',
+    secondary: '#2b0f16',
+    background: '#fbf0ee',
+    accent: '#c98a6b',
+    ink: '#26100f',
+  },
 ]
 
 export const FONT_OPTIONS: FontOption[] = [

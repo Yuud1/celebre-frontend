@@ -652,7 +652,10 @@ export function EventEditor({
                 <i style={{ background: palette.accent }} />
                 <i style={{ background: palette.background }} />
               </span>
-              <span>{palette.name}</span>
+              <span>
+                {palette.name}
+                {palette.tier === 'premium' && <em className="ai-chat__palette-tag">Premium</em>}
+              </span>
             </button>
           ))}
         </div>

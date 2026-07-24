@@ -266,7 +266,10 @@ export function BuilderChat({
                         <i style={{ background: p.accent }} />
                         <i style={{ background: p.background }} />
                       </span>
-                      <span>{p.name}</span>
+                      <span>
+                        {p.name}
+                        {p.tier === 'premium' && <em className="ai-chat__palette-tag">Premium</em>}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -278,7 +281,10 @@ export function BuilderChat({
                       <i style={{ background: selectedPalette.accent }} />
                       <i style={{ background: selectedPalette.background }} />
                     </span>
-                    <span>{selectedPalette.name}</span>
+                    <span>
+                      {selectedPalette.name}
+                      {selectedPalette.tier === 'premium' && <em className="ai-chat__palette-tag">Premium</em>}
+                    </span>
                   </div>
                 </div>
               ) : null}

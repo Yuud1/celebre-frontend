@@ -127,6 +127,7 @@ export interface TemplateDefinition {
 export interface PaletteDefinition {
   id: string
   name: string
+  tier?: 'pro' | 'premium'
   primary: string
   secondary: string
   background: string
