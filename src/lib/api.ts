@@ -93,7 +93,7 @@ export const api = {
     });
   },
   getDraft(id: string) {
-    return request<{ id: string; status: string; payload: Record<string, unknown> }>(
+    return request<{ id: string; status: string; payload: Record<string, unknown>; tierAnalysis: TierAnalysis }>(
       `/drafts/${id}`,
     );
   },
@@ -105,7 +105,7 @@ export const api = {
     });
   },
   publishDraft(id: string, planId?: string) {
-    return request<{ chargeUrl: string }>(`/drafts/${id}/publish`, {
+    return request<{ chargeUrl: string; tierAnalysis: TierAnalysis }>(`/drafts/${id}/publish`, {
       method: "POST",
       ...(planId ? { body: JSON.stringify({ planId }) } : {}),
     });
