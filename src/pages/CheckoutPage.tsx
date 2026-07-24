@@ -4,6 +4,8 @@ import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { syncBuilderDraftFromStorage } from '../lib/builderDraft'
 import { derivePlanFeatures, type ApiPlan } from '../lib/plans'
+import { TierBadge } from '../components/shared/TierBadge'
+import type { TierAnalysis } from '../types/tier'
 
 function CheckIcon() {
   return (
@@ -26,6 +28,7 @@ export function CheckoutPage() {
   const [publishing, setPublishing] = useState(false)
   const [chargeUrl, setChargeUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [tierAnalysis, setTierAnalysis] = useState<TierAnalysis | null>(null)
 
   useEffect(() => {
     const savedPlanName = localStorage.getItem('celebre_plan')
@@ -81,7 +84,12 @@ export function CheckoutPage() {
     setPublishing(true)
     setError(null)
     try {
-      const { chargeUrl: url } = await api.publishDraft(draftId, selectedPlanId ?? undefined)
+      const { chargeUrl: url, tierAnalysis: analysis } = await api.publishDraft(draftId, selectedPlanId ?? undefined)
+      setTierAnalysis(analysis)
+      const requiredPlan = plans.find(p => p.name === analysis.minimumPlan)
+      if (requiredPlan && requiredPlan.id !== selectedPlanId) {
+        setSelectedPlanId(requiredPlan.id)
+      }
       setChargeUrl(url)
       window.open(url, '_blank')
     } catch (err: any) {
@@ -164,6 +172,16 @@ export function CheckoutPage() {
               <strong style={{ fontSize: '1.25rem', letterSpacing: '-0.02em' }}>
                 R$ {((selectedPlan.displayPrice ?? selectedPlan.publicationFee) / 100).toFixed(2).replace('.', ',')}
               </strong>
+            </div>
+          )}
+
+          {tierAnalysis && selectedPlan && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <TierBadge
+                currentPlan={selectedPlan.name as TierAnalysis['minimumPlan']}
+                minimumPlan={tierAnalysis.minimumPlan}
+                downgradeWarnings={tierAnalysis.downgradeWarnings[selectedPlan.name]}
+              />
             </div>
           )}
 

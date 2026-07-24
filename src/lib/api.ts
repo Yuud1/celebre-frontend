@@ -1,3 +1,5 @@
+import type { TierAnalysis } from "../types/tier";
+
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -103,7 +105,7 @@ export const api = {
     });
   },
   publishDraft(id: string, planId?: string) {
-    return request<{ chargeUrl: string }>(`/drafts/${id}/publish`, {
+    return request<{ chargeUrl: string; tierAnalysis: TierAnalysis }>(`/drafts/${id}/publish`, {
       method: "POST",
       ...(planId ? { body: JSON.stringify({ planId }) } : {}),
     });
