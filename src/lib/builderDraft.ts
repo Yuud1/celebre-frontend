@@ -1,6 +1,7 @@
 import type { BuilderState, EventSections, EventTheme, EventTypeId, GiftItem, GiftType, HomeRoomId } from '../types/event'
-import { createThemeFromPalette, PALETTES, resolveEventContent, toDraftPayload } from '../templates/registry'
+import { createThemeFromPalette, resolveEventContent, toDraftPayload } from '../templates/registry'
 import { api } from './api'
+import { FALLBACK_PALETTE } from '../contexts/PaletteCatalogContext'
 
 interface DraftPayloadShape {
   name?: string
@@ -103,7 +104,7 @@ export async function hydrateFromDraft(draftId: string): Promise<BuilderState | 
       step: 2,
       eventType,
       templateId: payload.templateId,
-      theme: payload.theme ?? createThemeFromPalette(PALETTES[0].id),
+      theme: payload.theme ?? createThemeFromPalette(FALLBACK_PALETTE.id, [FALLBACK_PALETTE]),
       content,
       draftId: draft.id,
     }

@@ -1,3 +1,5 @@
+import type { PaletteDefinition } from "../types/event";
+
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -333,6 +335,11 @@ export const api = {
       displayPrice: number | null
       sortOrder: number
     }>>('/plans')
+  },
+
+  // ─── Theme Catalog ──────────────────────────────────────────
+  getPalettes() {
+    return request<PaletteDefinition[]>('/theme/palettes')
   },
 
   // ─── Contributions ──────────────────────────────────────────

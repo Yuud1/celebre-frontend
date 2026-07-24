@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom'
 import { BuilderPublishProvider, useOptionalBuilderPublishHeader } from './contexts/BuilderPublishContext'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { PaletteCatalogProvider } from './contexts/PaletteCatalogContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { AdminRoute } from './components/auth/AdminRoute'
 import { HomePage } from './pages/HomePage'
@@ -140,6 +141,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <PaletteCatalogProvider>
         <BuilderPublishProvider>
           <AppLayout>
           <Routes>
@@ -160,6 +162,7 @@ export default function App() {
           </Routes>
         </AppLayout>
         </BuilderPublishProvider>
+        </PaletteCatalogProvider>
       </AuthProvider>
     </BrowserRouter>
   )

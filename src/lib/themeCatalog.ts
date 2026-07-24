@@ -8,84 +8,6 @@ export interface FontOption {
   weight: number
 }
 
-export const PALETTES: PaletteDefinition[] = [
-  {
-    id: 'linen',
-    name: 'Linen',
-    primary: '#6f675a',
-    secondary: '#2f2a24',
-    background: '#f7f4ee',
-    accent: '#b9a587',
-    ink: '#201c18',
-  },
-  {
-    id: 'sage',
-    name: 'Sage',
-    primary: '#6f7f62',
-    secondary: '#2d3728',
-    background: '#f5f3ec',
-    accent: '#d8a35d',
-    ink: '#20231c',
-  },
-  {
-    id: 'blush',
-    name: 'Blush',
-    primary: '#b66f8f',
-    secondary: '#4a3240',
-    background: '#fcf2f7',
-    accent: '#e2a9c1',
-    ink: '#2b1f28',
-  },
-  {
-    id: 'mist',
-    name: 'Mist',
-    primary: '#56758a',
-    secondary: '#20313d',
-    background: '#f4f7f7',
-    accent: '#9eb8c4',
-    ink: '#18242b',
-  },
-  {
-    id: 'clay',
-    name: 'Clay',
-    primary: '#a05f3d',
-    secondary: '#3b271c',
-    background: '#f9efe5',
-    accent: '#dda176',
-    ink: '#24170f',
-  },
-  {
-    id: 'onyx',
-    name: 'Onyx',
-    tier: 'premium',
-    primary: '#c9a24b',
-    secondary: '#0f0f11',
-    background: '#161618',
-    accent: '#e4c780',
-    ink: '#f4f0e6',
-  },
-  {
-    id: 'emerald',
-    name: 'Emerald',
-    tier: 'premium',
-    primary: '#1f6f5c',
-    secondary: '#0c2b23',
-    background: '#0f2a22',
-    accent: '#c9a94e',
-    ink: '#f0ede0',
-  },
-  {
-    id: 'bordeaux',
-    name: 'Bordeaux',
-    tier: 'premium',
-    primary: '#7a2436',
-    secondary: '#2b0f16',
-    background: '#fbf0ee',
-    accent: '#c98a6b',
-    ink: '#26100f',
-  },
-]
-
 export const FONT_OPTIONS: FontOption[] = [
   {
     id: 'default',
@@ -124,8 +46,14 @@ export const FONT_OPTIONS: FontOption[] = [
   },
 ]
 
-export function getPaletteById(id: string) {
-  return PALETTES.find((p) => p.id === id)
+/**
+ * O catálogo de paletas (cores + tier) vem do backend via GET /theme/palettes
+ * (ver `usePaletteCatalog()` em `contexts/PaletteCatalogContext.tsx`) — fonte
+ * única de verdade. Estas funções são puras: sempre recebem a lista de
+ * paletas já carregada, nunca mantêm cópia própria.
+ */
+export function getPaletteById(id: string, palettes: PaletteDefinition[]) {
+  return palettes.find((p) => p.id === id)
 }
 
 export function getFontById(id: string) {
@@ -136,15 +64,15 @@ export function resolveFontFamily(fontId: string) {
   return getFontById(fontId)?.family ?? ''
 }
 
-export function createThemeFromPalette(paletteId: string): EventTheme {
-  const palette = getPaletteById(paletteId) ?? PALETTES[0]
+export function createThemeFromPalette(paletteId: string, palettes: PaletteDefinition[]): EventTheme {
+  const palette = getPaletteById(paletteId, palettes) ?? palettes[0]
   return {
-    paletteId: palette.id,
-    primary: palette.primary,
-    secondary: palette.secondary,
-    background: palette.background,
-    accent: palette.accent,
-    ink: palette.ink,
+    paletteId: palette?.id ?? paletteId,
+    primary: palette?.primary ?? '#6f675a',
+    secondary: palette?.secondary ?? '#2f2a24',
+    background: palette?.background ?? '#f7f4ee',
+    accent: palette?.accent ?? '#b9a587',
+    ink: palette?.ink ?? '#201c18',
     fontScale: 1,
   }
 }

@@ -4,8 +4,9 @@ import type { EditableField } from '../../types/editor'
 import { ImagePicker } from '../builder/ImagePicker'
 import { api } from '../../lib/api'
 import { FONT_OPTIONS } from '../../data/fontOptions'
-import { PALETTES, createThemeFromPalette } from '../../templates/registry'
+import { createThemeFromPalette } from '../../templates/registry'
 import { maskCurrencyInput, parseCurrencyToCents } from '../../lib/mask'
+import { usePaletteCatalog } from '../../contexts/PaletteCatalogContext'
 
 export interface EventEditorProps {
   eventType: EventTypeId
@@ -58,6 +59,7 @@ export function EventEditor({
   hideGifts,
 }: EventEditorProps) {
   const [activeTab, setActiveTab] = useState<EditTab>('geral')
+  const { palettes } = usePaletteCatalog()
   const focus = mapFieldToFocus(activeField ?? null)
 
   useEffect(() => {
@@ -633,14 +635,14 @@ export function EventEditor({
         <h4>Cores e tipografia</h4>
         <label>Paleta</label>
         <div className="ai-chat__palette-grid">
-          {PALETTES.map((palette) => (
+          {palettes.map((palette) => (
             <button
               key={palette.id}
               type="button"
               className={'ai-chat__palette-btn' + (theme.paletteId === palette.id ? ' is-selected' : '')}
               onClick={() =>
                 onTheme({
-                  ...createThemeFromPalette(palette.id),
+                  ...createThemeFromPalette(palette.id, palettes),
                   fontFamily: theme.fontFamily,
                   fontScale: theme.fontScale,
                   darkMode: theme.darkMode,
